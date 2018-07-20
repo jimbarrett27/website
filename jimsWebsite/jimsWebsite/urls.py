@@ -21,6 +21,7 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('frontPage/', include('frontPage.urls')),
+    path('blog/', include('blog.urls')),
 ]
 
 # redirect to the front page by default
