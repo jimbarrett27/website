@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('secretkey.txt') as sk:
+with open('jimsWebsite/secretkey.txt') as sk:
 	SECRET_KEY = sk.readline()[:-1]
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'SE'
+TIME_ZONE = 'Europe/Stockholm'
 
 USE_I18N = True
 
