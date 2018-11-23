@@ -1,5 +1,5 @@
 Flask
-Flask-Bcrypt=
+Flask-Bcrypt
 Flask-Migrate
 Flask-Script
 Flask-SQLAlchemy
