@@ -1,1 +1,1 @@
-web: python hello_lulu.py
+web: flask db upgrade; gunicorn jimsWebsite:app
