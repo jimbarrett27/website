@@ -1,6 +1,7 @@
-{% load static %}
+<!doctype html>
+<title>Concerns of a data guy</title>
 
-<link rel="stylesheet" type="text/css" href="{% static 'frontPage/styles.css' %}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css')}}" />
 
 <!-- Side navigation -->
 <div class="sidenav">
@@ -13,6 +14,5 @@
 <!-- Page content -->
 <div class="main">
   <h1>Concerns of a Data Guy</h1>
-
-  This is Jim's super cool website which does not at all look like it was designed by someone with no talent for frontend.
+  This is Jim's super cool website which does not at all look like it was designed by someone with next to no talent.
 </div>
