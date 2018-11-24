@@ -1,18 +1,6 @@
-<!doctype html>
-<title>Concerns of a data guy</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css')}}" />
-
-<!-- Side navigation -->
-<div class="sidenav">
-  <a href="#">Home</a>
-  <a href="#">Activity</a>
-  <a href="#">Blog</a>
-  <a href="#">Contact</a>
-</div>
-
-<!-- Page content -->
-<div class="main">
-  <h1>Concerns of a Data Guy</h1>
-  This is Jim's super cool website which does not at all look like it was designed by someone with next to no talent.
-</div>
+{% block content %}
+	<h1>Concerns of a Data Guy</h1>
+		This is Jim's super cool website which does not at all look like it was designed by someone with next to no talent.
+{% endblock %}
