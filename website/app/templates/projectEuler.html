@@ -9,36 +9,12 @@
 		<script type="text/javascript" src="{{ url_for('static', filename='exercise1.js')}}"></script>
 	</div>
 	<hr>
-
-	<button class="requestExercise2">Exercise 2</button>
-	<p class="exercise2Result"></p>
-	<script type="text/javascript">
-		var answerField2 = document.querySelector('.exercise2Result');
-		var requestButton2 = document.querySelector('.requestExercise2');
-
-		function exercise2() {
-			
-			let prev = 0;
-			let current = 1;
-
-			let total = 0;
-			while (current < 4000000)
-			{
-				let nextVal = current + prev;
-				
-				if (nextVal % 2 == 0)
-				{
-					total += nextVal;					
-				}
-				
-				prev = current;
-				current = nextVal;
-
-			}
-
-			answerField2.textContent = total;
-		}
-
-		requestButton2.addEventListener('click', exercise2);
-	</script>
+	<div>
+		<button class="requestExercise2">
+			Exercise 2
+		</button>
+		<p class="exercise2Result"></p>
+		<script type="text/javascript" src="{{ url_for('static', filename='exercise2.js')}}"></script>
+	</div>
+	<hr>
 {% endblock %}
