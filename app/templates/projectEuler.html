@@ -1,26 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<button class="requestExercise1">Exercise 1</button>
-	<p class="exercise1Result"></p>
-	<script type="text/javascript">
-		const answerField1 = document.querySelector('.exercise1Result');
-		const requestButton1 = document.querySelector('.requestExercise1');
-
-		function exercise1() {
-			
-			let total = 0;
-			for (let i=0; i<1000; i++)
-			{
-				if ((i % 3) * (i % 5) === 0) total += i;
-			}
-
-			answerField1.textContent = total;
-		}
-
-		requestButton1.addEventListener('click', exercise1);
-	</script>
-
+	<div>
+		<button class="requestExercise1">
+			Exercise 1
+		</button>
+		<p class="exercise1Result"/>
+		<script type="text/javascript" src="{{ url_for('static', filename='exercise1.js')}}"></script>
+	</div>
 	<hr>
 
 	<button class="requestExercise2">Exercise 2</button>
