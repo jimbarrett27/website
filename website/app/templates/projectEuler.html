@@ -4,8 +4,8 @@
 	<button class="requestExercise1">Exercise 1</button>
 	<p class="exercise1Result"></p>
 	<script type="text/javascript">
-		const answerField = document.querySelector('.exercise1Result');
-		const requestButton = document.querySelector('.requestExercise1');
+		const answerField1 = document.querySelector('.exercise1Result');
+		const requestButton1 = document.querySelector('.requestExercise1');
 
 		function exercise1() {
 			
@@ -15,9 +15,43 @@
 				if ((i % 3) * (i % 5) === 0) total += i;
 			}
 
-			answerField.textContent = total
+			answerField1.textContent = total;
 		}
 
-		requestButton.addEventListener('click', exercise1);
+		requestButton1.addEventListener('click', exercise1);
+	</script>
+
+	<hr>
+
+	<button class="requestExercise2">Exercise 2</button>
+	<p class="exercise2Result"></p>
+	<script type="text/javascript">
+		var answerField2 = document.querySelector('.exercise2Result');
+		var requestButton2 = document.querySelector('.requestExercise2');
+
+		function exercise2() {
+			
+			let prev = 0;
+			let current = 1;
+
+			let total = 0;
+			while (current < 4000000)
+			{
+				let nextVal = current + prev;
+				
+				if (nextVal % 2 == 0)
+				{
+					total += nextVal;					
+				}
+				
+				prev = current;
+				current = nextVal;
+
+			}
+
+			answerField2.textContent = total;
+		}
+
+		requestButton2.addEventListener('click', exercise2);
 	</script>
 {% endblock %}
