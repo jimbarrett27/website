@@ -1,27 +1,7 @@
 const answerField3 = document.querySelector('.exercise3Result');
 const requestButton3 = document.querySelector('.requestExercise3');
 
-function* primeNumberGenerator(arraySize)
-{
-	let sieve = [];
-	sieve.length = arraySize;
-	sieve.fill(true);
-
-	for (let i=2; i<arraySize; i++)
-	{
-		if (sieve[i])
-		{
-			yield i;
-
-			let j = i;
-			while (j<arraySize)
-			{
-				j += i;
-				sieve[j] = false
-			}
-		}
-	}
-}
+import {primeNumberGenerator} from "./primeNumbers.js";
 
 function exercise3() {
 	
@@ -31,8 +11,7 @@ function exercise3() {
 
 	while (target > 1)
 	{
-
-		currentPrime = gen.next().value;
+		var currentPrime = gen.next().value;
 
 		while (target % currentPrime === 0)
 		{
