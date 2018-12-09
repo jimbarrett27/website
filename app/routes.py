@@ -12,4 +12,7 @@ def activity():
 
 @app.route('/projectEuler')
 def projectEuler():
-	return render_template('projectEuler.html')
+
+	solved_problems = [1,2,3,4]
+
+	return render_template('projectEuler.html', solved_problems=solved_problems)

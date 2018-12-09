@@ -1,28 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-	<div>
-		<button class="requestExercise1">
-			Exercise 1
-		</button>
-		<p class="exercise1Result"/>
-		<script type="module" src="{{ url_for('static', filename='js/exercise1.js')}}"></script>
-	</div>
-	<hr>
-	<div>
-		<button class="requestExercise2">
-			Exercise 2
-		</button>
-		<p class="exercise2Result"></p>
-		<script type="module" src="{{ url_for('static', filename='js/exercise2.js')}}"></script>
-	</div>
-	<hr>
-	<div>
-		<button class="requestExercise3">
-			Exercise 3
-		</button>
-		<p class="exercise3Result"></p>
-		<script type="module" src="{{ url_for('static', filename='js/exercise3.js')}}"></script>
-	</div>
-	<hr>
+	{% for problem in solved_problems %}
+		{% set filename="js/exercise" + problem|string +".js" %}
+		<div>
+			<button class="requestExercise{{problem}}">
+				Exercise {{problem}}
+			</button>
+			<p class="exercise{{problem}}Result"/>
+			<script type="module" src="{{ url_for('static', filename=filename) }}"></script>
+		</div>
+		<hr>
+	{% endfor %}
 {% endblock %}
