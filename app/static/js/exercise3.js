@@ -1,6 +1,3 @@
-const answerField3 = document.querySelector('.exercise3Result');
-const requestButton3 = document.querySelector('.requestExercise3');
-
 import {primeNumberGenerator} from "./primeNumbers.js";
 
 function exercise3() {
@@ -20,7 +17,7 @@ function exercise3() {
 
 	}
 
-	answerField3.textContent = currentPrime;
+	return currentPrime;
 }
 
-requestButton3.addEventListener('click', exercise3);
+export { exercise3 as default }

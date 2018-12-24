@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 	{% for problem in solved_problems %}
 		{% set filename="js/exercise" + problem|string +".js" %}
@@ -8,8 +7,23 @@
 				Exercise {{problem}}
 			</button>
 			<p class="exercise{{problem}}Result"/>
-			<script type="module" src="{{ url_for('static', filename=filename) }}"></script>
+			<script type="module">
+				import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
+
+				exercise{{problem}};
+
+				const answerField{{problem}} = document.querySelector('.exercise{{problem}}Result');
+				const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
+
+				function displayAnswer()
+				{
+					let answer = exercise{{problem}}();
+					answerField{{problem}}.textContent = answer;
+				}
+
+				requestButton{{problem}}.addEventListener('click', displayAnswer);
+			</script>
 		</div>
-		<hr>
+		<hr>		
 	{% endfor %}
 {% endblock %}
