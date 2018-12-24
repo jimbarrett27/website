@@ -1,6 +1,3 @@
-var answerField2 = document.querySelector('.exercise2Result');
-var requestButton2 = document.querySelector('.requestExercise2');
-
 function exercise2() {
 	
 	let prev = 0;
@@ -21,7 +18,7 @@ function exercise2() {
 
 	}
 
-	answerField2.textContent = total;
+	return total;
 }
 
-requestButton2.addEventListener('click', exercise2);
+export { exercise2 as default }
