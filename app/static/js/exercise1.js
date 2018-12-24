@@ -1,6 +1,3 @@
-const answerField1 = document.querySelector('.exercise1Result');
-const requestButton1 = document.querySelector('.requestExercise1');
-
 function exercise1() {
 	
 	let total = 0;
@@ -9,7 +6,7 @@ function exercise1() {
 		if ((i % 3) * (i % 5) === 0) total += i;
 	}
 
-	answerField1.textContent = total;
+	return total;
 }
 
-requestButton1.addEventListener('click', exercise1);
+export { exercise1 as default };
