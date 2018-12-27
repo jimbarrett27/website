@@ -1,27 +1,24 @@
-const answerField4 = document.querySelector('.exercise4Result');
-const requestButton4 = document.querySelector('.requestExercise4');
-
 function exercise4()
 {
+	var biggest = -1;
 
-	var product;
-	outerloop:
-	for (let i=999; i>99; i--)
+	for (let i=100; i<1000; i++)
 	{
-		for(let j=999; j>i; j--)
+		for(let j=100; j<i; j++)
 		{
-			product = (i*j).toString();
+			let product = i*j;
 
-			if (product === product.split("").reverse().join(""))
-				console.log(i);
-				console.log(j);
+			let productString = product.toString(10);
+			let reversedString = productString.split("").reverse().join("");
 
-				break outerloop;
+			if (productString === reversedString && product > biggest)
+			{
+				biggest = product;
+			}	
 		}
 	}
 
-	answerField4.textContent = product;
+	return biggest;
 }
 
-	
-requestButton4.addEventListener('click', exercise4);
+export { exercise4 as default };
