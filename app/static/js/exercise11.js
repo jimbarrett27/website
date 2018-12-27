@@ -2,7 +2,7 @@ import {loadFile} from "./fileLoading.js"
 
 function exercise11()
 {
-	const inputData = loadFile('/static/js/data.txt').split("\n");
+	const inputData = loadFile('/static/data/exercise11Data.txt').split("\n");
 	
 	var grid = []
 	for (let row of inputData)
