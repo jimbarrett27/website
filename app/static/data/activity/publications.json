@@ -1,0 +1,38 @@
+[
+	{
+		"title": "Accuracy of inference on the physics of binary evolution from gravitational-wave observations",
+		"authors": "Jim W. Barrett, Sebastian M. Gaebel, Coenraad J. Neijssel, Alejandro Vigna-Gómez, Simon Stevenson, Christopher P. L. Berry, Will M. Farr, Ilya Mandel",
+		"link": "https://doi.org/10.1093/mnras/sty908",
+		"first_author": "True"
+	},
+	{
+		"title": "Exploring the Parameter Space of Compact Binary Population Synthesis",
+		"authors": "Jim W. Barrett, Ilya Mandel, Coenraad J. Neijssel, Simon Stevenson, Alejandro Vigna-Gomez",
+		"link": "https://doi.org/10.1017/S1743921317000059",
+		"first_author": "True"
+	},
+	{
+		"title": "On the formation history of Galactic double neutron stars",
+		"authors": "Alejandro Vigna-Gómez, Coenraad J. Neijssel, Simon Stevenson, Jim W. Barrett, Krzysztof Belczynski, Stephen Justham, Selma E. de Mink, Bernhard Müller, Philipp Podsiadlowski, Mathieu Renzo, Dorottya Szécsi, Ilya Mandel",
+		"link": "https://doi.org/10.1093/mnras/sty2463",
+		"first_author": "False"
+	},
+	{
+		"title": "Optimizing spectroscopic follow-up strategies for supernova photometric classification with active learning",
+		"authors": "E. E. O. Ishida, R. Beck, S. Gonzalez-Gaitan, R. S. de Souza, A. Krone-Martins, J. W. Barrett, N. Kennamer, R. Vilalta, J. M. Burgess, B. Quint, A. Z. Vitorelli, A. Mahabal, E. Gangler",
+		"link": "https://doi.org/10.1093/mnras/sty3015",
+		"first_author": "False"
+	},
+	{
+		"title": "Aldebaran b's temperate past uncovered in planet search data",
+		"authors": "Will M. Farr, Benjamin J. S. Pope, Guy R. Davies, Thomas S. H. North, Timothy R. White, Jim W. Barrett, Andrea Miglio, Mikkel N. Lund, Victoria Antoci, Mads Fredslund Andersen, Frank Grundahl, Daniel Huber",
+		"link": "https://doi.org/10.3847/2041-8213/aadfde",
+		"first_author": "False"
+	},
+	{
+		"title": "Formation of the first three gravitational-wave observations through isolated binary evolution",
+		"authors": "Simon Stevenson, Alejandro Vigna-Gomez, Ilya Mandel, Jim W. Barrett, Coenraad J. Neijssel, David Perkins, Selma E. de Mink",
+		"link": "https://doi.org/10.1038/ncomms14906",
+		"first_author": "False"
+	}
+]
