@@ -2,7 +2,7 @@ import {loadFile} from "./fileLoading.js"
 
 function exercise8()
 {
-	var longNumber = loadFile('/static/data/exercise8Data.txt').split("\n").join("");
+	var longNumber = loadFile('/static/data/projectEuler/exercise8Data.txt').split("\n").join("");
 
 	var array = longNumber.split("");
 	var biggest = -1;
