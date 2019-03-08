@@ -4,5 +4,17 @@
 		"date": "14/07/2017",
 		"author": "Jim Barrett",
 		"content_file": "gaussianProcessUpdateEquations.md"
+	},
+	{
+		"title": "(un-)Predictability of Sports",
+		"date": "31/12/2017",
+		"author": "Jim Barrett",
+		"content_file": "unpredictabilityOfSports.md"
+	},
+	{
+		"title": "Random Samples from a Sphere",
+		"date": "26/07/2017",
+		"author": "Jim Barrett",
+		"content_file": "samplesFromASphere.md"
 	}
 ]

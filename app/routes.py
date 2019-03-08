@@ -9,6 +9,7 @@ from pathlib import Path
 
 STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'static')
 BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'blogPosts')
+NOTEBOOK_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'jupyterHtml')
 
 def getBlogMetadata():
 	with open(os.path.join(BLOG_POST_DIRECTORY, 'blogMetadata.json')) as f:
@@ -62,3 +63,9 @@ def post(postHandle):
 			return render_template('blogPost.html', post=metadata)
 
 	abort(404)
+
+@app.route('/notebooks/<notebookName>')
+def notebook(notebookName):	
+	with open(os.path.join(NOTEBOOK_DIRECTORY, f'{notebookName}.html')) as f:
+		return f.read()
+
