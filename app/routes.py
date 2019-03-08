@@ -4,44 +4,15 @@ import os
 
 from app import app
 from collections import namedtuple
-from flask import render_template
+from flask import render_template, abort
 from pathlib import Path
 
 STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'static')
+BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'blogPosts')
 
-def getBlogPosts():
-
-	blogDirectory = os.path.join(STATIC_DIRECTORY, 'blogPosts')
-
-	blogPosts = []
-	for postFile in os.listdir(blogDirectory):
-		
-		if not postFile.endswith('.md'):
-			continue
-
-		blogPost = {
-			'content': ''
-		}
-		with open(os.path.join(blogDirectory, postFile)) as f:
-			metadata_finished = False
-			for line in f:
-				# drop newline
-				line = line[:-1]
-
-				if line == 'metadata-finished':
-					metadata_finished = True
-
-				elif not metadata_finished:
-					key, value = line.split(':')
-					blogPost[key] = value
-
-				else:
-					blogPost['content'] += line
-
-		blogPost['content'] = markdown.markdown(blogPost['content'])
-		blogPosts.append(blogPost)
-
-	return blogPosts
+def getBlogMetadata():
+	with open(os.path.join(BLOG_POST_DIRECTORY, 'blogMetadata.json')) as f:
+		return json.load(f)
 
 
 @app.route('/')
@@ -67,15 +38,27 @@ def projectEuler():
 @app.route('/blog')
 def blog():
 
-	blogPosts = getBlogPosts()
+	blogMetadata = getBlogMetadata()	
+
+	blogPosts = []
+	for metadata in blogMetadata:
+		postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
+		with open(postLocation, 'r') as f:
+			metadata['content'] = markdown.markdown(f.read())
+		blogPosts.append(metadata)
 
 	return render_template('blog.html', blogPosts=blogPosts)
 
-@app.route('/blog/<postName>')
-def post(postName):
+@app.route('/blog/<postHandle>')
+def post(postHandle):
 
-	with open(os.path.join(STATIC_DIRECTORY, 'blogPosts', 'test.md')) as f:
-		md = f.read()
-	post = markdown.markdown(md)
-	return render_template('blogPost.html', post=post)
+	blogMetadata = getBlogMetadata()
+	
+	for metadata in blogMetadata:
+		if metadata['content_file'][:-3] == postHandle:
+			postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
+			with open(postLocation, 'r') as f:
+				metadata['content'] = markdown.markdown(f.read())
+			return render_template('blogPost.html', post=metadata)
 
+	abort(404)
