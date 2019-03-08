@@ -16,11 +16,11 @@ $$ P(y_p|y_t) \propto P(y_p,y_t) \propto \exp\left[-\frac{1}{2} \left(\begin{arr
 
 Where \\(\Sigma\\) is the joint covariance matrix. Remember that under the Gaussian process model we have trained a function which computes the elements of the Covariance matrix purely as a function of the inputs, it is only a function of the outputs \\(y_p\\) that we're trying to find. We can define the covariance matrix blockwise
 
-$$ \Sigma = \left(\begin{array}{cc} T & C^T \\ C & P \end{array}\right) $$
+$$ \Sigma = \left(\begin{array}{cc} T & C^T \\\\ C & P \end{array}\right) $$
 
 Where \\(T\\) is the covariance matrix computed using only the training inputs \\(x_t\\), \\(P\\) is the covariance matrix computed using the prediction inputs \\(x_p\\), and \\(C\\) is the cross terms (i.e. the covariance \emph{between} \\(y_t\\) and \\(y_p\\), computed using \\(x_t\\) and \\(x_p\\)). It is a well known result (it's in numerical recipes, or on Wikipedia) that you can blockwise invert a matrix;
 
-$$ \Sigma^{-1} = \left(\begin{array}{cc}T^{-1} + T^{-1}C^T M CT^{-1} & -T^{-1}C^TM \\ -MCT^{-1} & M\end{array}\right) $$
+$$ \Sigma^{-1} = \left(\begin{array}{cc}T^{-1} + T^{-1}C^T M CT^{-1} & -T^{-1}C^TM \\\\ -MCT^{-1} & M\end{array}\right) $$
 
 Where \\(M = (P-CT^{-1}C^T)^{-1}\\). So, we can directly compute our Gaussian density
 
