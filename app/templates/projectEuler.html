@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 	{% for problem in solved_problems %}
-		{% set filename="js/exercise" + problem|string +".js" %}
+		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
 		<div>
 			<button class="requestExercise{{problem}}">
 				Exercise {{problem}}

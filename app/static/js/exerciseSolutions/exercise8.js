@@ -1,4 +1,4 @@
-import {loadFile} from "./fileLoading.js"
+import {loadFile} from "../libraryFunctions/fileLoading.js"
 
 function exercise8()
 {
