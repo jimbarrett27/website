@@ -2,6 +2,21 @@
 {% block content %}
 <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
 <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+
+<table style="width: 80%">
+{% for i in range(10) %}
+	<tr>
+	{% for j in range(1, 11) %}
+		<td>
+			<button class="requestExercise{{10*i + j}}", style="width: 100%;">
+				{{10*i + j}}
+			</button>
+		</td>
+	{% endfor %}
+	</tr>
+{% endfor %}
+</table>
+
 {% for problem in solvedProblems %}
 		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
 		<div>
