@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-	{% for problem in solvedProblems %}
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
+<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+{% for problem in solvedProblems %}
 		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
 		<div>
 			<button class="requestExercise{{problem}}">
 				Exercise {{problem}}
 			</button>
 			<p class="exercise{{problem}}Result"/>
+			<div class="exercise{{problem}}Source"/>
 			<script type="module">
 				import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
+				import loadFile from "{{ url_for('static', filename='js/libraryFunctions/fileLoading.js') }}";
 
-				exercise{{problem}};
 
+				const source{{problem}} = document.querySelector('.exercise{{problem}}Source');
 				const answerField{{problem}} = document.querySelector('.exercise{{problem}}Result');
 				const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
 
@@ -19,11 +23,16 @@
 				{
 					let answer = exercise{{problem}}();
 					answerField{{problem}}.textContent = answer;
+					source{{problem}}.innerHTML = '<pre><code class="javascript">'+loadFile("{{ url_for('static', filename=filename) }}")+'</code></pre>';
+					document.querySelectorAll('pre code').forEach((block) => {
+						hljs.highlightBlock(block);
+					});
 				}
 
 				requestButton{{problem}}.addEventListener('click', displayAnswer);
+				
 			</script>
 		</div>
 		<hr>		
-	{% endfor %}
+{% endfor %}
 {% endblock %}
