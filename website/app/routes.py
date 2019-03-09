@@ -2,6 +2,8 @@ import json
 import markdown
 import os
 
+import numpy as np
+
 from app import app
 from collections import namedtuple
 from flask import render_template, abort
@@ -32,9 +34,13 @@ def activity():
 @app.route('/projectEuler')
 def projectEuler():
 
-	solved_problems = [1,2,3,4,5,6,7,8,9,10,11]
+	solutionsDirectory =  os.path.join(STATIC_DIRECTORY, 'js', 'exerciseSolutions')
+	exerciseSolutionFiles = os.listdir(solutionsDirectory)
 
-	return render_template('projectEuler.html', solved_problems=solved_problems)
+	# all solution files follow the pattern exercise{}.js
+	solvedProblems = np.sort([int(filename[8:-3]) for filename in exerciseSolutionFiles if filename.endswith('.js')])
+
+	return render_template('projectEuler.html', solvedProblems=solvedProblems)
 
 @app.route('/blog')
 def blog():
