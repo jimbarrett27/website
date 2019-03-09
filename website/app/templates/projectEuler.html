@@ -47,7 +47,7 @@
 		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
 		<script type="module">
 			
-			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/fileLoading.js') }}";
+			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/loadFile.js') }}";
 			import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
 			import escapeHtml from "{{ url_for('static', filename='js/libraryFunctions/escapeHtml.js') }}";
 
