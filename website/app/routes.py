@@ -45,7 +45,7 @@ def blog():
 	for metadata in blogMetadata:
 		postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
 		with open(postLocation, 'r') as f:
-			metadata['content'] = markdown.markdown(f.read())
+			metadata['content'] = markdown.markdown(f.read(), extensions=['nl2br'])
 		blogPosts.append(metadata)
 
 	return render_template('blog.html', blogPosts=blogPosts)
@@ -59,7 +59,7 @@ def post(postHandle):
 		if metadata['content_file'][:-3] == postHandle:
 			postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
 			with open(postLocation, 'r') as f:
-				metadata['content'] = markdown.markdown(f.read())
+				metadata['content'] = markdown.markdown(f.read(), extensions=['nl2br'])
 			return render_template('blogPost.html', post=metadata)
 
 	abort(404)
