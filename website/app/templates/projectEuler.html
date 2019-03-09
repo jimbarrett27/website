@@ -49,6 +49,7 @@
 			
 			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/fileLoading.js') }}";
 			import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
+			import escapeHtml from "{{ url_for('static', filename='js/libraryFunctions/escapeHtml.js') }}";
 
 			const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
 
@@ -60,7 +61,7 @@
 			function displayCode()
 			{
 				title.innerText = "Exercise {{ problem }}" 
-				source.innerHTML = '<pre><code class="javascript">'+loadFile("{{ url_for('static', filename=filename) }}")+'</code></pre>';
+				source.innerHTML = '<pre><code class="javascript">'+escapeHtml(loadFile("{{ url_for('static', filename=filename) }}"))+'</code></pre>';
 				document.querySelectorAll('pre code').forEach((block) => {
 					hljs.highlightBlock(block);
 				});
