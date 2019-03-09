@@ -7,9 +7,10 @@
 {% for i in range(10) %}
 	<tr>
 	{% for j in range(1, 11) %}
+		{% set cellNumber=10*i + j %}
 		<td>
-			<button class="requestExercise{{10*i + j}}", style="width: 100%;">
-				{{10*i + j}}
+			<button class="requestExercise{{cellNumber}}", style="width: 100%;">
+				{{cellNumber}}
 			</button>
 		</td>
 	{% endfor %}
