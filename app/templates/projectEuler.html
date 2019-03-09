@@ -9,9 +9,15 @@
 	{% for j in range(1, 11) %}
 		{% set cellNumber=10*i + j %}
 		<td>
-			<button class="requestExercise{{cellNumber}}", style="width: 100%;">
+			{% if cellNumber in solvedProblems %}
+			<button class="requestExercise{{cellNumber}}", style="width: 100%; background-color: #51d14b">
 				{{cellNumber}}
 			</button>
+			{% else %}
+			<button class="requestExercise{{cellNumber}}", style="width: 100%; background-color: #d14b4b">
+				{{cellNumber}}
+			</button>
+			{% endif %}
 		</td>
 	{% endfor %}
 	</tr>
@@ -19,42 +25,50 @@
 </table>
 
 <div>
-	<h3 class="exerciseTitle">Exercise 1</h3>
-	<div class="exerciseSource"/>
-
+	<h3 class="exerciseTitle"></h3>
+	<div class="exerciseSource"></div>
+	<div>
+		<button class="runCode">Run Code!</button>
+		<h4 class="solution"></h4>
+	</div>
 </div>
 
 {% for problem in solvedProblems %}
 		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
-		<div>
-			<button class="requestExercise{{problem}}">
-				Exercise {{problem}}
-			</button>
-			<p class="exercise{{problem}}Result"/>
-			<div class="exercise{{problem}}Source"/>
-			<script type="module">
-				import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
-				import loadFile from "{{ url_for('static', filename='js/libraryFunctions/fileLoading.js') }}";
+		<script type="module">
+			
+			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/fileLoading.js') }}";
+			import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
 
+			const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
 
-				const source{{problem}} = document.querySelector('.exercise{{problem}}Source');
-				const answerField{{problem}} = document.querySelector('.exercise{{problem}}Result');
-				const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
+			const source = document.querySelector('.exerciseSource');
+			const title = document.querySelector('.exerciseTitle');
+			const solution = document.querySelector('.solution');
+			const runCodeButton = document.querySelector('.runCode');
+
+			function displayCode()
+			{
+				title.innerText = "Exercise {{ problem }}" 
+				source.innerHTML = '<pre><code class="javascript">'+loadFile("{{ url_for('static', filename=filename) }}")+'</code></pre>';
+				document.querySelectorAll('pre code').forEach((block) => {
+					hljs.highlightBlock(block);
+				});
 
 				function displayAnswer()
 				{
-					let answer = exercise{{problem}}();
-					answerField{{problem}}.textContent = answer;
-					source{{problem}}.innerHTML = '<pre><code class="javascript">'+loadFile("{{ url_for('static', filename=filename) }}")+'</code></pre>';
-					document.querySelectorAll('pre code').forEach((block) => {
-						hljs.highlightBlock(block);
-					});
+					
+					solution.innerText = exercise{{problem}}();
+
 				}
 
-				requestButton{{problem}}.addEventListener('click', displayAnswer);
-				
-			</script>
-		</div>
-		<hr>		
+				solution.innerText = ""
+				runCodeButton.addEventListener('click', displayAnswer);
+
+			}
+
+			requestButton{{problem}}.addEventListener('click', displayCode);
+
+		</script>
 {% endfor %}
 {% endblock %}
