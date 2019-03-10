@@ -16,3 +16,4 @@ function loadFile(path)
 }
 
 export { loadFile }
+export { loadFile as default }
