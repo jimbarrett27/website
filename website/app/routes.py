@@ -38,9 +38,14 @@ def projectEuler():
 	exerciseSolutionFiles = os.listdir(solutionsDirectory)
 
 	# all solution files follow the pattern exercise{}.js
-	solvedProblems = np.sort([int(filename[8:-3]) for filename in exerciseSolutionFiles if filename.endswith('.js')])
+	solvedProblemNumbers = np.sort([int(filename[8:-3]) for filename in exerciseSolutionFiles if filename.endswith('.js')])
 
-	return render_template('projectEuler.html', solvedProblems=solvedProblems)
+	with open(os.path.join(STATIC_DIRECTORY, 'data', 'projectEuler', 'projectEulerMetadata.json')) as f:
+		problemsMetadata = json.load(f)
+
+	solvedProblems = [problem for problem in problemsMetadata if int(problem['number']) in solvedProblemNumbers] 
+
+	return render_template('projectEuler.html', solvedProblems=solvedProblems, solvedProblemNumbers=solvedProblemNumbers)
 
 @app.route('/blog')
 def blog():
