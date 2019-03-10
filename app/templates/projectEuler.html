@@ -2,7 +2,7 @@
 {% block content %}
 <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
 <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
-
+<script type="text/javascript" async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
 <p> 
 	Unexpectedly, and indeed unenviously, I have found myself having to write a fair amount of JavaScript as part of my job at Klarna. 
 	Moreover, the nature of the JavaScript I find myself writing is mathematical. So I decided a good way to learn (besides writing the 
@@ -13,13 +13,14 @@
 	let you run the code yourself and see the answer.
 </p> 
 
+
 <table style="width: 100%">
 {% for i in range(10) %}
 	<tr>
 	{% for j in range(1, 11) %}
 		{% set cellNumber=10*i + j %}
 		<td>
-			{% if cellNumber in solvedProblems %}
+			{% if cellNumber in solvedProblemNumbers %}
 			<button class="requestExercise{{cellNumber}}", style="width: 100%; background-color: #51d14b">
 				{{cellNumber}}
 			</button>
@@ -36,6 +37,8 @@
 
 <div style="width: 100%">
 	<h3 class="exerciseTitle"></h3>
+	<div class="exerciseDescription"></div>
+	<h3>Solution</h3>
 	<div class="exerciseSource" style="width: 100%"></div>
 	<div>
 		<button class="runCode">Run Code!</button>
@@ -44,24 +47,26 @@
 </div>
 
 {% for problem in solvedProblems %}
-		{% set filename="js/exerciseSolutions/exercise" + problem|string +".js" %}
+		{% set filename="js/exerciseSolutions/exercise" + problem.number|string +".js" %}
 		<script type="module">
 			
 			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/loadFile.js') }}";
-			import exercise{{problem}} from "{{ url_for('static', filename=filename) }}";
+			import exercise{{problem.number}} from "{{ url_for('static', filename=filename) }}";
 			import escapeHtml from "{{ url_for('static', filename='js/libraryFunctions/escapeHtml.js') }}";
 			import expandJavaScript from "{{ url_for('static', filename='js/libraryFunctions/expandJavaScript.js') }}";
 
-			const requestButton{{problem}} = document.querySelector('.requestExercise{{problem}}');
+			const requestButton{{problem.number}} = document.querySelector('.requestExercise{{problem.number}}');
 
 			const source = document.querySelector('.exerciseSource');
 			const title = document.querySelector('.exerciseTitle');
+			const description = document.querySelector('.exerciseDescription');
 			const solution = document.querySelector('.solution');
 			const runCodeButton = document.querySelector('.runCode');
 
 			function displayCode()
 			{
-				title.innerText = "Exercise {{ problem }}";
+				title.innerText = "Exercise {{ problem.number }} - {{problem.name}}";
+				description.innerHTML = "{{ problem.description|safe }}"
 				source.innerHTML = '<pre><code class="javascript">'+escapeHtml(expandJavaScript("{{ url_for('static', filename=filename) }}"))+'</code></pre>';
 				document.querySelectorAll('pre code').forEach((block) => {
 					hljs.highlightBlock(block);
@@ -70,16 +75,17 @@
 				function displayAnswer()
 				{
 					
-					solution.innerText = exercise{{problem}}();
+					solution.innerText = exercise{{problem.number}}();
 
 				}
 
 				solution.innerText = ""
 				runCodeButton.addEventListener('click', displayAnswer);
+				MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 
 			}
 
-			requestButton{{problem}}.addEventListener('click', displayCode);
+			requestButton{{problem.number}}.addEventListener('click', displayCode);
 
 		</script>
 {% endfor %}
