@@ -1,4 +1,4 @@
-import {primeNumberGenerator} from "./primeNumbers.js";
+import {primeNumberGenerator} from "../libraryFunctions/primeNumberGenerator.js";
 
 function exercise3() {
 	
