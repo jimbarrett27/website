@@ -38,12 +38,12 @@
 <div style="width: 100%">
 	<h3 class="exerciseTitle"></h3>
 	<div class="exerciseDescription"></div>
-	<h3>Solution</h3>
-	<div class="exerciseSource" style="width: 100%"></div>
-	<div>
+	<div class="solutionDiv" style="display: none">
+		<h3>Solution</h3>
 		<button class="runCode">Run Code!</button>
 		<h4 class="solution"></h4>
 	</div>
+	<div class="exerciseSource" style="width: 100%"></div>
 </div>
 
 {% for problem in solvedProblems %}
@@ -62,11 +62,15 @@
 			const description = document.querySelector('.exerciseDescription');
 			const solution = document.querySelector('.solution');
 			const runCodeButton = document.querySelector('.runCode');
+			const solutionDiv = document.querySelector('.solutionDiv')
+
 
 			function displayCode()
 			{
+				solutionDiv.style.display = "block";
+
 				title.innerText = "Exercise {{ problem.number }} - {{problem.name}}";
-				description.innerHTML = "{{ problem.description|safe }}"
+				description.innerHTML = "{{ problem.description|safe }}";
 				source.innerHTML = '<pre><code class="javascript">'+escapeHtml(expandJavaScript("{{ url_for('static', filename=filename) }}"))+'</code></pre>';
 				document.querySelectorAll('pre code').forEach((block) => {
 					hljs.highlightBlock(block);
@@ -79,7 +83,7 @@
 
 				}
 
-				solution.innerText = ""
+				solution.innerText = "";
 				runCodeButton.addEventListener('click', displayAnswer);
 				MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 
