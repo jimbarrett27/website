@@ -3,3 +3,4 @@ gunicorn
 psycopg2
 markdown
 numpy
+tweepy
