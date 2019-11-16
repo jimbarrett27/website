@@ -2,7 +2,7 @@ import tweepy
 import os
 from dataclasses import make_dataclass
 from pathlib import Path
-import numpy
+import numpy as np
 
 TwitterCredentials = make_dataclass('TwitterCredentials', ['consumer', 'consumer_secret', 'access', 'access_secret'])
 
@@ -16,8 +16,5 @@ auth.set_access_token(twitter_credentials.access, twitter_credentials.access_sec
 
 api = tweepy.API(auth)
 
-try:
-    api.verify_credentials()
-    api.update_status(f"My favourite data is {np.random.choice(adjectives)} data")
-except:
-    print("Something went wrong with authentication!")
+api.verify_credentials()
+api.update_status(f"My favourite data is {np.random.choice(adjectives)} data")
