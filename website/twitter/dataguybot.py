@@ -9,7 +9,7 @@ TwitterCredentials = make_dataclass('TwitterCredentials', ['consumer', 'consumer
 twitter_credentials = TwitterCredentials(os.environ.get('TWITTER_CONSUMER'), os.environ.get('TWITTER_CONSUMER_SECRET'), os.environ.get('TWITTER_ACCESS'), os.environ.get('TWITTER_ACCESS_SECRET'))
 
 with open(Path('twitter') / "positive_adjectives.txt", 'r') as f:
-    adjectives = [l for l in f]
+    adjectives = [l[:-1].lower() for l in f]
 
 auth = tweepy.OAuthHandler(twitter_credentials.consumer, twitter_credentials.consumer_secret)
 auth.set_access_token(twitter_credentials.access, twitter_credentials.access_secret)
