@@ -1,82 +1,134 @@
-import json
-import markdown
-import os
+"""
+The various routes for the webserver
+"""
 
+import json
+import os
+from typing import Dict
+
+import markdown
 import numpy as np
+from flask import abort, render_template
 
 from app import app
-from collections import namedtuple
-from flask import render_template, abort
-from pathlib import Path
 
-STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'static')
-BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'blogPosts')
-NOTEBOOK_DIRECTORY = os.path.join(STATIC_DIRECTORY, 'jupyterHtml')
+STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), "static")
+BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, "blogPosts")
+NOTEBOOK_DIRECTORY = os.path.join(STATIC_DIRECTORY, "jupyterHtml")
 
-def getBlogMetadata():
-	with open(os.path.join(BLOG_POST_DIRECTORY, 'blogMetadata.json')) as f:
-		return json.load(f)
+HTML = str
 
 
-@app.route('/')
-@app.route('/frontPage')
-def frontPage():
-    return render_template('frontPage.html')
+def get_blog_metadata() -> Dict:
+    """
+    grabs the static metadata file for blogs
+    """
+    with open(os.path.join(BLOG_POST_DIRECTORY, "blogMetadata.json")) as f:
+        return json.load(f)
 
-@app.route('/activity')
-def activity():
 
-	with open(os.path.join(STATIC_DIRECTORY, 'data', 'activity', 'publications.json')) as f:
-		publications = json.load(f)
+@app.route("/")
+@app.route("/frontPage")
+def front_page() -> HTML:
+    """
+    Renders the front page
+    """
+    return render_template("frontPage.html")
 
-	return render_template('activity.html', publications=publications)
 
-@app.route('/projectEuler')
-def projectEuler():
+@app.route("/activity")
+def activity() -> HTML:
+    """
+    Renders the activity page
+    """
+    with open(
+        os.path.join(STATIC_DIRECTORY, "data", "activity", "publications.json")
+    ) as f:
+        publications = json.load(f)
 
-	solutionsDirectory =  os.path.join(STATIC_DIRECTORY, 'js', 'exerciseSolutions')
-	exerciseSolutionFiles = os.listdir(solutionsDirectory)
+    return render_template("activity.html", publications=publications)
 
-	# all solution files follow the pattern exercise{}.js
-	solvedProblemNumbers = np.sort([int(filename[8:-3]) for filename in exerciseSolutionFiles if filename.endswith('.js')])
 
-	with open(os.path.join(STATIC_DIRECTORY, 'data', 'projectEuler', 'projectEulerMetadata.json')) as f:
-		problemsMetadata = json.load(f)
+@app.route("/projectEuler")
+def project_euler() -> HTML:
+    """
+    Works out which problems are solved and renders the project Euler page
+    """
 
-	solvedProblems = [problem for problem in problemsMetadata if int(problem['number']) in solvedProblemNumbers] 
+    solutions_directory = os.path.join(STATIC_DIRECTORY, "js", "exerciseSolutions")
+    exercise_solution_files = os.listdir(solutions_directory)
 
-	return render_template('projectEuler.html', solvedProblems=solvedProblems, solvedProblemNumbers=solvedProblemNumbers)
+    # all solution files follow the pattern exercise{}.js
+    solved_problem_numbers = np.sort(
+        [
+            int(filename[8:-3])
+            for filename in exercise_solution_files
+            if filename.endswith(".js")
+        ]
+    )
 
-@app.route('/blog')
-def blog():
+    with open(
+        os.path.join(
+            STATIC_DIRECTORY, "data", "projectEuler", "projectEulerMetadata.json"
+        )
+    ) as f:
+        problems_metadata = json.load(f)
 
-	blogMetadata = getBlogMetadata()	
+    solved_problems = [
+        problem
+        for problem in problems_metadata
+        if int(problem["number"]) in solved_problem_numbers
+    ]
 
-	blogPosts = []
-	for metadata in blogMetadata:
-		postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
-		with open(postLocation, 'r') as f:
-			metadata['content'] = markdown.markdown(f.read(), extensions=['nl2br'])
-		blogPosts.append(metadata)
+    return render_template(
+        "projectEuler.html",
+        solvedProblems=solved_problems,
+        solvedProblemNumbers=solved_problem_numbers,
+    )
 
-	return render_template('blog.html', blogPosts=blogPosts)
 
-@app.route('/blog/<postHandle>')
-def post(postHandle):
+@app.route("/blog")
+def blog() -> HTML:
+    """
+    Renders the blog index page
+    """
 
-	blogMetadata = getBlogMetadata()
-	
-	for metadata in blogMetadata:
-		if metadata['content_file'][:-3] == postHandle:
-			postLocation = os.path.join(BLOG_POST_DIRECTORY, metadata['content_file'])
-			with open(postLocation, 'r') as f:
-				metadata['content'] = markdown.markdown(f.read(), extensions=['nl2br'])
-			return render_template('blogPost.html', post=metadata)
+    blog_metadata = get_blog_metadata()
 
-	abort(404)
+    blog_posts = []
+    for metadata in blog_metadata:
+        post_location = os.path.join(BLOG_POST_DIRECTORY, metadata["content_file"])
+        with open(post_location, "r") as f:
+            metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+        blog_posts.append(metadata)
 
-@app.route('/notebooks/<notebookName>')
-def notebook(notebookName):	
-	with open(os.path.join(NOTEBOOK_DIRECTORY, f'{notebookName}.html')) as f:
-		return f.read()
+    return render_template("blog.html", blogPosts=blog_posts)
 
+
+@app.route("/blog/<post_handle>")
+def post(post_handle: str) -> HTML:
+    """
+    Renders an individual blog page
+    """
+
+    blog_metadata = get_blog_metadata()
+
+    for metadata in blog_metadata:
+        if metadata["content_file"][:-3] == post_handle:
+            post_location = os.path.join(BLOG_POST_DIRECTORY, metadata["content_file"])
+            with open(post_location, "r") as f:
+                metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+            return render_template("blogPost.html", post=metadata)
+
+    abort(404)
+    # TODO custom 404
+    return ""
+
+
+@app.route("/notebooks/<notebookName>")
+def notebook(notebook_name: str) -> HTML:
+    """
+    Renders a jupyter notebook as HTML
+    """
+    with open(os.path.join(NOTEBOOK_DIRECTORY, f"{notebook_name}.html")) as f:
+        return f.read()

@@ -1,6 +1,10 @@
 Flask
 gunicorn
-psycopg2
+psycopg2-binary
 markdown
 numpy
 tweepy
+pylint
+mypy
+black
+isort
