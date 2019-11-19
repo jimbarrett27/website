@@ -1,3 +1,6 @@
+"""
+isort:skip_file
+"""
 # pylint: skip-file
 
 from flask import Flask
