@@ -8,7 +8,11 @@ reformat:
 mypy:
 	mypy --ignore-missing-imports app twitter
 
+jslint:
+	npx eslint app/static/js/ 
+
 stylechecks:
 	make reformat 
 	make lint
 	make mypy
+	make jslint

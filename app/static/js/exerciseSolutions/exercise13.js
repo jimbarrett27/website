@@ -1,16 +1,18 @@
-import {loadFile} from "../libraryFunctions/loadFile.js"
+import {loadFile} from '../libraryFunctions/loadFile.js';
 
-function exercise13()
-{
-	var bigIntegers = loadFile('/static/data/projectEuler/exercise13Data.txt').split("\n");
+/**
+ * Solution to project euler exercise 13
+ * @return {number} the solution!
+ */
+function exercise13() {
+  const bigIntegers = loadFile('/static/data/projectEuler/exercise13Data.txt').split('\n');
 
-	var total = BigInt(0);
-	for (let integer of bigIntegers)
-	{
-		total = total + BigInt(integer);
-	}
-	
-	return total.toString().slice(0,10);
+  let total = BigInt(0);
+  for (const integer of bigIntegers) {
+    total = total + BigInt(integer);
+  }
+
+  return total.toString().slice(0, 10);
 }
 
-export { exercise13 as default }
+export {exercise13 as default};

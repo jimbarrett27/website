@@ -1,18 +1,20 @@
-import {primeNumberGenerator} from "../libraryFunctions/primeNumberGenerator.js";
+import {primeNumberGenerator} from '../libraryFunctions/primeNumberGenerator.js';
 
-function exercise10()
-{
-	let gen = primeNumberGenerator(2000000);
+/**
+ * Solution to project euler exercise 10
+ * @return {number} the solution!
+ */
+function exercise10() {
+  const gen = primeNumberGenerator(2000000);
 
-	var sum = 0;
-	while (true)
-	{
-		let prime = gen.next();
-		if (prime.done) break;
-		sum += prime.value;
-	}
+  let sum = 0;
+  while (true) {
+    const prime = gen.next();
+    if (prime.done) break;
+    sum += prime.value;
+  }
 
-	return sum;
+  return sum;
 }
 
-export { exercise10 as default }
+export {exercise10 as default};
