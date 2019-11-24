@@ -1,75 +1,63 @@
-import {loadFile} from "../libraryFunctions/loadFile.js"
+import {loadFile} from '../libraryFunctions/loadFile.js';
 
-function exercise11()
-{
-	const inputData = loadFile('/static/data/projectEuler/exercise11Data.txt').split("\n");
-	
-	var grid = []
-	for (let row of inputData)
-	{
-		grid.push(row.split(" "))
-	}
+/**
+ * Solution to project euler exercise 11
+ */
+function exercise11() {
+  const inputData = loadFile('/static/data/projectEuler/exercise11Data.txt').split('\n');
 
-	let biggest = -1;
+  const grid = [];
+  for (const row of inputData) {
+    grid.push(row.split(' '));
+  }
 
-	// rows
-	for (let i=0; i<grid.length; i++)
-	{
-		for (let j=0; j<grid[0].length - 4; j++)
-		{
-			let product = 1;
-			for (let k=0; k<4; k++)
-			{
-				product *= grid[i][j+k]
-			}
-			if (product > biggest) biggest = product;
-		}
-	}
+  let biggest = -1;
 
-	// columns
-	for (let i=0; i<grid.length; i++)
-	{
-		for (let j=0; j<grid[0].length - 4; j++)
-		{
-			let product = 1;
-			for (let k=0; k<4; k++)
-			{
-				product *= grid[j+k][i]
-			}
-			if (product > biggest) biggest = product;
-		}
-	}
+  // rows
+  for (let i=0; i<grid.length; i++) {
+    for (let j=0; j<grid[0].length - 4; j++) {
+      let product = 1;
+      for (let k=0; k<4; k++) {
+        product *= grid[i][j+k];
+      }
+      if (product > biggest) biggest = product;
+    }
+  }
 
-	// UL-DR diagonals
-	for (let i=0; i<grid.length - 4; i++)
-	{
-		for (let j=0; j<grid[0].length - 4; j++)
-		{
-			let product = 1;
-			for (let k=0; k<4; k++)
-			{
-				product *= grid[i+k][j+k]
-			}
-			if (product > biggest) biggest = product;
-		}
-	}
+  // columns
+  for (let i=0; i<grid.length; i++) {
+    for (let j=0; j<grid[0].length - 4; j++) {
+      let product = 1;
+      for (let k=0; k<4; k++) {
+        product *= grid[j+k][i];
+      }
+      if (product > biggest) biggest = product;
+    }
+  }
 
-	// UR-DL diagonals
-	for (let i=4; i<grid.length; i++)
-	{
-		for (let j=0; j<grid[0].length - 4; j++)
-		{
-			let product = 1;
-			for (let k=0; k<4; k++)
-			{
-				product *= grid[i-k][j+k]
-			}
-			if (product > biggest) biggest = product;
-		}
-	}
+  // UL-DR diagonals
+  for (let i=0; i<grid.length - 4; i++) {
+    for (let j=0; j<grid[0].length - 4; j++) {
+      let product = 1;
+      for (let k=0; k<4; k++) {
+        product *= grid[i+k][j+k];
+      }
+      if (product > biggest) biggest = product;
+    }
+  }
 
-	return biggest;
+  // UR-DL diagonals
+  for (let i=4; i<grid.length; i++) {
+    for (let j=0; j<grid[0].length - 4; j++) {
+      let product = 1;
+      for (let k=0; k<4; k++) {
+        product *= grid[i-k][j+k];
+      }
+      if (product > biggest) biggest = product;
+    }
+  }
 
+  return biggest;
 }
 
-export { exercise11 as default }
+export {exercise11 as default};

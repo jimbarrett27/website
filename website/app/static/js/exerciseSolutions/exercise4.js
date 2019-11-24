@@ -1,24 +1,23 @@
-function exercise4()
-{
-	var biggest = -1;
+/**
+ * Solution to project euler exercise 4
+ */
+function exercise4() {
+  let biggest = -1;
 
-	for (let i=100; i<1000; i++)
-	{
-		for(let j=100; j<i; j++)
-		{
-			let product = i*j;
+  for (let i=100; i<1000; i++) {
+    for (let j=100; j<i; j++) {
+      const product = i*j;
 
-			let productString = product.toString(10);
-			let reversedString = productString.split("").reverse().join("");
+      const productString = product.toString(10);
+      const reversedString = productString.split('').reverse().join('');
 
-			if (productString === reversedString && product > biggest)
-			{
-				biggest = product;
-			}	
-		}
-	}
+      if (productString === reversedString && product > biggest) {
+        biggest = product;
+      }
+    }
+  }
 
-	return biggest;
+  return biggest;
 }
 
-export { exercise4 as default };
+export {exercise4 as default};
