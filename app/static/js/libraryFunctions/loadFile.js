@@ -1,19 +1,17 @@
-function loadFile(path)
-{
-	var fileContents;
+function loadFile(path) {
+  let fileContents;
 
-	function listener()
-	{
-		fileContents = this.responseText;
-	}
-	
-	var req = new XMLHttpRequest();
-	req.addEventListener("load", listener);
-	req.open('GET', path, false);
-	req.send();
+  function listener() {
+    fileContents = this.responseText;
+  }
 
-	return fileContents;
+  const req = new XMLHttpRequest();
+  req.addEventListener('load', listener);
+  req.open('GET', path, false);
+  req.send();
+
+  return fileContents;
 }
 
-export { loadFile }
-export { loadFile as default }
+export {loadFile};
+export {loadFile as default};

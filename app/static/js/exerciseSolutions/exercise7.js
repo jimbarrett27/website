@@ -1,14 +1,16 @@
-import {primeNumberGenerator} from "../libraryFunctions/primeNumberGenerator.js";
+import {primeNumberGenerator} from '../libraryFunctions/primeNumberGenerator.js';
 
-function exercise7()
-{
-	let gen = primeNumberGenerator(1000000);
+/**
+ * Solution to project euler exercise 7
+ */
+function exercise7() {
+  const gen = primeNumberGenerator(1000000);
 
-	let prime;
-	
-	for (let i=0; i<10001; i++) prime = gen.next().value;
+  let prime;
 
-	return prime;
+  for (let i=0; i<10001; i++) prime = gen.next().value;
+
+  return prime;
 }
 
-export { exercise7 as default }
+export {exercise7 as default};
