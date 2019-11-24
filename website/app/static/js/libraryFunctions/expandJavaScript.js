@@ -1,5 +1,12 @@
 import {loadFile} from './loadFile.js';
 
+/**
+ * Given a path to a javascript file, follows the imports and replaces them
+ * with the relevant functions from other files, to make one js script
+ *
+ * @param {string} path
+ * @return {string} expanded javascript
+ */
 function expandJavaScript(path) {
   const js = loadFile(path);
 

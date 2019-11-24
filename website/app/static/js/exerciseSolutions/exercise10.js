@@ -2,6 +2,7 @@ import {primeNumberGenerator} from '../libraryFunctions/primeNumberGenerator.js'
 
 /**
  * Solution to project euler exercise 10
+ * @return {number} the solution!
  */
 function exercise10() {
   const gen = primeNumberGenerator(2000000);

@@ -1,3 +1,10 @@
+/**
+ * Generates the prime numbers using the sieve of
+ * eratosthenes
+ *
+ * @param {number} arraySize
+ * @yields {number} the next prime number
+ */
 function* primeNumberGenerator(arraySize) {
   const sieve = [];
   sieve.length = arraySize;

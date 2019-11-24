@@ -1,5 +1,6 @@
 /**
  * Solution to project euler exercise 4
+ * @return {number} the solution!
  */
 function exercise4() {
   let biggest = -1;

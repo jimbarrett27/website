@@ -2,6 +2,7 @@ import {primeNumberGenerator} from '../libraryFunctions/primeNumberGenerator.js'
 
 /**
  * Solution to project euler exercise 3
+ * @return {number} the solution!
  */
 function exercise3() {
   const gen = primeNumberGenerator(1000000);
@@ -9,7 +10,7 @@ function exercise3() {
   let target = 600851475143;
 
   while (target > 1) {
-    var currentPrime = gen.next().value;
+    const currentPrime = gen.next().value;
 
     while (target % currentPrime === 0) {
       target = target / currentPrime;
