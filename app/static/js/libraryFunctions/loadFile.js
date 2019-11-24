@@ -1,8 +1,17 @@
+/**
+ * loads a local static file's contents into a string
+ *
+ * @param {string} path
+ * @return {string} the contents of the file
+ */
 function loadFile(path) {
   let fileContents;
 
+  /**
+   * listen for the file contents response
+   */
   function listener() {
-    fileContents = this.responseText;
+    fileContents = this.responseText; // eslint-disable-line no-invalid-this
   }
 
   const req = new XMLHttpRequest();

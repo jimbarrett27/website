@@ -1,5 +1,6 @@
 /**
  * Solution to project euler exercise 2
+ * @return {number} the solution!
  */
 function exercise2() {
   let prev = 0;

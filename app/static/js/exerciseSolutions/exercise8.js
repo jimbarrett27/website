@@ -2,6 +2,7 @@ import {loadFile} from '../libraryFunctions/loadFile.js';
 
 /**
  * Solution to project euler exercise 8
+ * @return {number} the solution!
  */
 function exercise8() {
   const longNumber = loadFile('/static/data/projectEuler/exercise8Data.txt').split('\n').join('');

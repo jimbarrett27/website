@@ -2,6 +2,7 @@ import {loadFile} from '../libraryFunctions/loadFile.js';
 
 /**
  * Solution to project euler exercise 11
+ * @return {number} the solution!
  */
 function exercise11() {
   const inputData = loadFile('/static/data/projectEuler/exercise11Data.txt').split('\n');

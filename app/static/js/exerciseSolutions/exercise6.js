@@ -1,5 +1,6 @@
 /**
  * Solution to project euler exercise 6
+ * @return {number} the solution!
  */
 function exercise6() {
   let sumOfSquares = 0;

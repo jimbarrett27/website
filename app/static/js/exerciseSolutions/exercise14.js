@@ -1,5 +1,6 @@
 /**
  * Solution to project euler exercise 14
+ * @return {number} the solution!
  */
 function exercise14() {
   const smallerThan = 1000000;
