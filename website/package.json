@@ -1,0 +1,24 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "Jim's very own website",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^6.7.0",
+    "eslint-config-google": "^0.14.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimbarrett27/website.git"
+  },
+  "author": "Jim Barrett",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jimbarrett27/website/issues"
+  },
+  "homepage": "https://github.com/jimbarrett27/website#readme"
+}

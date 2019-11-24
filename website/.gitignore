@@ -5,3 +5,5 @@ app.db
 *.DS_Store*
 *.mypy_cache*
 *.vscode*
+node_modules
+package-lock.json
