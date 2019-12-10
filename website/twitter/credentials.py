@@ -5,8 +5,8 @@ import os
 from dataclasses import make_dataclass
 
 TwitterCredentials = make_dataclass(  # pylint: disable=invalid-name
-        "TwitterCredentials", ["consumer", "consumer_secret", "access", "access_secret"]
-    )
+    "TwitterCredentials", ["consumer", "consumer_secret", "access", "access_secret"]
+)
 
 CREDENTIALS = TwitterCredentials(
     os.environ.get("TWITTER_CONSUMER"),
