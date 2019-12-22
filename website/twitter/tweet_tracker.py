@@ -1,1 +1,0 @@
-from twitter.util import get_tweepy_api
