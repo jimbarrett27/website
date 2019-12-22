@@ -1,8 +1,5 @@
-TRADED_COINS = [
-    'BTC',
-    'OMG',
-    'MITH',
-    'LINK',
-    'ETH',
-    'DUSK'
-]
+"""
+Various constants
+"""
+
+TRADED_COINS = ["BTC", "OMG", "MITH", "LINK", "ETH", "DUSK"]
