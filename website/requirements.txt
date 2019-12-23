@@ -8,3 +8,5 @@ pylint
 mypy
 black
 isort
+python-binance
+matplotlib
