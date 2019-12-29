@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 
-from crypto.balance import get_current_balance
+from crypto.market_values import get_current_balance
 from twitter.util import get_tweepy_api
 
 
