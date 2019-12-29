@@ -1,4 +1,7 @@
-from dataclasses import dataclass, field
+"""
+Accesses and stores the current market value for all of the traded coins
+"""
+
 from time import time
 
 import matplotlib
@@ -12,6 +15,9 @@ matplotlib.use("Agg")
 
 
 def get_traded_coin_quantities():
+    """
+    gets how many of each traded coin I have
+    """
 
     client = get_authenticated_client()
     return {
