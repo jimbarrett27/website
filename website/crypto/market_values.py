@@ -105,7 +105,7 @@ def update_ticker_tables():
 
     for coin in TRADED_COINS:
         cursor.execute(
-            sql.SQL("INSERT INTO {} (QUANTITY, VALUE, TIME) VALUES ({},{},{});").format(
+            sql.SQL("INSERT INTO {} (VALUE, QUANTITY, TIME) VALUES ({},{},{});").format(
                 sql.SQL(coin),
                 sql.SQL(str(traded_coin_values[coin])),
                 sql.SQL(str(traded_coin_quantities[coin])),
