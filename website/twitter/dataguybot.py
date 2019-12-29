@@ -28,7 +28,9 @@ def dataguybot_tweet():
     if current_hour % 4 == 0:
         with NamedTemporaryFile() as f:
             plot_filepath = f"{f.name}.png"
-            current_crypto_balance = get_current_balance(bar_plot_location=plot_filepath)
+            current_crypto_balance = get_current_balance(
+                bar_plot_location=plot_filepath
+            )
             tweet = (
                 f"Jim's current crypto portfolio is worth "
                 + f"approximately ${round(current_crypto_balance, 2)}"
