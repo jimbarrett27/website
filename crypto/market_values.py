@@ -2,8 +2,8 @@
 Accesses and stores the current market value for all of the traded coins
 """
 
-from time import time
 import json
+from time import time
 
 import matplotlib
 import matplotlib.pyplot as plot
@@ -73,9 +73,15 @@ def update_ticker_data():
 
     traded_coin_values = get_traded_coin_values()
     traded_coin_quantities = get_traded_coin_quantities()
-    
-    tick = {coin: {'quantity': traded_coin_quantities[coin], 'value': traded_coin_values[coin]} for coin in TRADED_COINS}
-    tick['TIME'] = int(time())
-            
-    with open('crypto/data/coin_values.dat', 'a') as f:
-        f.write(f'json.dumps(tick)\n')
+
+    tick = {
+        coin: {
+            "quantity": traded_coin_quantities[coin],
+            "value": traded_coin_values[coin],
+        }
+        for coin in TRADED_COINS
+    }
+    tick["TIME"] = int(time())
+
+    with open("crypto/data/coin_values.dat", "a") as f:
+        f.write(f"{json.dumps(tick)}\n")
