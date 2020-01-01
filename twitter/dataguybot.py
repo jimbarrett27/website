@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 
-from crypto.market_values import get_current_balance, update_ticker_tables
+from crypto.market_values import get_current_balance, update_ticker_data
 from twitter.util import get_tweepy_api
 
 
@@ -40,7 +40,7 @@ def dataguybot_tweet():
             )
             api.update_with_media(plot_filepath, status=tweet)
 
-    update_ticker_tables()
+    update_ticker_data()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 Flask
 gunicorn
-psycopg2-binary
 markdown
 numpy
 tweepy
