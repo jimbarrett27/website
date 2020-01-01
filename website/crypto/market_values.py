@@ -3,13 +3,13 @@ Accesses and stores the current market value for all of the traded coins
 """
 
 from time import time
+import json
 
 import matplotlib
 import matplotlib.pyplot as plot
-from psycopg2 import connect, sql
 
 from crypto.client import get_authenticated_client
-from crypto.constants import DATABASE_URL, TRADED_COINS
+from crypto.constants import TRADED_COINS
 
 matplotlib.use("Agg")
 
@@ -66,52 +66,16 @@ def get_traded_coin_values(units="USDT"):
     return traded_coin_values
 
 
-def create_database_tables():
-    """
-    Makes a database for each coin
-    """
-
-    connection = connect(DATABASE_URL)
-    cursor = connection.cursor()
-
-    for coin in TRADED_COINS:
-        cursor.execute(
-            sql.SQL(
-                "CREATE TABLE {} ("
-                "ID SERIAL PRIMARY KEY NOT NULL,"
-                "QUANTITY FLOAT(8) NOT NULL,"
-                "VALUE FLOAT(8) NOT NULL,"
-                "TIME INTEGER NOT NULL"
-                ");"
-            ).format(sql.SQL(coin))
-        )
-
-    connection.commit()
-    connection.close()
-
-
-def update_ticker_tables():
+def update_ticker_data():
     """
     updates all of the database tables with the latest values
     """
 
-    connection = connect(DATABASE_URL)
-    cursor = connection.cursor()
-
     traded_coin_values = get_traded_coin_values()
     traded_coin_quantities = get_traded_coin_quantities()
-
-    now = int(time())
-
-    for coin in TRADED_COINS:
-        cursor.execute(
-            sql.SQL("INSERT INTO {} (VALUE, QUANTITY, TIME) VALUES ({},{},{});").format(
-                sql.SQL(coin),
-                sql.SQL(str(traded_coin_values[coin])),
-                sql.SQL(str(traded_coin_quantities[coin])),
-                sql.SQL(str(now)),
-            )
-        )
-
-    connection.commit()
-    connection.close()
+    
+    tick = {coin: {'quantity': traded_coin_quantities[coin], 'value': traded_coin_values[coin]} for coin in TRADED_COINS}
+    tick['TIME'] = int(time())
+            
+    with open('crypto/data/coin_values.dat', 'a') as f:
+        f.write(f'json.dumps(tick)\n')
