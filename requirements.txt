@@ -9,3 +9,4 @@ black
 isort
 python-binance
 matplotlib
+psycopg2-binary
