@@ -6,11 +6,8 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="unititled">
-	<meta name="keywords" content="HTML5 Crowdfunding Profile Template">
-	<meta name="author" content="Audain Designs">
-	<link rel="shortcut icon" href="favicon.ico">  
-	<title>Launch - HTML5 Crowdfunding Profile Template</title>
+	<meta name="author" content="Jim Barrett">  
+	<title>Concerns of a Dataguy</title>
 
 	<!-- Gobal CSS -->
 	<link href="assets/css/bootstrap.min.css" rel="stylesheet">
@@ -57,10 +54,9 @@
 					<div class="section-block">
 						<div class="section-tabs">
 							<ul class="nav nav-tabs" role="tablist">
-								<li role="presentation" class="active"><a href="#about" aria-controls="about" role="tab" data-toggle="tab">About</a></li>
-								<li role="presentation"><a href="#activity" aria-controls="activity" role="tab" data-toggle="tab">Activity</a></li>
-								<li role="presentation"><a href="#blog" aria-controls="blog" role="tab" data-toggle="tab">Blog</a></li>
-								<li role="presentation"><a href="#project-euler" aria-controls="project-euler" role="tab" data-toggle="tab">Project Euler</a></li>
+								{% for tab_content in tab_contents %}
+									<li role="presentation" class="{{ tab_content.active }}"><a href="#{{ tab_content.variable_name }}" aria-controls="{{ tab_content.variable_name }}" role="tab" data-toggle="tab">{{ tab_content.name }}</a></li>
+								{% endfor %}
 							</ul>
 						</div>
 					</div>
@@ -68,14 +64,13 @@
 					<!--tab panes-->
 					<div class="section-block">
 						<div class="tab-content">
-							<div role="tabpanel" class="tab-pane active" id="about">
-							</div>
-							<div role="tabpanel" class="tab-pane active" id="activity">
-							</div>
-							<div role="tabpanel" class="tab-pane active" id="blog">
-							</div>
-							<div role="tabpanel" class="tab-pane" id="project-euler">
-							</div>
+							{% for tab_content in tab_contents %}
+								<div role="tabpanel" class="tab-pane {{ tab_content.active }}" id="{{ tab_content.variable_name }}">
+									<div>
+									{{ tab_content.content | safe }}
+									</div>
+								</div>
+							{% endfor %}
 						</div>
 					</div>
 				</div>

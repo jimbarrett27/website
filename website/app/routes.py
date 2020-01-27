@@ -11,6 +11,7 @@ import numpy as np
 from flask import abort, render_template
 
 from app import app
+from pathlib import Path
 
 STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), "static")
 BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, "blogPosts")
@@ -28,12 +29,21 @@ def get_blog_metadata() -> Dict:
 
 
 @app.route("/")
-@app.route("/frontPage")
-def front_page() -> HTML:
+def main() -> HTML:
     """
-    Renders the front page
+    Renders the base page
     """
-    return render_template("frontPage.html")
+
+    tab_contents = [
+        {
+            "name": 'About',
+            "variable_name": 'about',
+            "content": render_template("about.html"),
+            "active": "active"
+        },
+    ]
+
+    return render_template("main.html", tab_contents=tab_contents)
 
 
 @app.route("/activity")
