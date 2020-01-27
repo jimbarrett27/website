@@ -41,25 +41,41 @@ def main() -> HTML:
             "content": render_template("about.html"),
             "active": "active"
         },
+        {
+            "name": 'Publications',
+            "variable_name": 'publications',
+            "content": publications(),
+            "active": ""
+        },
+        {
+            "name": "Project Euler",
+            "variable_name": "project_euler",
+            "content": project_euler(),
+            "active": ""
+        },
+        {
+            "name": "Blog",
+            "variable_name": "blog",
+            "content": blog(),
+            "active": ""
+        }
     ]
 
     return render_template("main.html", tab_contents=tab_contents)
 
 
-@app.route("/activity")
-def activity() -> HTML:
+def publications() -> HTML:
     """
-    Renders the activity page
+    Renders the publications page
     """
     with open(
         os.path.join(STATIC_DIRECTORY, "data", "activity", "publications.json")
     ) as f:
         publications = json.load(f)
 
-    return render_template("activity.html", publications=publications)
+    return render_template("publications.html", publications=publications)
 
 
-@app.route("/projectEuler")
 def project_euler() -> HTML:
     """
     Works out which problems are solved and renders the project Euler page
@@ -97,7 +113,6 @@ def project_euler() -> HTML:
     )
 
 
-@app.route("/blog")
 def blog() -> HTML:
     """
     Renders the blog index page
