@@ -4,20 +4,21 @@ The various routes for the webserver
 
 import json
 import os
+from pathlib import Path
 from typing import Dict
 
 import markdown
 import numpy as np
-from flask import abort, render_template
+from flask import render_template
 
 from app import app
-from pathlib import Path
 
-STATIC_DIRECTORY = Path(__file__).parent.resolve() / 'static'
-BLOG_POST_DIRECTORY = STATIC_DIRECTORY / 'blogPosts'
-NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / 'jupyterHtml'
+STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
+BLOG_POST_DIRECTORY = STATIC_DIRECTORY / "blogPosts"
+NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "jupyterHtml"
 
 HTML = str
+
 
 @app.route("/")
 def main() -> HTML:
@@ -27,29 +28,24 @@ def main() -> HTML:
 
     tab_contents = [
         {
-            "name": 'About',
-            "variable_name": 'about',
+            "name": "About",
+            "variable_name": "about",
             "content": render_template("about.html"),
-            "active": "active"
+            "active": "active",
         },
         {
-            "name": 'Publications',
-            "variable_name": 'publications',
+            "name": "Publications",
+            "variable_name": "publications",
             "content": publications(),
-            "active": ""
+            "active": "",
         },
         {
             "name": "Project Euler",
             "variable_name": "project_euler",
             "content": project_euler(),
-            "active": ""
+            "active": "",
         },
-        {
-            "name": "Blog",
-            "variable_name": "blog",
-            "content": blog(),
-            "active": ""
-        }
+        {"name": "Blog", "variable_name": "blog", "content": blog(), "active": ""},
     ]
 
     return render_template("main.html", tab_contents=tab_contents)
@@ -60,9 +56,10 @@ def publications() -> HTML:
     Renders the publications page
     """
     publications_json = STATIC_DIRECTORY / "data/activity/publications.json"
-    publications = json.loads(publications_json.read_text())
 
-    return render_template("publications.html", publications=publications)
+    return render_template(
+        "publications.html", publications=json.loads(publications_json.read_text())
+    )
 
 
 def project_euler() -> HTML:
@@ -103,6 +100,7 @@ def get_blog_metadata() -> Dict:
     grabs the static metadata file for blogs
     """
     return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
+
 
 def blog() -> HTML:
     """
