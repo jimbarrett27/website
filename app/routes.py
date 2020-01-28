@@ -13,20 +13,11 @@ from flask import abort, render_template
 from app import app
 from pathlib import Path
 
-STATIC_DIRECTORY = os.path.join(os.path.realpath(os.path.dirname(__file__)), "static")
-BLOG_POST_DIRECTORY = os.path.join(STATIC_DIRECTORY, "blogPosts")
-NOTEBOOK_DIRECTORY = os.path.join(STATIC_DIRECTORY, "jupyterHtml")
+STATIC_DIRECTORY = Path(__file__).parent.resolve() / 'static'
+BLOG_POST_DIRECTORY = STATIC_DIRECTORY / 'blogPosts'
+NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / 'jupyterHtml'
 
 HTML = str
-
-
-def get_blog_metadata() -> Dict:
-    """
-    grabs the static metadata file for blogs
-    """
-    with open(os.path.join(BLOG_POST_DIRECTORY, "blogMetadata.json")) as f:
-        return json.load(f)
-
 
 @app.route("/")
 def main() -> HTML:
@@ -68,10 +59,8 @@ def publications() -> HTML:
     """
     Renders the publications page
     """
-    with open(
-        os.path.join(STATIC_DIRECTORY, "data", "activity", "publications.json")
-    ) as f:
-        publications = json.load(f)
+    publications_json = STATIC_DIRECTORY / "data/activity/publications.json"
+    publications = json.loads(publications_json.read_text())
 
     return render_template("publications.html", publications=publications)
 
@@ -81,7 +70,7 @@ def project_euler() -> HTML:
     Works out which problems are solved and renders the project Euler page
     """
 
-    solutions_directory = os.path.join(STATIC_DIRECTORY, "js", "exerciseSolutions")
+    solutions_directory = STATIC_DIRECTORY / "js/exerciseSolutions"
     exercise_solution_files = os.listdir(solutions_directory)
 
     # all solution files follow the pattern exercise{}.js
@@ -93,12 +82,8 @@ def project_euler() -> HTML:
         ]
     )
 
-    with open(
-        os.path.join(
-            STATIC_DIRECTORY, "data", "projectEuler", "projectEulerMetadata.json"
-        )
-    ) as f:
-        problems_metadata = json.load(f)
+    problems_json = STATIC_DIRECTORY / "data/projectEuler/projectEulerMetadata.json"
+    problems_metadata = json.loads(problems_json.read_text())
 
     solved_problems = [
         problem
@@ -113,6 +98,12 @@ def project_euler() -> HTML:
     )
 
 
+def get_blog_metadata() -> Dict:
+    """
+    grabs the static metadata file for blogs
+    """
+    return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
+
 def blog() -> HTML:
     """
     Renders the blog index page
@@ -122,7 +113,7 @@ def blog() -> HTML:
 
     blog_posts = []
     for metadata in blog_metadata:
-        post_location = os.path.join(BLOG_POST_DIRECTORY, metadata["content_file"])
+        post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
         with open(post_location, "r") as f:
             metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
         blog_posts.append(metadata)
@@ -130,30 +121,9 @@ def blog() -> HTML:
     return render_template("blog.html", blogPosts=blog_posts)
 
 
-@app.route("/blog/<post_handle>")
-def post(post_handle: str) -> HTML:
-    """
-    Renders an individual blog page
-    """
-
-    blog_metadata = get_blog_metadata()
-
-    for metadata in blog_metadata:
-        if metadata["content_file"][:-3] == post_handle:
-            post_location = os.path.join(BLOG_POST_DIRECTORY, metadata["content_file"])
-            with open(post_location, "r") as f:
-                metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
-            return render_template("blogPost.html", post=metadata)
-
-    abort(404)
-    # TODO custom 404
-    return ""
-
-
-@app.route("/notebooks/<notebookName>")
+@app.route("/notebooks/<notebook_name>")
 def notebook(notebook_name: str) -> HTML:
     """
     Renders a jupyter notebook as HTML
     """
-    with open(os.path.join(NOTEBOOK_DIRECTORY, f"{notebook_name}.html")) as f:
-        return f.read()
+    return (NOTEBOOK_DIRECTORY / f"{notebook_name}.html").read_text()
