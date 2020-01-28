@@ -1,0 +1,20 @@
+<h2>First Author Publications</h2>
+{% for publication in publications %}
+	{% if publication.first_author == 'True' %}
+		<p>
+			<b>{{ publication.title }}</b><br>
+			{{ publication.authors }}<br> 
+			<a href={{ publication.link }}>{{ publication.link }}</a>
+		</p>
+	{% endif %}
+{% endfor %}
+<h2> Other Publications </h2>
+{% for publication in publications %}
+	{% if publication.first_author == 'False' %}
+		<p>
+			<b>{{ publication.title }}</b><br>
+			{{ publication.authors }}<br> 
+			<a href={{ publication.link }}>{{ publication.link }}</a>
+		</p>
+	{% endif %}
+{% endfor %}

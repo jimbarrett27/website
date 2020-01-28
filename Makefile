@@ -15,4 +15,3 @@ stylechecks:
 	make reformat 
 	make lint
 	make mypy
-	make jslint
