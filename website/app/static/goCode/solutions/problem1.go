@@ -1,9 +1,6 @@
-package main
+package solutions
 
-import "C"
-
-//export problem1
-func problem1() (sum int) {
+func Problem1() (sum int) {
 
 	sum = 0
 	for x := 0; x < 1000; x++ {
@@ -15,7 +12,4 @@ func problem1() (sum int) {
 
 	return
 
-}
-
-func main() {
 }

@@ -15,3 +15,6 @@ stylechecks:
 	make reformat 
 	make lint
 	make mypy
+
+compile-go:
+	go build -buildmode=c-shared -o app/static/bin/projectEuler.so app/static/goCode/main.go
