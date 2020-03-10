@@ -63,10 +63,10 @@ def publications() -> HTML:
     )
 
 
-@app.route("/foo", methods=['GET'])
-def food():
-    print('foooooo')
-    return Response("fuck yeah!")
+@app.route("/project_euler_solution_code/<problem_number>", methods=['GET'])
+def fetch_project_euler_solution_code(problem_number: int):
+    code_file = STATIC_DIRECTORY / "goCode/solutions" / f"problem{problem_number}.go"
+    return code_file.read_text()
 
 def project_euler() -> HTML:
     """

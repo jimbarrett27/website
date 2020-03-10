@@ -41,7 +41,7 @@
 		<button class="runCode">Run Code!</button>
 		<h4 class="solution"></h4>
 	</div>
-	<pre><code class="go"></code><div class="exerciseSource" style="width: 100%"></div></code></pre>
+	<pre><code class="go"><div class="exerciseSource" style="width: 100%"></div></code></pre>
 </div>
 
 {% for problem in solvedProblems %}
@@ -60,10 +60,10 @@
 
 				solutionDiv.style.display = "block";
 
-				title.innerText = "Exercise {{ problem.number }} - {{problem.name}}";
+				title.innerText = "Problem {{ problem.number }} - {{problem.name}}";
 				description.innerHTML = "{{ problem.description|safe }}";
 
-				let response = await fetch("/foo");
+				let response = await fetch("/project_euler_solution_code/" + {{ problem.number }});
 				source.innerText = await response.text();
 				document.querySelectorAll('pre code').forEach((block) => {
 					hljs.highlightBlock(block);
