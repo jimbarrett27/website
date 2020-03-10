@@ -7,6 +7,7 @@ import os
 import re
 from pathlib import Path
 from typing import Dict
+from ctypes import cdll, c_double
 
 import markdown
 import numpy as np
@@ -20,6 +21,19 @@ NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "jupyterHtml"
 
 HTML = str
 
+
+from io import StringIO 
+import sys
+
+class Capturing(list):
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio
+        sys.stdout = self._stdout
 
 @app.route("/")
 def main() -> HTML:
@@ -64,9 +78,20 @@ def publications() -> HTML:
 
 
 @app.route("/project_euler_solution_code/<problem_number>", methods=['GET'])
-def fetch_project_euler_solution_code(problem_number: int):
+def fetch_project_euler_solution_code(problem_number: int) -> str:
     code_file = STATIC_DIRECTORY / "goCode/solutions" / f"problem{problem_number}.go"
     return code_file.read_text()
+
+@app.route("/project_euler_solution/<problem_number>", methods=['GET'])
+def fetch_project_euler_solution(problem_number: int) -> str:
+    solutions_lib = cdll.LoadLibrary(STATIC_DIRECTORY / 'bin/projectEuler.so')
+    solutions_lib.solution.restype = c_double
+    solution = solutions_lib.solution(int(problem_number))
+    if solution == -1:
+        return f"No Solution for problem {problem_number}"
+    if solution == round(solution):
+        solution = int(solution)
+    return str(solution)
 
 def project_euler() -> HTML:
     """
