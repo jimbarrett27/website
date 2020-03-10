@@ -12,7 +12,6 @@
 	let you run the code yourself and see the answer.
 </p> 
 
-
 <table style="width: 100%">
 {% for i in range(10) %}
 	<tr>
@@ -42,49 +41,42 @@
 		<button class="runCode">Run Code!</button>
 		<h4 class="solution"></h4>
 	</div>
-	<div class="exerciseSource" style="width: 100%"></div>
+	<pre><code class="go"></code><div class="exerciseSource" style="width: 100%"></div></code></pre>
 </div>
 
 {% for problem in solvedProblems %}
-		{% set filename="js/exerciseSolutions/exercise" + problem.number|string +".js" %}
 		<script type="module">
 			
-			import loadFile from "{{ url_for('static', filename='js/libraryFunctions/loadFile.js') }}";
-			import exercise{{problem.number}} from "{{ url_for('static', filename=filename) }}";
-			import escapeHtml from "{{ url_for('static', filename='js/libraryFunctions/escapeHtml.js') }}";
-			import expandJavaScript from "{{ url_for('static', filename='js/libraryFunctions/expandJavaScript.js') }}";
-
 			const requestButton{{problem.number}} = document.querySelector('.requestExercise{{problem.number}}');
 
-			const source = document.querySelector('.exerciseSource');
-			const title = document.querySelector('.exerciseTitle');
-			const description = document.querySelector('.exerciseDescription');
-			const solution = document.querySelector('.solution');
-			const runCodeButton = document.querySelector('.runCode');
-			const solutionDiv = document.querySelector('.solutionDiv')
-
-
-			function displayCode()
+			let displayCode = async function ()
 			{
+				const source = document.querySelector('.exerciseSource');
+				const title = document.querySelector('.exerciseTitle');
+				const description = document.querySelector('.exerciseDescription');
+				const solution = document.querySelector('.solution');
+				const runCodeButton = document.querySelector('.runCode');
+				const solutionDiv = document.querySelector('.solutionDiv')
+
 				solutionDiv.style.display = "block";
 
 				title.innerText = "Exercise {{ problem.number }} - {{problem.name}}";
 				description.innerHTML = "{{ problem.description|safe }}";
-				source.innerHTML = '<pre><code class="javascript">'+escapeHtml(expandJavaScript("{{ url_for('static', filename=filename) }}"))+'</code></pre>';
+
+				let response = await fetch("/foo");
+				source.innerText = await response.text();
 				document.querySelectorAll('pre code').forEach((block) => {
 					hljs.highlightBlock(block);
 				});
 
-				function displayAnswer()
+				let displayAnswer = async function ()
 				{
-					
-					solution.innerText = exercise{{problem.number}}();
-
+					let response = await fetch("/foo")
+					solution.innerText = await response.text()
 				}
 
-				solution.innerText = "";
 				runCodeButton.addEventListener('click', displayAnswer);
-				MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+				MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
 			}
 

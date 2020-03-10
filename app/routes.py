@@ -4,12 +4,13 @@ The various routes for the webserver
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict
 
 import markdown
 import numpy as np
-from flask import render_template
+from flask import render_template, Response
 
 from app import app
 
@@ -62,36 +63,34 @@ def publications() -> HTML:
     )
 
 
+@app.route("/foo", methods=['GET'])
+def food():
+    print('foooooo')
+    return Response("fuck yeah!")
+
 def project_euler() -> HTML:
     """
     Works out which problems are solved and renders the project Euler page
     """
 
-    solutions_directory = STATIC_DIRECTORY / "js/exerciseSolutions"
-    exercise_solution_files = os.listdir(solutions_directory)
+    solutions_directory = STATIC_DIRECTORY / "goCode/solutions"
+    exercise_solution_files = solutions_directory.glob('*.go')
 
-    # all solution files follow the pattern exercise{}.js
-    solved_problem_numbers = np.sort(
-        [
-            int(filename[8:-3])
-            for filename in exercise_solution_files
-            if filename.endswith(".js")
-        ]
-    )
-
+    # all solution files follow the pattern problem{}.go
     problems_json = STATIC_DIRECTORY / "data/projectEuler/projectEulerMetadata.json"
     problems_metadata = json.loads(problems_json.read_text())
 
-    solved_problems = [
-        problem
-        for problem in problems_metadata
-        if int(problem["number"]) in solved_problem_numbers
-    ]
+    solved_problems = []
+    for path in exercise_solution_files:
+        problem_number = int(re.search(r'\d+', path.parts[-1]).group())
+        problem_metadata = [metadata for metadata in problems_metadata if metadata['number'] == problem_number][0]
+        problem_metadata['code'] = path.read_text()
+        solved_problems.append(problem_metadata)
 
     return render_template(
         "projectEuler.html",
         solvedProblems=solved_problems,
-        solvedProblemNumbers=solved_problem_numbers,
+        solvedProblemNumbers=[problem['number'] for problem in solved_problems]
     )
 
 
