@@ -71,7 +71,7 @@
 
 				let displayAnswer = async function ()
 				{
-					let response = await fetch("/foo")
+					let response = await fetch("/project_euler_solution/"  + {{ problem.number }});
 					solution.innerText = await response.text()
 				}
 
