@@ -8,7 +8,6 @@ func Problem3() (largestFactor int) {
 
 	var targetNumber int = 600851475143
 
-	// hacky
 	var primes = numberutils.PrimesUpTo(1000000)
 
 	for i := len(primes) - 1; i >= 0; i-- {
