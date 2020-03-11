@@ -66,6 +66,8 @@ def publications() -> HTML:
 def fetch_project_euler_solution_code(problem_number: int) -> str:
     """
     Gets the code for the requested problem number
+
+    # TODO show library functions as well as the solution itself
     """
     code_file = STATIC_DIRECTORY / "goCode/solutions" / f"problem{problem_number}.go"
     if code_file.exists() and code_file.is_file():

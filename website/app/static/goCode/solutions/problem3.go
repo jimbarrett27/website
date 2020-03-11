@@ -1,8 +1,6 @@
 package solutions
 
-import (
-	"../numberutils"
-)
+import "../numberutils"
 
 func Problem3() (largestFactor int) {
 
