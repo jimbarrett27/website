@@ -7,11 +7,15 @@ import re
 from ctypes import c_double, cdll
 from pathlib import Path
 from typing import Dict
+from time import sleep
+import logging
 
 import markdown
-from flask import render_template
-
+from flask import render_template, Response
+from multiprocessing import Process, Queue
 from app import app
+
+logging.basicConfig(level=logging.INFO)
 
 STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
 BLOG_POST_DIRECTORY = STATIC_DIRECTORY / "blogPosts"
@@ -69,6 +73,8 @@ def fetch_project_euler_solution_code(problem_number: int) -> str:
 
     # TODO show library functions as well as the solution itself
     """
+    app.logger.info(f"Fetching code for problem number {problem_number}")
+
     code_file = STATIC_DIRECTORY / "goCode/solutions" / f"problem{problem_number}.go"
     if code_file.exists() and code_file.is_file():
         return code_file.read_text()
@@ -76,19 +82,42 @@ def fetch_project_euler_solution_code(problem_number: int) -> str:
     return f"No code found for problem {problem_number}"
 
 
+def stream_project_euler_solution(problem_number):
+
+    app.logger.info(f"Processing request for problem number {problem_number}")
+
+    solution = 0
+    def worker(queue) -> int:
+        solutions_lib = cdll.LoadLibrary(str(STATIC_DIRECTORY / "bin/projectEuler.so"))
+        solutions_lib.solution.restype = c_double
+        solution = solutions_lib.solution(int(problem_number))
+        queue.put(solution)
+
+    queue = Queue(1)
+    proc = Process(target=worker, args=(queue,))
+    proc.start()
+    while queue.empty():
+        sleep(0.5)
+        yield str(1)
+
+    solution = queue.get()
+    app.logger.info(f"Found solution for problem {problem_number}: {solution}")
+
+    if solution == 0:
+        yield f"No Solution for problem {problem_number}"
+    if solution == round(solution):
+        solution = int(solution)
+
+
+    yield f"\n{str(solution)}"
+
+
 @app.route("/project_euler_solution/<problem_number>", methods=["GET"])
 def fetch_project_euler_solution(problem_number: int) -> str:
     """
     Executes the go code for the requested problem number
     """
-    solutions_lib = cdll.LoadLibrary(str(STATIC_DIRECTORY / "bin/projectEuler.so"))
-    solutions_lib.solution.restype = c_double
-    solution = solutions_lib.solution(int(problem_number))
-    if solution == -1:
-        return f"No Solution for problem {problem_number}"
-    if solution == round(solution):
-        solution = int(solution)
-    return str(solution)
+    return Response(stream_project_euler_solution(problem_number), mimetype='text/plain')
 
 
 def project_euler() -> HTML:
