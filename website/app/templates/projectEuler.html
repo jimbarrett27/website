@@ -86,7 +86,7 @@
 				{
 					solution.innerText = ""
 					
-					solution.innerText = "Calculating..."
+					solution.innerText = "Calculating"
 					
 					const xmlRequest = new XMLHttpRequest();
 					await xmlRequest.open("GET", "/project_euler_solution/"  + {{ problem.number }}, true);
@@ -94,11 +94,15 @@
 
 					async function waitForAnswer() {
 						return await new Promise(resolve => {
+							let i = 0;
 							const interval = setInterval(() => {
+								// Animation for ellipses
+								solution.innerText = "Calculating" + Array.from({ length: i%4 }).fill('.').join('')
 								if (xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.responseText !== '1') {
 									resolve();
 									clearInterval(interval);
 								};
+								i++;
 							}, 500);
 						});
 					}
