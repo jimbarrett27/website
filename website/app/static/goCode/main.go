@@ -19,7 +19,7 @@ func solution(problemNumber int) float64 {
 	case 50:
 		return float64(solutions.Problem50())
 	default:
-		return -1
+		return 0
 	}
 
 }
