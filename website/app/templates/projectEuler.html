@@ -61,7 +61,11 @@
 				const runCodeButton = document.querySelector('.runCode');
 				const solutionDiv = document.querySelector('.solutionDiv')
 
+				window.jimActiveProblem = {{problem.number}}
+
 				solutionDiv.style.display = "block";
+
+				solution.innerText = ""
 
 				title.innerText = "Problem {{ problem.number }} - {{problem.name}}";
 				description.innerHTML = "{{ problem.description|safe }}";
@@ -74,8 +78,14 @@
 
 				let displayAnswer = async function ()
 				{
-					let response = await fetch("/project_euler_solution/"  + {{ problem.number }});
-					solution.innerText = await response.text()
+					solution.innerText = "Calculating..."
+					
+					let response = await fetch(
+						"/project_euler_solution/"  + {{ problem.number }}, 
+					); 
+					if (window.jimActiveProblem === {{problem.number}}) solution.innerText = await response.text()
+					
+				
 				}
 
 				runCodeButton.addEventListener('click', displayAnswer);
