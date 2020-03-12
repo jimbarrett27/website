@@ -3,19 +3,22 @@ The various routes for the webserver
 """
 
 import json
+import logging
 import re
 from ctypes import c_double, cdll
+from multiprocessing import Process, Queue
 from pathlib import Path
-from typing import Dict
 from time import sleep
-import logging
+from typing import Dict, Generator
 
 import markdown
-from flask import render_template, Response
-from multiprocessing import Process, Queue
+from flask import Response, render_template
+from flask.logging import create_logger
+
 from app import app
 
 logging.basicConfig(level=logging.INFO)
+LOGGER = create_logger(app)
 
 STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
 BLOG_POST_DIRECTORY = STATIC_DIRECTORY / "blogPosts"
@@ -73,7 +76,7 @@ def fetch_project_euler_solution_code(problem_number: int) -> str:
 
     # TODO show library functions as well as the solution itself
     """
-    app.logger.info(f"Fetching code for problem number {problem_number}")
+    LOGGER.info(f"Fetching code for problem number {problem_number}")
 
     code_file = STATIC_DIRECTORY / "goCode/solutions" / f"problem{problem_number}.go"
     if code_file.exists() and code_file.is_file():
@@ -82,18 +85,23 @@ def fetch_project_euler_solution_code(problem_number: int) -> str:
     return f"No code found for problem {problem_number}"
 
 
-def stream_project_euler_solution(problem_number):
+def stream_project_euler_solution(problem_number: int) -> Generator:
+    """
+    Runs the requested go function in a subprocess, and waits for it to finish,
+    giving the client a thumbs up every few seconds
+    """
 
-    app.logger.info(f"Processing request for problem number {problem_number}")
+    LOGGER.info(f"Processing request for problem number {problem_number}")
 
     solution = 0
-    def worker(queue) -> int:
+
+    def worker(queue: Queue):
         solutions_lib = cdll.LoadLibrary(str(STATIC_DIRECTORY / "bin/projectEuler.so"))
         solutions_lib.solution.restype = c_double
         solution = solutions_lib.solution(int(problem_number))
         queue.put(solution)
 
-    queue = Queue(1)
+    queue: Queue = Queue(1)
     proc = Process(target=worker, args=(queue,))
     proc.start()
     while queue.empty():
@@ -101,23 +109,24 @@ def stream_project_euler_solution(problem_number):
         yield str(1)
 
     solution = queue.get()
-    app.logger.info(f"Found solution for problem {problem_number}: {solution}")
+    LOGGER.info(f"Found solution for problem {problem_number}: {solution}")
 
     if solution == 0:
         yield f"No Solution for problem {problem_number}"
     if solution == round(solution):
         solution = int(solution)
 
-
     yield f"\n{str(solution)}"
 
 
 @app.route("/project_euler_solution/<problem_number>", methods=["GET"])
-def fetch_project_euler_solution(problem_number: int) -> str:
+def fetch_project_euler_solution(problem_number: int) -> Response:
     """
-    Executes the go code for the requested problem number
+    Send the generator reponse to poll for solutions
     """
-    return Response(stream_project_euler_solution(problem_number), mimetype='text/plain')
+    return Response(
+        stream_project_euler_solution(problem_number), mimetype="text/plain"
+    )
 
 
 def project_euler() -> HTML:
