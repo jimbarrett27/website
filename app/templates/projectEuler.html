@@ -51,6 +51,8 @@
 		<script type="module">
 			
 			const requestButton{{problem.number}} = document.querySelector('.requestExercise{{problem.number}}');
+			
+			window.jimActiveDisplaySolutionFunction = null;
 
 			let displayCode = async function ()
 			{
@@ -62,6 +64,10 @@
 				const solutionDiv = document.querySelector('.solutionDiv')
 
 				window.jimActiveProblem = {{problem.number}}
+				if (window.jimActiveDisplaySolutionFunction !== null) runCodeButton.removeEventListener('click', window.jimActiveDisplaySolutionFunction)
+				
+				//remove event listeners
+				runCodeButton
 
 				solutionDiv.style.display = "block";
 
@@ -78,17 +84,35 @@
 
 				let displayAnswer = async function ()
 				{
+					solution.innerText = ""
+					
 					solution.innerText = "Calculating..."
 					
-					let response = await fetch(
-						"/project_euler_solution/"  + {{ problem.number }}, 
-					); 
-					if (window.jimActiveProblem === {{problem.number}}) solution.innerText = await response.text()
-					
+					const xmlRequest = new XMLHttpRequest();
+					await xmlRequest.open("GET", "/project_euler_solution/"  + {{ problem.number }}, true);
+					await xmlRequest.send()
+
+					async function waitForAnswer() {
+						return await new Promise(resolve => {
+							const interval = setInterval(() => {
+								if (xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.responseText !== '1') {
+									resolve();
+									clearInterval(interval);
+								};
+							}, 500);
+						});
+					}
+
+					await waitForAnswer()
+
+					let responses = xmlRequest.responseText.split('\n')
+					solution.innerText = responses[responses.length - 1]
+
 				
 				}
 
 				runCodeButton.addEventListener('click', displayAnswer);
+				window.jimActiveDisplaySolutionFunction = displayAnswer;
 				MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
 			}
