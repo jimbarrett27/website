@@ -9,12 +9,13 @@ mypy:
 	mypy --ignore-missing-imports app twitter crypto
 
 jslint:
-	npx eslint app/static/js/ 
+	jshint app/static/js/
 
 stylechecks:
 	make reformat 
 	make lint
 	make mypy
+	make jslint
 
 compile-go:
 	go build -buildmode=c-shared -o app/static/bin/projectEuler.so app/static/goCode/main.go
