@@ -68,8 +68,17 @@ def publications() -> HTML:
         "publications.html", publications=json.loads(publications_json.read_text())
     )
 
+@app.route("/project_euler_data/<int:problem_number>", methods=["GET"]) 
+def fetch_project_euler_data(problem_number: int) -> str:
+    """
+    Fetchs the data file for project euler and serves it up.
+    """
+    LOGGER.info(f"Fetching the data file for exercise {problem_number}")
+    data_dir = STATIC_DIRECTORY / f"data/projectEuler/problem{problem_number}.dat"
+    return data_dir.read_text()
 
-@app.route("/project_euler_solution_code/<problem_number>", methods=["GET"])
+
+@app.route("/project_euler_solution_code/<int:problem_number>", methods=["GET"])
 def fetch_project_euler_solution_code(problem_number: int) -> str:
     """
     Gets the code for the requested problem number
@@ -118,8 +127,7 @@ def stream_project_euler_solution(problem_number: int) -> Generator:
 
     yield f"\n{str(solution)}"
 
-
-@app.route("/project_euler_solution/<problem_number>", methods=["GET"])
+@app.route("/project_euler_solution/<int:problem_number>", methods=["GET"])
 def fetch_project_euler_solution(problem_number: int) -> Response:
     """
     Send the generator reponse to poll for solutions
