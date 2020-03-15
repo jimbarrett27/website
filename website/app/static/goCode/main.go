@@ -22,6 +22,8 @@ func solution(problemNumber int) float64 {
 		return float64(solutions.Problem5())
 	case 6:
 		return float64(solutions.Problem6())
+	case 7:
+		return float64(solutions.Problem6())
 	case 50:
 		return float64(solutions.Problem50())
 	default:
