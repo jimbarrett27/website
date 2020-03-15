@@ -68,7 +68,8 @@ def publications() -> HTML:
         "publications.html", publications=json.loads(publications_json.read_text())
     )
 
-@app.route("/project_euler_data/<int:problem_number>", methods=["GET"]) 
+
+@app.route("/project_euler_data/<int:problem_number>", methods=["GET"])
 def fetch_project_euler_data(problem_number: int) -> str:
     """
     Fetchs the data file for project euler and serves it up.
@@ -126,6 +127,7 @@ def stream_project_euler_solution(problem_number: int) -> Generator:
         solution = int(solution)
 
     yield f"\n{str(solution)}"
+
 
 @app.route("/project_euler_solution/<int:problem_number>", methods=["GET"])
 def fetch_project_euler_solution(problem_number: int) -> Response:
