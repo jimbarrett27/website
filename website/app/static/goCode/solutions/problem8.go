@@ -10,7 +10,7 @@ import (
 func getData() (data string) {
 
 	port := os.Getenv("PORT")
-	localhost := fmt.Sprintf("http://localhost:%s/project_euler_data/8", port)
+	localhost := fmt.Sprintf("https://localhost:%s/project_euler_data/8", port)
 	resp, _ := http.Get(localhost)
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
