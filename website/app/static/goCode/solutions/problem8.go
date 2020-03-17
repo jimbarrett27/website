@@ -1,26 +1,10 @@
 package solutions
 
-import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-)
-
-func getData() (data string) {
-
-	port := os.Getenv("PORT")
-	localhost := fmt.Sprintf("https://localhost:%s/project_euler_data/8", port)
-	resp, _ := http.Get(localhost)
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	data = string(body)
-	return
-}
+import "../serverutils"
 
 func Problem8() int {
 
-	numberWithLineBreaks := getData()
+	numberWithLineBreaks := serverutils.GetData(8)
 	var number []int
 
 	for i := range numberWithLineBreaks {
