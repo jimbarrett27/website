@@ -1,0 +1,2 @@
+projectEuler.h filter=lfs diff=lfs merge=lfs -text
+projectEuler.so filter=lfs diff=lfs merge=lfs -text
