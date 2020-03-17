@@ -3,6 +3,7 @@ package solutions
 import (
 	"fmt"
 
+	"../numberutils"
 	"../serverutils"
 )
 
@@ -15,7 +16,7 @@ func Problem8() int {
 	for i := range numberWithLineBreaks {
 		if numberWithLineBreaks[i] != byte('\n') {
 			// convert from uint8 char to actual ordinal
-			number = append(number, int(numberWithLineBreaks[i])-48)
+			number = append(number, numberutils.NumberFromByte(numberWithLineBreaks[i]))
 		}
 	}
 
