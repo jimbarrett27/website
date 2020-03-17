@@ -1,9 +1,14 @@
 package solutions
 
-import "../serverutils"
+import (
+	"fmt"
+
+	"../serverutils"
+)
 
 func Problem8() int {
 
+	fmt.Println("you're god damn right")
 	numberWithLineBreaks := serverutils.GetData(8)
 	var number []int
 
