@@ -2,31 +2,21 @@ package solutions
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
+
+	"../numberutils"
+	"../serverutils"
 )
-
-func getData() (data string) {
-
-	port := os.Getenv("PORT")
-	localhost := fmt.Sprintf("https://localhost:%s/project_euler_data/8", port)
-	resp, _ := http.Get(localhost)
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-	data = string(body)
-	return
-}
 
 func Problem8() int {
 
-	numberWithLineBreaks := getData()
+	fmt.Println("you're god damn right")
+	numberWithLineBreaks := serverutils.GetData(8)
 	var number []int
 
 	for i := range numberWithLineBreaks {
 		if numberWithLineBreaks[i] != byte('\n') {
 			// convert from uint8 char to actual ordinal
-			number = append(number, int(numberWithLineBreaks[i])-48)
+			number = append(number, numberutils.NumberFromByte(numberWithLineBreaks[i]))
 		}
 	}
 
