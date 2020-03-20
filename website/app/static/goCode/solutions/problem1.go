@@ -9,7 +9,6 @@ func Problem1() (sum int) {
 			sum += x
 		}
 	}
-
 	return
 
 }
