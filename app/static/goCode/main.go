@@ -7,39 +7,39 @@ import (
 )
 
 //export solution
-func solution(problemNumber int) float64 {
+func solution(problemNumber int) int {
 
 	switch problemNumber {
 	case 1:
-		return float64(solutions.Problem1())
+		return solutions.Problem1()
 	case 2:
-		return float64(solutions.Problem2())
+		return solutions.Problem2()
 	case 3:
-		return float64(solutions.Problem3())
+		return solutions.Problem3()
 	case 4:
-		return float64(solutions.Problem4())
+		return solutions.Problem4()
 	case 5:
-		return float64(solutions.Problem5())
+		return solutions.Problem5()
 	case 6:
-		return float64(solutions.Problem6())
+		return solutions.Problem6()
 	case 7:
-		return float64(solutions.Problem7())
+		return solutions.Problem7()
 	case 8:
-		return float64(solutions.Problem8())
+		return solutions.Problem8()
 	case 9:
-		return float64(solutions.Problem9())
+		return solutions.Problem9()
 	case 10:
-		return float64(solutions.Problem10())
+		return solutions.Problem10()
 	case 11:
-		return float64(solutions.Problem11())
+		return solutions.Problem11()
 	case 12:
-		return float64(solutions.Problem12())
+		return solutions.Problem12()
 	case 13:
-		return float64(solutions.Problem13())
+		return solutions.Problem13()
 	case 14:
-		return float64(solutions.Problem14())
+		return solutions.Problem14()
 	case 50:
-		return float64(solutions.Problem50())
+		return solutions.Problem50()
 	default:
 		return 0
 	}
