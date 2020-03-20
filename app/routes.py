@@ -5,7 +5,7 @@ The various routes for the webserver
 import json
 import logging
 import re
-from ctypes import c_double, cdll
+from ctypes import c_int64, cdll
 from multiprocessing import Process, Queue
 from pathlib import Path
 from time import sleep
@@ -106,25 +106,28 @@ def stream_project_euler_solution(problem_number: int) -> Generator:
     solution = 0
 
     def worker(queue: Queue):
+        """
+        Uses the compiled Go code to compute the solution to the requested problem
+        """
         solutions_lib = cdll.LoadLibrary(str(STATIC_DIRECTORY / "bin/projectEuler.so"))
-        solutions_lib.solution.restype = c_double
+        solutions_lib.solution.restype = c_int64
         solution = solutions_lib.solution(int(problem_number))
         queue.put(solution)
 
+    # spawn a child process to call the go code, and poll it until it's done
     queue: Queue = Queue(1)
     proc = Process(target=worker, args=(queue,))
     proc.start()
     while queue.empty():
-        sleep(0.5)
         yield str(1)
+        sleep(0.5)
 
     solution = queue.get()
     LOGGER.info(f"Found solution for problem {problem_number}: {solution}")
 
+    # default from the Go code
     if solution == 0:
         yield f"No Solution for problem {problem_number}"
-    if solution == round(solution):
-        solution = int(solution)
 
     yield f"\n{str(solution)}"
 

@@ -69,7 +69,7 @@ extern "C" {
 #endif
 
 
-extern GoFloat64 solution(GoInt p0);
+extern GoInt solution(GoInt p0);
 
 #ifdef __cplusplus
 }
