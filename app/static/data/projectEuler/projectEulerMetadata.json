@@ -70,6 +70,11 @@
 		"description": "<p>The following iterative sequence is defined for the set of positive integers:</p><p>$$n \\\\rightarrow n/2 \\\\; (n\\\\; is \\\\; even) $$<br>$$n \\\\rightarrow 3n+1 \\\\; (n\\\\; is \\\\; odd)$$</p><p> Using the rule above and starting with 13, we generate the following sequence:</p><p>$$13\\\\rightarrow 40\\\\rightarrow 20\\\\rightarrow 10\\\\rightarrow 5\\\\rightarrow 16\\\\rightarrow 8\\\\rightarrow 4\\\\rightarrow 2\\\\rightarrow 1 $$</p><p>It can be seen that this sequence (starting at 13 and finishing at 1) contains 10 terms. Although it has not been proved yet (Collatz Problem), it is thought that all starting numbers finish at 1.</p><p>Which starting number, under one million, produces the longest chain?</p>"
 	},
 	{
+		"number": 15,
+		"name": "Lattice Paths",
+		"description": "<p>Starting in the top left corner of a 2×2 grid, and only being able to move to the right and down, there are exactly 6 routes to the bottom right corner.</p><img src=\\\"/static/images/projectEuler/problem15.png\\\"><p>How many such routes are there through a 20×20 grid?</p>"
+	},
+	{
 		"number": 50,
 		"name": "Consecutive Prime Sum",
 		"description": "<p>The prime 41, can be written as the sum of six consecutive primes:</p><p>41 = 2 + 3 + 5 + 7 + 11 + 13</p><p>This is the longest sum of consecutive primes that adds to a prime below one-hundred.</p><p>The longest sum of consecutive primes below one-thousand that adds to a prime, contains 21 terms, and is equal to 953.</p><p>Which prime, below one-million, can be written as the sum of the most consecutive primes?</p> "
