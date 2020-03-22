@@ -1,12 +1,12 @@
 lint:
-	pylint --disable=bad-continuation,fixme app twitter crypto
+	pylint --disable=bad-continuation,fixme app
 
 reformat:
-	black --exclude=app/__init__.py app twitter crypto
-	isort --recursive app twitter crypto
+	black --exclude=app/__init__.py app
+	isort --recursive app
 
 mypy:
-	mypy --ignore-missing-imports app twitter crypto
+	mypy --ignore-missing-imports app
 
 jslint:
 	jshint app/static/js/
