@@ -2,11 +2,7 @@ Flask
 gunicorn
 markdown
 numpy
-tweepy
 pylint
 mypy
 black
 isort
-python-binance
-matplotlib
-psycopg2-binary
