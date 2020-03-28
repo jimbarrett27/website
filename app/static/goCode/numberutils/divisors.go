@@ -4,6 +4,13 @@ import "math"
 
 func FindDivisors(num int) (divisors []int) {
 
+	if num == 2 {
+		return []int{1, 2}
+	}
+	if num == 3 {
+		return []int{1, 3}
+	}
+
 	maxDivisor := int(math.Sqrt(float64(num)))
 	for i := 1; i < maxDivisor; i++ {
 		if num%i == 0 {
