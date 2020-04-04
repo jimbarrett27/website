@@ -6,3 +6,4 @@ pylint
 mypy
 black
 isort
+pytest
