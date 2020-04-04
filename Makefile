@@ -1,12 +1,12 @@
 lint:
-	pylint --disable=bad-continuation,fixme app
+	pylint --disable=bad-continuation,fixme app tests
 
 reformat:
-	black --exclude=app/__init__.py app
-	isort --recursive app
+	black --exclude=app/__init__.py app tests
+	isort --recursive app tests
 
 mypy:
-	mypy --ignore-missing-imports app
+	mypy --ignore-missing-imports app tests
 
 jslint:
 	jshint app/static/js/
@@ -16,6 +16,9 @@ stylechecks:
 	make lint
 	make mypy
 	make jslint
+
+test:
+	python -m pytest tests
 
 compile-go:
 	go build -buildmode=c-shared -o app/static/bin/projectEuler.so app/static/goCode/main.go
