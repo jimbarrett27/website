@@ -51,7 +51,7 @@ let initialiseRequestButton = function (problemNumber, problemName, problemDescr
                             clearInterval(interval);
                         }
                         i += 1;
-                    }, 500);
+                    }, 50);
                 });
             }
 
