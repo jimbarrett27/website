@@ -1,6 +1,8 @@
 package numberutils
 
-import "math"
+import (
+	"math"
+)
 
 func FindDivisors(num int) (divisors []int) {
 
@@ -11,11 +13,14 @@ func FindDivisors(num int) (divisors []int) {
 		return []int{1, 3}
 	}
 
-	maxDivisor := int(math.Sqrt(float64(num)))
+	maxDivisor := int(math.Ceil(math.Sqrt(float64(num))))
 	for i := 1; i < maxDivisor; i++ {
 		if num%i == 0 {
 			divisors = append(divisors, i)
-			divisors = append(divisors, num/i)
+			pairedDivisor := num / i
+			if pairedDivisor != maxDivisor {
+				divisors = append(divisors, num/i)
+			}
 		}
 	}
 
