@@ -6,13 +6,11 @@ import json
 import logging
 import re
 from ctypes import c_int64, cdll
-from multiprocessing import Process, Queue
 from pathlib import Path
-from time import sleep
-from typing import Dict, Generator
+from typing import Dict
 
 import markdown
-from flask import Response, render_template
+from flask import render_template
 from flask.logging import create_logger
 
 from app import app
@@ -96,7 +94,7 @@ def fetch_project_euler_solution_code(problem_number: int) -> str:
 
 
 @app.route("/project_euler_solution/<int:problem_number>", methods=["GET"])
-def fetch_project_euler_solution(problem_number: int) -> Response:
+def fetch_project_euler_solution(problem_number: int) -> str:
     """
     Send the generator reponse to poll for solutions
     """
