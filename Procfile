@@ -1,1 +1,1 @@
-web: waitress-serve --threads=256  app:app
+web: waitress-serve app:app
