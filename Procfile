@@ -1,1 +1,1 @@
-web: gunicorn --threads 256 --timeout 60  app:app
+web: waitress-serve --threads=256  app:app

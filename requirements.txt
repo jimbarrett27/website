@@ -1,5 +1,5 @@
 Flask
-gunicorn
+waitress
 markdown
 numpy
 pylint
