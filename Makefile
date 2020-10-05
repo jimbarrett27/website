@@ -1,5 +1,5 @@
 lint:
-	pylint --disable=bad-continuation,fixme app tests
+	pylint --disable=bad-continuation,logging-fstring-interpolation,fixme,mixed-line-endings app tests
 
 reformat:
 	black --exclude=app/__init__.py app tests
