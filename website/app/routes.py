@@ -53,7 +53,7 @@ def main() -> HTML:
         {"name": "Blog", "variable_name": "blog", "content": blog(), "active": ""},
     ]
 
-    return render_template("main.html", tab_contents=tab_contents)
+    return render_template("new_main.html", tab_contents=tab_contents)
 
 
 def publications() -> HTML:
