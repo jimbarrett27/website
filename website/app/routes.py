@@ -5,15 +5,15 @@ The various routes for the webserver
 import json
 import logging
 import re
-from ctypes import c_int64, cdll
-from pathlib import Path
-from typing import Dict
 
 import markdown
 from flask import render_template
 from flask.logging import create_logger
 
 from app import app
+from ctypes import c_int64, cdll
+from pathlib import Path
+from typing import Dict
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -25,24 +25,17 @@ NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "jupyterHtml"
 HTML = str
 
 TAB_CONTENTS = [
-        {
-            "name": "Publications",
-            "route": "/publications"
-        },
-        {
-            "name": "Project Euler",
-            "route": "/project_euler"
-        },
-        {"name": "Blog", "route": "/blog"},
-    ]
+    {"name": "Publications", "route": "/publications"},
+    {"name": "Project Euler", "route": "/project_euler"},
+    {"name": "Blog", "route": "/blog"},
+]
+
 
 @app.route("/")
 def main() -> HTML:
     """
     Renders the base page
     """
-
-    
 
     return render_template("main.html", tab_contents=TAB_CONTENTS)
 
@@ -55,8 +48,11 @@ def publications() -> HTML:
     publications_json = STATIC_DIRECTORY / "data/activity/publications.json"
 
     return render_template(
-        "publications.html", publications=json.loads(publications_json.read_text()), tab_contents=TAB_CONTENTS
+        "publications.html",
+        publications=json.loads(publications_json.read_text()),
+        tab_contents=TAB_CONTENTS,
     )
+
 
 @app.route("/project_euler")
 def project_euler() -> HTML:
@@ -89,8 +85,9 @@ def project_euler() -> HTML:
         "projectEuler.html",
         solvedProblems=solved_problems,
         solvedProblemNumbers=[problem["number"] for problem in solved_problems],
-        tab_contents=TAB_CONTENTS
+        tab_contents=TAB_CONTENTS,
     )
+
 
 @app.route("/project_euler_data/<int:problem_number>", methods=["GET"])
 def fetch_project_euler_data(problem_number: int) -> str:
