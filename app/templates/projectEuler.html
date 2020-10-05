@@ -1,3 +1,5 @@
+{% extends "main.html" %}
+{% block page_content %}
 <h2>Project Euler</h2>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
@@ -44,7 +46,7 @@
 		<button class="runCode">Run Code!</button>
 		<h4 class="solution"></h4>
 	</div>
-	<pre><code class="go"><div class="exerciseSource" style="width: 100%"></div></code></pre>
+	<pre><code class="go"><div class="exerciseSource" style="width: 50%; text-align: left;"></div></code></pre>
 </div>
 <script type="text/javascript" src="/static/js/projectEuler.js">
 </script>
@@ -53,4 +55,5 @@
 		initialiseRequestButton("{{ problem.number }}", "{{ problem.name }}", "{{ problem.description|safe }}", document.querySelector('.requestExercise{{problem.number}}'))
 	{% endfor %}
 </script>
+{% endblock %}
 

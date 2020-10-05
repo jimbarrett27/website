@@ -1,3 +1,5 @@
+{% extends "main.html" %}
+{% block page_content %}
 <h2>First Author Publications</h2>
 {% for publication in publications %}
 	{% if publication.first_author == 'True' %}
@@ -18,3 +20,4 @@
 		</p>
 	{% endif %}
 {% endfor %}
+{% endblock %}
