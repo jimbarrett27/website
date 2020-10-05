@@ -5,15 +5,15 @@ The various routes for the webserver
 import json
 import logging
 import re
-from ctypes import c_int64, cdll
-from pathlib import Path
-from typing import Dict
 
 import markdown
 from flask import render_template
 from flask.logging import create_logger
 
 from app import app
+from ctypes import c_int64, cdll
+from pathlib import Path
+from typing import Dict
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -24,6 +24,12 @@ NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "jupyterHtml"
 
 HTML = str
 
+TAB_CONTENTS = [
+    {"name": "Publications", "route": "/publications"},
+    {"name": "Project Euler", "route": "/project_euler"},
+    {"name": "Blog", "route": "/blog"},
+]
+
 
 @app.route("/")
 def main() -> HTML:
@@ -31,31 +37,10 @@ def main() -> HTML:
     Renders the base page
     """
 
-    tab_contents = [
-        {
-            "name": "About",
-            "variable_name": "about",
-            "content": render_template("about.html"),
-            "active": "active",
-        },
-        {
-            "name": "Publications",
-            "variable_name": "publications",
-            "content": publications(),
-            "active": "",
-        },
-        {
-            "name": "Project Euler",
-            "variable_name": "project_euler",
-            "content": project_euler(),
-            "active": "",
-        },
-        {"name": "Blog", "variable_name": "blog", "content": blog(), "active": ""},
-    ]
-
-    return render_template("main.html", tab_contents=tab_contents)
+    return render_template("main.html", tab_contents=TAB_CONTENTS)
 
 
+@app.route("/publications")
 def publications() -> HTML:
     """
     Renders the publications page
@@ -63,7 +48,44 @@ def publications() -> HTML:
     publications_json = STATIC_DIRECTORY / "data/activity/publications.json"
 
     return render_template(
-        "publications.html", publications=json.loads(publications_json.read_text())
+        "publications.html",
+        publications=json.loads(publications_json.read_text()),
+        tab_contents=TAB_CONTENTS,
+    )
+
+
+@app.route("/project_euler")
+def project_euler() -> HTML:
+    """
+    Works out which problems are solved and renders the project Euler page
+    """
+
+    solutions_directory = STATIC_DIRECTORY / "goCode/solutions"
+    exercise_solution_files = solutions_directory.glob("*.go")
+
+    # all solution files follow the pattern problem{}.go
+    problems_json = STATIC_DIRECTORY / "data/projectEuler/projectEulerMetadata.json"
+    problems_metadata = json.loads(problems_json.read_text())
+
+    solved_problems = []
+    for path in exercise_solution_files:
+        matches = re.search(r"\d+", path.parts[-1])
+        if matches is None:
+            continue
+        problem_number = int(matches.group())
+        problem_metadata = [
+            metadata
+            for metadata in problems_metadata
+            if metadata["number"] == problem_number
+        ][0]
+        problem_metadata["code"] = path.read_text()
+        solved_problems.append(problem_metadata)
+
+    return render_template(
+        "projectEuler.html",
+        solvedProblems=solved_problems,
+        solvedProblemNumbers=[problem["number"] for problem in solved_problems],
+        tab_contents=TAB_CONTENTS,
     )
 
 
@@ -106,39 +128,6 @@ def fetch_project_euler_solution(problem_number: int) -> str:
     return str(solution)
 
 
-def project_euler() -> HTML:
-    """
-    Works out which problems are solved and renders the project Euler page
-    """
-
-    solutions_directory = STATIC_DIRECTORY / "goCode/solutions"
-    exercise_solution_files = solutions_directory.glob("*.go")
-
-    # all solution files follow the pattern problem{}.go
-    problems_json = STATIC_DIRECTORY / "data/projectEuler/projectEulerMetadata.json"
-    problems_metadata = json.loads(problems_json.read_text())
-
-    solved_problems = []
-    for path in exercise_solution_files:
-        matches = re.search(r"\d+", path.parts[-1])
-        if matches is None:
-            continue
-        problem_number = int(matches.group())
-        problem_metadata = [
-            metadata
-            for metadata in problems_metadata
-            if metadata["number"] == problem_number
-        ][0]
-        problem_metadata["code"] = path.read_text()
-        solved_problems.append(problem_metadata)
-
-    return render_template(
-        "projectEuler.html",
-        solvedProblems=solved_problems,
-        solvedProblemNumbers=[problem["number"] for problem in solved_problems],
-    )
-
-
 def get_blog_metadata() -> Dict:
     """
     grabs the static metadata file for blogs
@@ -146,6 +135,7 @@ def get_blog_metadata() -> Dict:
     return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
 
 
+@app.route("/blog")
 def blog() -> HTML:
     """
     Renders the blog index page
@@ -160,7 +150,7 @@ def blog() -> HTML:
             metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
         blog_posts.append(metadata)
 
-    return render_template("blog.html", blogPosts=blog_posts)
+    return render_template("blog.html", blogPosts=blog_posts, tab_contents=TAB_CONTENTS)
 
 
 @app.route("/notebooks/<notebook_name>")
