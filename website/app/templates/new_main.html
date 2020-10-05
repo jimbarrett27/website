@@ -28,16 +28,13 @@ Released   : 20131203
 	<div id="header" class="container">
 		<div id="menu">
 			<ul>
-				<li class="current_page_item"><a href="#" accesskey="1" title="">Homepage</a></li>
-				<li><a href="#" accesskey="2" title="">Our Clients</a></li>
-				<li><a href="#" accesskey="3" title="">About Us</a></li>
-				<li><a href="#" accesskey="4" title="">Careers</a></li>
-				<li><a href="#" accesskey="5" title="">Contact Us</a></li>
+				{% for tab_content in tab_contents %}
+					<li role="presentation" class="{{ tab_content.active }}"><a href="#{{ tab_content.variable_name }}">{{ tab_content.name }}</a></li>
+				{% endfor %}
 			</ul>
 		</div>
 		<div id="logo">
-			<h1><a href="#">Veridical</a></h1>
-			<span>Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a></span> </div>
+			<h1><a href="#">Jim W. Barrett</a></h1>
 	</div>
 </div>
 <div id="wrapper1">
