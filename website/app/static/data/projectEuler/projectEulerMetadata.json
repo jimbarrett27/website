@@ -115,6 +115,11 @@
 		"description": "<p>A perfect number is a number for which the sum of its proper divisors is exactly equal to the number. For example, the sum of the proper divisors of 28 would be 1 + 2 + 4 + 7 + 14 = 28, which means that 28 is a perfect number.</p><p>A number n is called deficient if the sum of its proper divisors is less than n and it is called abundant if this sum exceeds n.</p><p>As 12 is the smallest abundant number, 1 + 2 + 3 + 4 + 6 = 16, the smallest number that can be written as the sum of two abundant numbers is 24. By mathematical analysis, it can be shown that all integers greater than 28123 can be written as the sum of two abundant numbers. However, this upper limit cannot be reduced any further by analysis even though it is known that the greatest number that cannot be expressed as the sum of two abundant numbers is less than this limit.</p><p>Find the sum of all the positive integers which cannot be written as the sum of two abundant numbers.</p>"
 	},
 	{
+		"number": 25,
+		"name": "1000-digit Fibonacci number",
+		"description": "<p>The Fibonacci sequence is defined by the recurrence relation:</p><p>\\\\(F_n = F_{n-1} + F_{n-2}\\\\), where \\\\(F_1 = F_2 = 1\\\\)</p><p>Hence the first 12 terms will be</p><p>\\\\(F_1=1\\\\)</p><p>\\\\(F_2=1\\\\)</p><p>\\\\(F_3=2\\\\)</p><p>\\\\(F_4=3\\\\)</p><p>\\\\(F_5=5\\\\)</p><p>\\\\(F_6=8\\\\)</p><p>\\\\(F_7=13\\\\)</p><p>\\\\(F_8=21\\\\)</p><p>\\\\(F_9=34\\\\)</p><p>\\\\(F_{10}=55\\\\)</p><p>\\\\(F_{11}=89\\\\)</p><p>\\\\(F_{12}=144\\\\)</p><p>The 12th term, \\\\(F_{12}\\\\), is the first term to contain 3 digits.</p><p>What is the index of the first term in the Fibonacci sequence to contain 1000 digits?</p>"
+	},
+	{
 		"number": 50,
 		"name": "Consecutive Prime Sum",
 		"description": "<p>The prime 41, can be written as the sum of six consecutive primes:</p><p>41 = 2 + 3 + 5 + 7 + 11 + 13</p><p>This is the longest sum of consecutive primes that adds to a prime below one-hundred.</p><p>The longest sum of consecutive primes below one-thousand that adds to a prime, contains 21 terms, and is equal to 953.</p><p>Which prime, below one-million, can be written as the sum of the most consecutive primes?</p"
