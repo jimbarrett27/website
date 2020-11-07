@@ -56,6 +56,8 @@ func solution(problemNumber int) int {
 		return solutions.Problem22()
 	case 23:
 		return solutions.Problem23()
+	case 25:
+		return solutions.Problem25()
 	case 50:
 		return solutions.Problem50()
 	case 67:

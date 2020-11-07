@@ -12,3 +12,10 @@ func SumBigNumberDigits(bigNum *big.Int) (sum int) {
 	}
 	return
 }
+
+
+func CountBigNumberDigits(num *big.Int) (nDigits int) {
+	numStr := fmt.Sprint(num)
+	nDigits = len(numStr)
+	return
+}
