@@ -125,6 +125,11 @@
 		"description": "<p>The Fibonacci sequence is defined by the recurrence relation:</p><p>\\\\(F_n = F_{n-1} + F_{n-2}\\\\), where \\\\(F_1 = F_2 = 1\\\\)</p><p>Hence the first 12 terms will be</p><p>\\\\(F_1=1\\\\)</p><p>\\\\(F_2=1\\\\)</p><p>\\\\(F_3=2\\\\)</p><p>\\\\(F_4=3\\\\)</p><p>\\\\(F_5=5\\\\)</p><p>\\\\(F_6=8\\\\)</p><p>\\\\(F_7=13\\\\)</p><p>\\\\(F_8=21\\\\)</p><p>\\\\(F_9=34\\\\)</p><p>\\\\(F_{10}=55\\\\)</p><p>\\\\(F_{11}=89\\\\)</p><p>\\\\(F_{12}=144\\\\)</p><p>The 12th term, \\\\(F_{12}\\\\), is the first term to contain 3 digits.</p><p>What is the index of the first term in the Fibonacci sequence to contain 1000 digits?</p>"
 	},
 	{
+		"number": 27,
+		"name": "Quadratic Primes",
+		"description": "<p>Euler discovered the remarkable quadratic formula:</p><p>$$n^2+n+41$$</p><p>It turns out It turns out that the formula will produce 40 primes for the consecutive integer values \\\\(0\\\\leq n \\\\leq 39\\\\). However, when \\\\(n=40, 40^2 + 40 + 41=40(40+1) + 41\\\\) is divisible by 41, and certainly when \\\\(n=41, 41^2+41+41\\\\) is clearly divisible by 41.</p><p>The incredible formula \\\\(n^2 -79n +1601\\\\) was discovered, which produces 80 primes for the consecutive values \\\\(0\\\\leq n \\\\leq 79\\\\). The product of the coefficients, -79 and 1601, is -126479.</p><p>Considering quadratics of the form:</p><p>\\\\(n^2+an+b\\\\) where \\\\(|a|<1000\\\\) and \\\\(|b| <1000\\\\)</p><p>Find the product of the coefficients, a and b, for the quadratic expression that produces the maximum number of primes for consecutive values of n, starting with n=0"
+	},
+	{
 		"number": 50,
 		"name": "Consecutive Prime Sum",
 		"description": "<p>The prime 41, can be written as the sum of six consecutive primes:</p><p>41 = 2 + 3 + 5 + 7 + 11 + 13</p><p>This is the longest sum of consecutive primes that adds to a prime below one-hundred.</p><p>The longest sum of consecutive primes below one-thousand that adds to a prime, contains 21 terms, and is equal to 953.</p><p>Which prime, below one-million, can be written as the sum of the most consecutive primes?</p"
