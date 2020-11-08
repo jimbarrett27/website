@@ -23,10 +23,8 @@ func SieveUpTo(max int) (sieve []bool) {
 	return
 }
 
-func PrimesUpTo(max int) (primes []int) {
-
-	sieve := SieveUpTo(max)
-
+func PrimesFromSieve(sieve []bool) (primes []int) {
+	
 	for i := range sieve {
 		if !sieve[i] {
 			primes = append(primes, i+1)
@@ -34,7 +32,13 @@ func PrimesUpTo(max int) (primes []int) {
 	}
 
 	return
+}
 
+func PrimesUpTo(max int) (primes []int) {
+
+	sieve := SieveUpTo(max)
+	primes = PrimesFromSieve(sieve)
+	return
 }
 
 func IsPrime(primes []int, number int) bool {
