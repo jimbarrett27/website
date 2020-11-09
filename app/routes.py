@@ -20,7 +20,7 @@ LOGGER = create_logger(app)
 
 STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
 BLOG_POST_DIRECTORY = STATIC_DIRECTORY / "blogPosts"
-NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "jupyterHtml"
+NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "notebooks"
 
 HTML = str
 
@@ -171,9 +171,9 @@ def blog_post(post_id: int) -> HTML:
     return render_template("blog_post.html", blogPost=post_metadata, tab_contents=TAB_CONTENTS)
 
 
-@app.route("/notebooks/<notebook_name>")
-def notebook(notebook_name: str) -> HTML:
+@app.route("/notebooks/<notebook_file>")
+def notebook(notebook_file: str) -> HTML:
     """
     Renders a jupyter notebook as HTML
     """
-    return (NOTEBOOK_DIRECTORY / f"{notebook_name}.html").read_text()
+    return (NOTEBOOK_DIRECTORY / f"{notebook_file}").read_text()
