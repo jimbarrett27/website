@@ -3,30 +3,35 @@
 		"title": "Gaussian Process Update Equations",
 		"date": "14/07/2017",
 		"author": "Jim Barrett",
-		"content_file": "gaussianProcessUpdateEquations.md"
+		"content_file": "gaussianProcessUpdateEquations.md",
+		"post_id": 4
 	},
 	{
 		"title": "(un-)Predictability of Sports",
 		"date": "31/12/2017",
 		"author": "Jim Barrett",
-		"content_file": "unpredictabilityOfSports.md"
+		"content_file": "unpredictabilityOfSports.md",
+		"post_id": 3
 	},
 	{
 		"title": "Random Samples from a Sphere",
 		"date": "26/07/2017",
 		"author": "Jim Barrett",
-		"content_file": "samplesFromASphere.md"
+		"content_file": "samplesFromASphere.md",
+		"post_id": 2
 	},
 	{
 		"title": "New Paper - Accuracy of Inference",
 		"date": "04/12/2017",
 		"author": "Jim Barrett",
-		"content_file": "accuracyOfInferencePaper.md"
+		"content_file": "accuracyOfInferencePaper.md",
+		"post_id": 1
 	},
 	{
 		"title": "It's Jim's life, but not as we know it!",
 		"date": "07/06/2016",
 		"author": "Jim Barrett",
-		"content_file": "itsJimsLife.md"
+		"content_file": "itsJimsLife.md",
+		"post_id": 0
 	}
 ]

@@ -152,6 +152,22 @@ def blog() -> HTML:
 
     return render_template("blog.html", blogPosts=blog_posts, tab_contents=TAB_CONTENTS)
 
+@app.route("/blog/<int:post_id>")
+def blog_post(post_id: int) -> HTML:
+    """
+    Renders an individual page from the blog
+    """
+
+    metadata = {}
+    for metadata in get_blog_metadata():
+        if metadata['post_id'] == int(post_id):
+            post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
+            with open(post_location, "r") as f:
+                metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+        break
+
+    return render_template("blog_post.html", blogPost=metadata, tab_contents=TAB_CONTENTS)
+
 
 @app.route("/notebooks/<notebook_name>")
 def notebook(notebook_name: str) -> HTML:
