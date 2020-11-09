@@ -457,14 +457,21 @@
 	{
 		overflow: hidden;
 		padding: 8em 0em;
-		text-align: center;
+		text-align: left;
 		color: rgba(0,0,0,0.5);
 	}
 	
-	#welcome .content
+	#welcome .frontpage
 	{
 		padding: 0em 8em;
+		text-align: center;
 	}
+
+	/* #welcome .content
+	{
+		padding: 0em 8em;
+		text-align: center;
+	} */
 
 	#welcome .title
 	{
