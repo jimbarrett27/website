@@ -13344,7 +13344,7 @@ Best l = 1.6259474735691932
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now that we have our optimised value for $l$, we can compute all of the other values of $\Sigma$. From this, we can plug straight in to the Gaussian process update equations (the derivation of these is long, but you can see the full derivation on some loser's blog <a href="http://www.concernsofadataguy.com/blog">here</a>), which define a multivariate Gaussian distribution from which our function is drawn</p>
+<p>Now that we have our optimised value for $l$, we can compute all of the other values of $\Sigma$. From this, we can plug straight in to the Gaussian process update equations (the derivation of these is long, but you can see the full derivation on some loser's blog <a href="http://www.concernsofadataguy.com/blog/4">here</a>), which define a multivariate Gaussian distribution from which our function is drawn</p>
 $$ P(y_p|y_t) \sim \mathcal{N}(CT^{-1}y_t, P-CT^{-1}C^T) $$<p>So that our predictions are given by the mean vector</p>
 $$ \mu \approx CT^{-1}y_t $$<p>with uncertainty summarised by the covariance matrix</p>
 $$ \Sigma \approx P-CT^{-1}C^T$$
