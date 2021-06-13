@@ -11,7 +11,8 @@ from flask import render_template
 from flask.logging import create_logger
 
 from app import app
-from app.constants import STATIC_DIRECTORY, BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY
+from app.constants import (BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY,
+                           STATIC_DIRECTORY)
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
