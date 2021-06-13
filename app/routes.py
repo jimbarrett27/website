@@ -4,7 +4,6 @@ The various routes for the webserver
 
 import json
 import logging
-from pathlib import Path
 from typing import Dict
 
 import markdown
@@ -12,13 +11,10 @@ from flask import render_template
 from flask.logging import create_logger
 
 from app import app
+from app.constants import STATIC_DIRECTORY, BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
-
-STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
-BLOG_POST_DIRECTORY = STATIC_DIRECTORY / "blogPosts"
-NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "notebooks"
 
 HTML = str
 
