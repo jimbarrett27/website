@@ -4,14 +4,14 @@ The various routes for the webserver
 
 import json
 import logging
+from pathlib import Path
+from typing import Dict
 
 import markdown
 from flask import render_template
 from flask.logging import create_logger
 
 from app import app
-from pathlib import Path
-from typing import Dict
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
