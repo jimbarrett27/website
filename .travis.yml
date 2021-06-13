@@ -2,9 +2,19 @@ language: python
 python:     # current default Python on Travis CI
   - "3.7"
 
+branches:
+  only: 
+    - main
+
 # command to install dependencies
 install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - python run_stylechecks.py
+  - black app tests
+  - isort app tests
+  - python -m pylint app tests
+  - python -m mypy app tests
+
+script:
+  - python -m pytest tests --cov
