@@ -7,6 +7,7 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - black app
-  - isort app
-  - python -m pylint app
+  - black app tests
+  - isort app tests
+  - python -m pylint app tests
+  - python -m mypy app tests
