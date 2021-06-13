@@ -1,69 +1,82 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE HTML>
 <!--
-Design by TEMPLATED
-http://templated.co
-Released for free under the Creative Commons Attribution License
-
-Name       : Veridical 
-Description: A two-column, fixed-width design with dark color scheme.
-Version    : 1.0
-Released   : 20131203
-
+	Stellar by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 -->
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title></title>
-<meta name="keywords" content="" />
-<meta name="description" content="" />
-<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900" rel="stylesheet" />
-<link href="/static/css/default.css" rel="stylesheet" type="text/css" media="all" />
-<link href="/static/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+<html>
+	<head>
+		<title>Stellar by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/static/css/main.css" />
+		<noscript><link rel="stylesheet" href="/static/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
 
-<!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
+		<!-- Wrapper -->
+			<div id="wrapper">
 
-</head>
-<body>
-<div id="header-wrapper">
-	<div id="header" class="container">
-		<div id="menu">
-			<ul>
-				{% for tab_content in tab_contents %}
-					<li role="presentation"><a href="{{ tab_content.route }}">{{ tab_content.name }}</a></li>
-				{% endfor %}
-			</ul>
-		</div>
-		<div id="logo">
-			<h1><a href="/">Jim W. Barrett</a></h1>
-		</div>
-	</div>
-</div>
-<div id="wrapper1">
-	<div id="welcome" class="container">
-		{% block page_content %}
-		<div class="frontpage">
-			<p>
-				I'm a Data Scientist working at the Uppsala Monitoring Centre, based in Uppsala, Sweden. 
-				This site is intended to be something of a playground for me to mess around with various web related things. 
-				I'm also planning to use it to host a blog, as and when I have some interesting stuff to write about. 
-				You can see all the source of this website on <a href="https://github.com/jimbarrett27/website">GitHub</a>.
-			</p>
-		</div>
-		{% endblock %}
-	</div>
-</div>
-<div id="copyright">
-	<div class="title">
-		<h3></h3>
-		<span class="byline">Feel free to get in touch</span> 
-	</div>
-	<ul class="contact">
-		<li><a href="https://twitter.com/jimbarrett27" class="icon icon-twitter"><span>Twitter</span></a></li>
-		<li><a href="https://www.linkedin.com/in/jimbarrett27/" class="icon icon-linkedin"><span>LinkedIn</span></a></li>
-		<li><a href="https://github.com/jimbarrett27" class="icon icon-github-sign"><span>Github</span></a></li>
-		<li><a href="mailto:jimbarrett27@gmail.com" class="icon icon-envelope"><span>Email</span></a></li>
-	</ul>
-	<p>HTML Template Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>.</p>
-</div>
-</body>
+				<!-- Header -->
+					<header id="header" class="alt">
+						<h1>Jim W. Barrett</h1>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							{% for tab_content in tab_contents %}
+							<li><a href="{{ tab_content.route }}">{{ tab_content.name }}</a></li>
+							{% endfor %}
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Introduction -->
+							<section id="intro" class="main">
+								<div class="spotlight">
+									<div class="content">
+										{% block page_content %}
+										<div>
+											<p>
+												I'm a Data Scientist working at the Uppsala Monitoring Centre, based in Uppsala, Sweden. 
+												This site is intended to be something of a playground for me to mess around with various web related things. 
+												I'm also planning to use it to host a blog, as and when I have some interesting stuff to write about. 
+												You can see all the source of this website on <a href="https://github.com/jimbarrett27/website">GitHub</a>.
+											</p>
+										</div>
+										{% endblock %}
+									</div>
+								</div>
+							</section>
+					</div>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<section>
+							<h2>Contact</h2>
+							<ul class="icons">
+								<li><a href="https://twitter.com/jimbarrett27" class="icon brands fa-twitter alt"><span class="label">Twitter</span></a></li>
+								<li><a href="mailto:jimbarrett27@gmail.com" class="icon brands fa-envelope"><span class="label">Email</span></a></li>
+								<li><a href="https://github.com/jimbarrett27" class="icon brands fa-github alt"><span class="label">GitHub</span></a></li>
+								<li><a href="https://www.linkedin.com/in/jimbarrett27/" class="icon brands fa-linkedin alt"><span class="label">LinkedIn</span></a></li>
+							</ul>
+						</section>
+						<p class="copyright">&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/static/js/jquery.min.js"></script>
+			<script src="/static/js/jquery.scrollex.min.js"></script>
+			<script src="/static/js/jquery.scrolly.min.js"></script>
+			<script src="/static/js/browser.min.js"></script>
+			<script src="/static/js/breakpoints.min.js"></script>
+			<script src="/static/js/util.js"></script>
+			<script src="/static/js/main.js"></script>
+
+	</body>
 </html>
