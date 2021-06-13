@@ -19,6 +19,3 @@ stylechecks:
 
 test:
 	python -m pytest tests
-
-compile-go:
-	go build -buildmode=c-shared -o app/static/bin/projectEuler.so app/static/goCode/main.go
