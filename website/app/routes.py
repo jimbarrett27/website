@@ -25,6 +25,7 @@ NOTEBOOK_DIRECTORY = STATIC_DIRECTORY / "notebooks"
 HTML = str
 
 TAB_CONTENTS = [
+    {"name": "Home", "route": "/"},
     {"name": "Publications", "route": "/publications"},
     {"name": "Project Euler", "route": "/project_euler"},
     {"name": "Blog", "route": "/blog"},
