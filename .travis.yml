@@ -11,3 +11,6 @@ script:
   - isort app tests
   - python -m pylint app tests
   - python -m mypy app tests
+
+script:
+  - python -m pytest --cov
