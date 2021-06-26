@@ -18,3 +18,9 @@ script:
 
 script:
   - python -m pytest tests --cov
+
+deploy:
+  provider: gae
+  keyfile: personal-website-318015-bf6cbd444844.json.enc
+  project: personal-website-318015
+  on: main
