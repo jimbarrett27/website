@@ -3324,12 +3324,12 @@ input, select, textarea {
 		@media screen and (max-width: 736px) {
 
 			#nav {
-				display: none;
+				max-width: calc(100% - 4em);
 			}
 
-				#nav + #main {
+				/* #nav + #main {
 					padding-top: 0;
-				}
+				} */
 
 		}
 
@@ -3657,6 +3657,10 @@ input, select, textarea {
 					width: calc(100% + 3em);
 				}
 
+				#nav {
+					max-width: calc(100% - 2em);
+				}
+
 		}
 
 		@media screen and (max-width: 360px) {
@@ -3678,6 +3682,10 @@ input, select, textarea {
 						#main > .main > .image.main:first-child img {
 							border-radius: 0;
 						}
+
+			#nav {
+				max-width: 100%;
+			}
 
 		}
 
