@@ -9,3 +9,4 @@ app.db
 node_modules
 package-lock.json
 .coverage
+.pytest_cache
