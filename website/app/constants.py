@@ -1,3 +1,7 @@
+"""
+A collection of constants
+"""
+
 from pathlib import Path
 
 STATIC_DIRECTORY = Path(__file__).parent.resolve() / "static"
