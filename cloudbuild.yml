@@ -1,4 +1,15 @@
 steps:
-- name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy"]
-timeout: "1600s"
+  # Install dependencies
+  - name: python
+    entrypoint: pip
+    args: ["install", "-r", "requirements.txt", "--user"]
+  - name: python
+    entrypoint: python
+    args: ["-m", pytest]
+  - name: python
+    entrypoint: python
+    args: ["-m", pylint]
+  - name: python
+    entrypoint: python
+    args: ["-m", pytest]
+  
