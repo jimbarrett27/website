@@ -11,8 +11,7 @@ from flask import render_template
 from flask.logging import create_logger
 
 from app import app
-from app.constants import (BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY,
-                           STATIC_DIRECTORY)
+from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -67,7 +66,7 @@ def blog() -> HTML:
     blog_posts = []
     for metadata in blog_metadata:
         post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-        with open(post_location, "r") as f:
+        with post_location.open("r") as f:
             metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
         blog_posts.append(metadata)
 
@@ -86,7 +85,7 @@ def blog_post(post_id: int) -> HTML:
     for metadata in get_blog_metadata():
         if metadata["post_id"] == int(post_id):
             post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-            with open(post_location, "r") as f:
+            with post_location.open("r") as f:
                 metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
             post_metadata = metadata
 
