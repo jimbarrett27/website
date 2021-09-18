@@ -3,13 +3,24 @@ steps:
   - name: python
     entrypoint: pip
     args: ["install", "-r", "requirements.txt", "--user"]
+
+  # Check import formatting
   - name: python
     entrypoint: python
-    args: ["-m", pytest]
+    args: ["-m", "isort", "--check", "app"]
+
+  # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", pylint]
+    args: ["-m", "black", "--check", "app"]
+
+  # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", pytest]
+    args: ["-m", "pylint", "app"]
+
+  # Run tests
+  - name: python
+    entrypoint: python
+    args: ["-m", "pytest"]
   
