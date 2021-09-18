@@ -1,2 +1,2 @@
-runtime: python38
+runtime: python39
 entrypoint: waitress-serve --port=$PORT app:app
