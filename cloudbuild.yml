@@ -26,6 +26,7 @@ steps:
   
 
   - name: "gcr.io/cloud-builders/gcloud"
-    args: ["if", "[ $BRANCH_NAME != 'main' ];", "then", "app", "deploy;", "fi"]
+    entrypoint: bash
+    args: ["if", "[ $BRANCH_NAME == 'main' ];", "then", "app", "deploy;", "fi"]
 
 timeout: "1600s"
