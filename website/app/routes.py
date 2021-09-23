@@ -5,6 +5,7 @@ The various routes for the webserver
 import json
 import logging
 from typing import Dict
+from pathlib import Path
 
 import markdown
 from flask import render_template
@@ -54,6 +55,15 @@ def get_blog_metadata() -> Dict:
     """
     return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
 
+def generate_html_from_static_markdown(static_file_location: Path) -> HTML:
+    """
+    Takes a markdown file and generates a HTML string from it
+    """
+
+    md = static_file_location.read_text()
+    html = markdown.markdown(md, extensions=["nl2br"])
+
+    return html
 
 @app.route("/blog")
 def blog() -> HTML:
@@ -66,8 +76,7 @@ def blog() -> HTML:
     blog_posts = []
     for metadata in blog_metadata:
         post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-        with post_location.open("r") as f:
-            metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+        metadata["content"] = generate_html_from_static_markdown(post_location)
         blog_posts.append(metadata)
 
     return render_template("blog.html", blogPosts=blog_posts, tab_contents=TAB_CONTENTS)
@@ -85,8 +94,7 @@ def blog_post(post_id: int) -> HTML:
     for metadata in get_blog_metadata():
         if metadata["post_id"] == int(post_id):
             post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-            with post_location.open("r") as f:
-                metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+            metadata["content"] = generate_html_from_static_markdown(post_location)
             post_metadata = metadata
 
     return render_template(
