@@ -6,6 +6,7 @@ import json
 import logging
 from typing import Dict
 from pathlib import Path
+from flask.templating import render_template_string
 
 import markdown
 from flask import render_template
@@ -23,6 +24,7 @@ TAB_CONTENTS = [
     {"name": "Home", "route": "/"},
     {"name": "Publications", "route": "/publications"},
     {"name": "Blog", "route": "/blog"},
+    {"name": "Changelog", "route": "/changelog"}
 ]
 
 
@@ -115,4 +117,5 @@ def changelog() -> HTML:
     Renders the changelog page
     """
 
-    return generate_html_from_static_markdown(STATIC_DIRECTORY / 'changelog.md')
+    html = generate_html_from_static_markdown(STATIC_DIRECTORY / 'changelog.md')
+    return render_template_string(html, tab_contents=TAB_CONTENTS)
