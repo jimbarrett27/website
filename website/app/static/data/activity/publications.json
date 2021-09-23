@@ -18,6 +18,12 @@
 		"first_author": "True"
 	},
 	{
+		"title": "Rapid stellar and binary population synthesis with COMPAS",
+		"authors": "Team COMPAS: Jeff Riley, Poojan Agrawal, Jim W. Barrett, Kristan N. K. Boyett, Floor S. Broekgaarden, Debatri Chattopadhyay, Sebastian M. Gaebel, Fabian Gittins, Ryosuke Hirai, George Howitt, Stephen Justham, Lokesh Khandelwal, Floris Kummer, Mike Y. M. Lau, Ilya Mandel, Selma E. de Mink, Coenraad Neijssel, Tim Riley, Lieke van Son, Simon Stevenson, Alejandro Vigna-Gomez, Serena Vinciguerra, Tom Wagg, Reinhold Willcox",
+		"link": "https://arxiv.org/abs/2109.10352",
+		"first_author": "False"
+	},
+	{
 		"title": "On the formation history of Galactic double neutron stars",
 		"authors": "Alejandro Vigna-Gómez, Coenraad J. Neijssel, Simon Stevenson, Jim W. Barrett, Krzysztof Belczynski, Stephen Justham, Selma E. de Mink, Bernhard Müller, Philipp Podsiadlowski, Mathieu Renzo, Dorottya Szécsi, Ilya Mandel",
 		"link": "https://doi.org/10.1093/mnras/sty2463",
