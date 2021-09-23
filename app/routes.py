@@ -4,13 +4,13 @@ The various routes for the webserver
 
 import json
 import logging
-from typing import Dict
 from pathlib import Path
-from flask.templating import render_template_string
+from typing import Dict
 
 import markdown
 from flask import render_template
 from flask.logging import create_logger
+from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
@@ -24,7 +24,7 @@ TAB_CONTENTS = [
     {"name": "Home", "route": "/"},
     {"name": "Publications", "route": "/publications"},
     {"name": "Blog", "route": "/blog"},
-    {"name": "Changelog", "route": "/changelog"}
+    {"name": "Changelog", "route": "/changelog"},
 ]
 
 
@@ -57,15 +57,17 @@ def get_blog_metadata() -> Dict:
     """
     return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
 
+
 def generate_html_from_static_markdown(static_file_location: Path) -> HTML:
     """
     Takes a markdown file and generates a HTML string from it
     """
 
-    md = static_file_location.read_text()
-    html = markdown.markdown(md, extensions=["nl2br"])
+    md_content = static_file_location.read_text()
+    html = markdown.markdown(md_content, extensions=["nl2br"])
 
     return html
+
 
 @app.route("/blog")
 def blog() -> HTML:
@@ -90,8 +92,6 @@ def blog_post(post_id: int) -> HTML:
     Renders an individual page from the blog
     """
 
-    print(post_id)
-
     post_metadata = {}
     for metadata in get_blog_metadata():
         if metadata["post_id"] == int(post_id):
@@ -111,11 +111,12 @@ def notebook(notebook_file: str) -> HTML:
     """
     return (NOTEBOOK_DIRECTORY / f"{notebook_file}").read_text()
 
+
 @app.route("/changelog")
 def changelog() -> HTML:
     """
     Renders the changelog page
     """
 
-    html = generate_html_from_static_markdown(STATIC_DIRECTORY / 'changelog.md')
+    html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
     return render_template_string(html, tab_contents=TAB_CONTENTS)
