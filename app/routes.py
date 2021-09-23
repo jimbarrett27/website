@@ -108,3 +108,11 @@ def notebook(notebook_file: str) -> HTML:
     Renders a jupyter notebook as HTML
     """
     return (NOTEBOOK_DIRECTORY / f"{notebook_file}").read_text()
+
+@app.route("/changelog")
+def changelog() -> HTML:
+    """
+    Renders the changelog page
+    """
+
+    return generate_html_from_static_markdown(STATIC_DIRECTORY / 'changelog.md')
