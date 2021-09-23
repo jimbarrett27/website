@@ -4,11 +4,13 @@ The various routes for the webserver
 
 import json
 import logging
+from pathlib import Path
 from typing import Dict
 
 import markdown
 from flask import render_template
 from flask.logging import create_logger
+from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
@@ -22,6 +24,7 @@ TAB_CONTENTS = [
     {"name": "Home", "route": "/"},
     {"name": "Publications", "route": "/publications"},
     {"name": "Blog", "route": "/blog"},
+    {"name": "Changelog", "route": "/changelog"},
 ]
 
 
@@ -55,6 +58,17 @@ def get_blog_metadata() -> Dict:
     return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
 
 
+def generate_html_from_static_markdown(static_file_location: Path) -> HTML:
+    """
+    Takes a markdown file and generates a HTML string from it
+    """
+
+    md_content = static_file_location.read_text()
+    html = markdown.markdown(md_content, extensions=["nl2br"])
+
+    return html
+
+
 @app.route("/blog")
 def blog() -> HTML:
     """
@@ -66,8 +80,7 @@ def blog() -> HTML:
     blog_posts = []
     for metadata in blog_metadata:
         post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-        with post_location.open("r") as f:
-            metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+        metadata["content"] = generate_html_from_static_markdown(post_location)
         blog_posts.append(metadata)
 
     return render_template("blog.html", blogPosts=blog_posts, tab_contents=TAB_CONTENTS)
@@ -79,14 +92,11 @@ def blog_post(post_id: int) -> HTML:
     Renders an individual page from the blog
     """
 
-    print(post_id)
-
     post_metadata = {}
     for metadata in get_blog_metadata():
         if metadata["post_id"] == int(post_id):
             post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-            with post_location.open("r") as f:
-                metadata["content"] = markdown.markdown(f.read(), extensions=["nl2br"])
+            metadata["content"] = generate_html_from_static_markdown(post_location)
             post_metadata = metadata
 
     return render_template(
@@ -100,3 +110,13 @@ def notebook(notebook_file: str) -> HTML:
     Renders a jupyter notebook as HTML
     """
     return (NOTEBOOK_DIRECTORY / f"{notebook_file}").read_text()
+
+
+@app.route("/changelog")
+def changelog() -> HTML:
+    """
+    Renders the changelog page
+    """
+
+    html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
+    return render_template_string(html, tab_contents=TAB_CONTENTS)
