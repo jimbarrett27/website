@@ -46,5 +46,11 @@
 		"authors": "Simon Stevenson, Alejandro Vigna-Gomez, Ilya Mandel, Jim W. Barrett, Coenraad J. Neijssel, David Perkins, Selma E. de Mink",
 		"link": "https://doi.org/10.1038/ncomms14906",
 		"first_author": "False"
+	},
+	{
+		"title": "STROOPWAFEL: simulating rare outcomes from astrophysical populations, with application to gravitational-wave sources",
+		"authors":"Floor S Broekgaarden, Stephen Justham, Selma E de Mink, Jonathan Gair, Ilya Mandel, Simon Stevenson, Jim W Barrett, Alejandro Vigna-Gómez, Coenraad J Neijssel",
+		"link": "https://academic.oup.com/mnras/article-abstract/490/4/5228/5575207?redirectedFrom=fulltext",
+		"first_author": "False"
 	}
 ]
