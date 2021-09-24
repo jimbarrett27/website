@@ -36,8 +36,8 @@ def extend_base_template(*args, **kwargs):
 
     if args[0].endswith(".html"):
         return render_template(*args, tab_contents=tab_contents, **kwargs)
-    else:
-        return render_template_string(*args, tab_contents=tab_contents, **kwargs)
+
+    return render_template_string(*args, tab_contents=tab_contents, **kwargs)
 
 
 @app.route("/")
