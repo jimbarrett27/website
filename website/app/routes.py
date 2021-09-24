@@ -20,6 +20,7 @@ LOGGER = create_logger(app)
 
 HTML = str
 
+
 def extend_base_template(*args, **kwargs):
     """
     Passes all of the kwargs required by the base template,
@@ -33,7 +34,7 @@ def extend_base_template(*args, **kwargs):
         {"name": "Changelog", "route": "/changelog"},
     ]
 
-    if args[0].endswith('.html'):
+    if args[0].endswith(".html"):
         return render_template(*args, tab_contents=tab_contents, **kwargs)
     else:
         return render_template_string(*args, tab_contents=tab_contents, **kwargs)
@@ -109,9 +110,7 @@ def blog_post(post_id: int) -> HTML:
             metadata["content"] = generate_html_from_static_markdown(post_location)
             post_metadata = metadata
 
-    return extend_base_template(
-        "blog_post.html", blogPost=post_metadata
-    )
+    return extend_base_template("blog_post.html", blogPost=post_metadata)
 
 
 @app.route("/notebooks/<notebook_file>")
