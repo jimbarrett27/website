@@ -20,12 +20,23 @@ LOGGER = create_logger(app)
 
 HTML = str
 
-TAB_CONTENTS = [
-    {"name": "Home", "route": "/"},
-    {"name": "Publications", "route": "/publications"},
-    {"name": "Blog", "route": "/blog"},
-    {"name": "Changelog", "route": "/changelog"},
-]
+def extend_base_template(*args, **kwargs):
+    """
+    Passes all of the kwargs required by the base template,
+    then continues with rendering the template
+    """
+
+    tab_contents = [
+        {"name": "Home", "route": "/"},
+        {"name": "Publications", "route": "/publications"},
+        {"name": "Blog", "route": "/blog"},
+        {"name": "Changelog", "route": "/changelog"},
+    ]
+
+    if args[0].endswith('.html'):
+        return render_template(*args, tab_contents=tab_contents, **kwargs)
+    else:
+        return render_template_string(*args, tab_contents=tab_contents, **kwargs)
 
 
 @app.route("/")
@@ -34,7 +45,7 @@ def main() -> HTML:
     Renders the base page
     """
 
-    return render_template("main.html", tab_contents=TAB_CONTENTS)
+    return extend_base_template("main.html")
 
 
 @app.route("/publications")
@@ -44,10 +55,9 @@ def publications() -> HTML:
     """
     publications_json = STATIC_DIRECTORY / "data/activity/publications.json"
 
-    return render_template(
+    return extend_base_template(
         "publications.html",
         publications=json.loads(publications_json.read_text()),
-        tab_contents=TAB_CONTENTS,
     )
 
 
@@ -83,7 +93,7 @@ def blog() -> HTML:
         metadata["content"] = generate_html_from_static_markdown(post_location)
         blog_posts.append(metadata)
 
-    return render_template("blog.html", blogPosts=blog_posts, tab_contents=TAB_CONTENTS)
+    return extend_base_template("blog.html", blogPosts=blog_posts)
 
 
 @app.route("/blog/<int:post_id>")
@@ -99,8 +109,8 @@ def blog_post(post_id: int) -> HTML:
             metadata["content"] = generate_html_from_static_markdown(post_location)
             post_metadata = metadata
 
-    return render_template(
-        "blog_post.html", blogPost=post_metadata, tab_contents=TAB_CONTENTS
+    return extend_base_template(
+        "blog_post.html", blogPost=post_metadata
     )
 
 
@@ -119,4 +129,4 @@ def changelog() -> HTML:
     """
 
     html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
-    return render_template_string(html, tab_contents=TAB_CONTENTS)
+    return extend_base_template(html)
