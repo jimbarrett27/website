@@ -8,3 +8,4 @@ black
 isort
 pytest
 pytest-cov
+google-cloud-secret-manager

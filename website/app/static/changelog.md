@@ -5,6 +5,10 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.2.1** - 01/11/2021
+
+* Launch the app from a script rather than the command line
+
 ## **v3.1.1** - 25/09/2021
 
 * Refactor how the base page contents are passed to other templates
