@@ -7,17 +7,17 @@ steps:
   # Check import formatting
   - name: python
     entrypoint: python
-    args: ["-m", "isort", "--check", "app"]
+    args: ["-m", "isort", "--check", "app", "bots"]
 
   # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", "black", "--check", "app"]
+    args: ["-m", "black", "--check", "app", "bots"]
 
   # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", "pylint", "app"]
+    args: ["-m", "pylint", "app", "bots"]
 
   # Run tests
   - name: python
