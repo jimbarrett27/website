@@ -8,8 +8,7 @@ class GCPSecret:
     secret_id: str
     version: str
 
-    @property
-    def name(self, client: secretmanager.SecretManagerServiceClient):
+    def get_name(self, client: secretmanager.SecretManagerServiceClient):
         return client.secret_version_path(
             self.project_id, 
             self.secret_id, 
@@ -21,7 +20,7 @@ def get_gcp_secret(gcp_secret) -> str:
     client = secretmanager.SecretManagerServiceClient()
 
     # Get the secret.
-    response = client.access_secret_version(request={"name": gcp_secret.name(client)})
+    response = client.access_secret_version(request={"name": gcp_secret.get_name(client)})
 
     return response.payload.data.decode("UTF-8")
 
