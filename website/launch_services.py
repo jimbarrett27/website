@@ -12,7 +12,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S' 
 )
 
-launch_hello_bot()
+# launch_hello_bot()
 
 port = os.environ.get('PORT')
 serve(app, port=port)
