@@ -8,14 +8,14 @@ from pathlib import Path
 from typing import Dict
 
 import markdown
-import requests
 from flask import render_template, request
 from flask.logging import create_logger
 from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
-from bots.secrets import get_telegram_bot_key, get_telegram_user_id
+from gcp_util.secrets import get_telegram_bot_key, get_telegram_user_id
+from telegram_bot.bot import handle_bot_request
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -147,17 +147,11 @@ def telegram_webhook(telegram_key: str):
         return ""
 
     request_data = request.get_json()
-
     message = request_data["message"]
 
     if not message["from"]["id"] == get_telegram_user_id():
         return ""
 
-    response_data = {"chat_id": get_telegram_user_id(), "text": message["text"]}
-
-    requests.post(
-        f"https://api.telegram.org/bot{get_telegram_bot_key()}/sendMessage",
-        json=response_data,
-    )
+    handle_bot_request(message["text"])
 
     return ""
