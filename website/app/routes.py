@@ -15,7 +15,6 @@ from flask.templating import render_template_string
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
 from gcp_util.secrets import get_telegram_bot_key, get_telegram_user_id
-
 from telegram_bot.bot import handle_bot_request
 
 logging.basicConfig(level=logging.INFO)
@@ -153,6 +152,6 @@ def telegram_webhook(telegram_key: str):
     if not message["from"]["id"] == get_telegram_user_id():
         return ""
 
-    handle_bot_request(message['text'])    
-    
+    handle_bot_request(message["text"])
+
     return ""
