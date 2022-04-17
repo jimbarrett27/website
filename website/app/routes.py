@@ -147,6 +147,10 @@ def telegram_webhook(telegram_key: str):
         return ""
 
     request_data = request.get_json()
+
+    if 'result' not in request_data:
+        raise ValueError(f'blah: {request_data}')
+
     message = request_data["result"]["message"]
 
     if not message["from"]["id"] == get_telegram_user_id():
