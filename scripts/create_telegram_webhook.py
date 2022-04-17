@@ -1,4 +1,4 @@
-from bots.secrets import get_telegram_bot_key
+from gcp_util.secrets import get_telegram_bot_key
 import requests
 
 def main():
