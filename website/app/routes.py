@@ -15,7 +15,7 @@ from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
-from bots.secrets import get_telegram_bot_key, get_telegram_user_id
+from gcp_util.secrets import get_telegram_bot_key, get_telegram_user_id
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
