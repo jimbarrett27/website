@@ -153,6 +153,6 @@ def telegram_webhook(telegram_key: str):
     if not message["from"]["id"] == get_telegram_user_id():
         return ""
 
-    handle_bot_request(message)    
+    handle_bot_request(message['text'])    
     
     return ""
