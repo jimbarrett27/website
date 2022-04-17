@@ -13,7 +13,7 @@ def get_stored_json(blob_name: str, client: storage.Client = None):
 
     return stored_json   
 
-def update_stored_json(blob_name: str, update_dict: Dict[str, Any], client: storage.Client = None) -> None:
+def update_stored_json(blob_name: str, update_dict: Dict[str, Any], client: storage.Client = None) -> bool:
 
     if client is None:
         client = storage.Client()
@@ -24,4 +24,10 @@ def update_stored_json(blob_name: str, update_dict: Dict[str, Any], client: stor
     bucket = client.bucket('jim_data')
     blob = bucket.get_blob(blob_name)
     blob.upload_from_string(json.dumps(existing_data))
+
+    new_json = get_stored_json(blob_name, client=client)
     
+    if update_dict in new_json:
+        return True
+    
+    return False
