@@ -25,19 +25,20 @@ def handle_bot_request(message: str):
 
 def send_message_to_bot(message: str):
     
-    response_data = {"chat_id": get_telegram_user_id(), "text": message["text"]}
+    response_data = {"chat_id": get_telegram_user_id(), "text": message}
 
     requests.post(
         f"https://api.telegram.org/bot{get_telegram_bot_key()}/sendMessage",
         json=response_data,
     )
 
-def record_weight(body: str):
+def record_weight(body: str) -> None:
 
     try:
         weight = float(body)
     except:
         send_message_to_bot(f"'{body}' couldn't be interpreted as a float. Weight not recorded")
+        return
 
     new_measurement = {
         'date': datetime.now().isoformat(),
