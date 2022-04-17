@@ -6,14 +6,16 @@ import json
 import logging
 from pathlib import Path
 from typing import Dict
+import requests
 
 import markdown
-from flask import render_template
+from flask import render_template, request
 from flask.logging import create_logger
 from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
+from bots.secrets import get_telegram_bot_key, get_telegram_user_id
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -129,3 +131,34 @@ def changelog() -> HTML:
 
     html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
     return extend_base_template(html)
+
+@app.route(f"/telegram_webhook/<telegram_key>", methods=['POST'])
+def telegram_webhook(telegram_key: str):
+
+    if not telegram_key == get_telegram_bot_key():
+        return ''
+
+    if not request.method == 'POST':
+        return ''
+
+    request_data = request.get_json()
+    message = request_data['result']['message']
+
+    print(type(message['from']['id']), type(get_telegram_user_id()))
+
+    if not message['from']['id'] == get_telegram_user_id():
+        return ''
+
+    response_data = {
+        'chat_id': get_telegram_user_id(),
+        'text': message['text']
+    }
+
+    requests.post(f'https://api.telegram.org/bot{get_telegram_bot_key()}/sendMessage', json=response_data)
+    
+    return ''
+    
+    
+    
+
+    

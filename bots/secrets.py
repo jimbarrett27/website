@@ -53,7 +53,7 @@ def get_telegram_bot_key() -> str:
     return get_gcp_secret(secret)
 
 @lru_cache(maxsize=1)
-def get_telegram_user_id() -> str:
+def get_telegram_user_id() -> int:
     """
     Fetches the token for the main telegram bot
     """
@@ -62,4 +62,4 @@ def get_telegram_user_id() -> str:
         project_id="personal-website-318015", secret_id="TELEGRAM_USER_ID", version=1
     )
 
-    return get_gcp_secret(secret)
+    return int(get_gcp_secret(secret))
