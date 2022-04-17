@@ -5,6 +5,10 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.3.0** - 17/04/2022
+* Scrap the previous changes
+* Create a route to act as a webhook for the telegram bot 
+
 ## **v3.2.0** - 01/11/2021
 
 * Launch the app from a script rather than the command line
