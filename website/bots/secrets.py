@@ -3,10 +3,9 @@ Functions for management and retrieval of my GCP secrets
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 from google.cloud import secretmanager
-
-from functools import lru_cache
 
 
 @dataclass
@@ -40,6 +39,7 @@ def get_gcp_secret(gcp_secret: GCPSecret) -> str:
 
     return response.payload.data.decode("UTF-8")
 
+
 @lru_cache(maxsize=1)
 def get_telegram_bot_key() -> str:
     """
@@ -51,6 +51,7 @@ def get_telegram_bot_key() -> str:
     )
 
     return get_gcp_secret(secret)
+
 
 @lru_cache(maxsize=1)
 def get_telegram_user_id() -> int:
