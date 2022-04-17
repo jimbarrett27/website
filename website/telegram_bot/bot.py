@@ -44,5 +44,7 @@ def record_weight(body: str):
         'weight': weight
     }
 
-    update_stored_json('weight.json', update_dict=new_measurement)
-    
+    if update_stored_json('weight.json', update_dict=new_measurement):
+        send_message_to_bot(f"successfully recored weight as {weight}")
+    else:
+        send_message_to_bot("Something went wrong storing the weight. Debug time 🤓")
