@@ -3,6 +3,7 @@ Functions for management and retrieval of my GCP secrets
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 from google.cloud import secretmanager
 
@@ -39,13 +40,27 @@ def get_gcp_secret(gcp_secret: GCPSecret) -> str:
     return response.payload.data.decode("UTF-8")
 
 
-def get_telegram_key() -> str:
+@lru_cache(maxsize=1)
+def get_telegram_bot_key() -> str:
     """
     Fetches the token for the main telegram bot
     """
 
     secret = GCPSecret(
-        project_id="personal-website-318015", secret_id="JIMMY_MAIN", version=1
+        project_id="personal-website-318015", secret_id="JIMMY_MAIN", version=2
     )
 
     return get_gcp_secret(secret)
+
+
+@lru_cache(maxsize=1)
+def get_telegram_user_id() -> int:
+    """
+    Fetches the token for the main telegram bot
+    """
+
+    secret = GCPSecret(
+        project_id="personal-website-318015", secret_id="TELEGRAM_USER_ID", version=1
+    )
+
+    return int(get_gcp_secret(secret))
