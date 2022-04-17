@@ -5,6 +5,11 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.4.0** - 18/04/2022
+* Refactor out the telegram bot functionality
+* Add echo and weight tracking functionality to the bot
+* Add some error checking to the bot
+
 ## **v3.3.0** - 17/04/2022
 * Scrap the previous changes
 * Create a route to act as a webhook for the telegram bot 
