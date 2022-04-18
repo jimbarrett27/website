@@ -24,6 +24,8 @@ def handle_bot_request(message: str):
         send_message_to_me(body)
     elif command == "weighin":
         record_weight(body)
+    elif command == "⭐️":
+        record_gold_star()
     else:
         send_message_to_me(f"'{command}' is an unknown command. Try again 😇")
 
@@ -57,6 +59,19 @@ def record_weight(body: str) -> None:
     new_measurement = {"date": datetime.now().isoformat(), "weight": weight}
 
     if update_stored_json("weight.json", update_dict=new_measurement):
-        send_message_to_me(f"successfully recored weight as {weight}")
+        send_message_to_me(f"successfully recorded weight as {weight}")
     else:
         send_message_to_me("Something went wrong storing the weight. Debug time 🤓")
+
+
+def record_gold_star():
+    """
+    Record a gold star to the dataset
+    """
+
+    new_datapoint = {"timestamp": datetime.now().isoformat()}
+
+    if update_stored_json("gold_stars.json", update_dict=new_datapoint):
+        send_message_to_me("successfully recorded ⭐️")
+    else:
+        send_message_to_me("Something went wrong storing ⭐️. Debug time 🤓")
