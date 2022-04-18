@@ -69,10 +69,9 @@ def record_gold_star():
     Record a gold star to the dataset
     """
 
-    new_datapoint = {'timestamp': datetime.now().isoformat()}
+    new_datapoint = {"timestamp": datetime.now().isoformat()}
 
-    
     if update_stored_json("gold_stars.json", update_dict=new_datapoint):
-        send_message_to_me(f"successfully recorded ⭐️")
+        send_message_to_me("successfully recorded ⭐️")
     else:
-        send_message_to_me("Something went wrong storing ⭐️. Debug time 🤓")    
+        send_message_to_me("Something went wrong storing ⭐️. Debug time 🤓")
