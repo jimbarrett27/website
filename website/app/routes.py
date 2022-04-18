@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict
 
 import markdown
-from flask import render_template, request
+from flask import render_template, request, send_from_directory
 from flask.logging import create_logger
 from flask.templating import render_template_string
 
@@ -155,3 +155,11 @@ def telegram_webhook(telegram_key: str):
     handle_bot_request(message["text"].lower())
 
     return ""
+
+
+@app.route("/robots.txt")
+def robots():
+    """
+    Serve up the robots.txt file
+    """
+    return send_from_directory(STATIC_DIRECTORY, "robots.txt")
