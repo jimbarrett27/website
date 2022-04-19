@@ -64,3 +64,15 @@ def get_telegram_user_id() -> int:
     )
 
     return int(get_gcp_secret(secret))
+
+@lru_cache(maxsize=1)
+def get_cron_verification_password() -> int:
+    """
+    Fetches the token for the main telegram bot
+    """
+
+    secret = GCPSecret(
+        project_id="personal-website-318015", secret_id="CRON_VERIFICATION_PASSWORD", version=1
+    )
+
+    return get_gcp_secret(secret)
