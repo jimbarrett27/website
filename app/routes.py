@@ -14,9 +14,12 @@ from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
-from gcp_util.secrets import get_cron_verification_password, get_telegram_bot_key, get_telegram_user_id
-from telegram_bot.bot import handle_bot_request
-from telegram_bot.bot import send_message_to_me
+from gcp_util.secrets import (
+    get_cron_verification_password,
+    get_telegram_bot_key,
+    get_telegram_user_id,
+)
+from telegram_bot.bot import handle_bot_request, send_message_to_me
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -165,7 +168,8 @@ def robots():
     """
     return send_from_directory(STATIC_DIRECTORY, "robots.txt")
 
-@app.route('/web_ticker', methods=['POST'])
+
+@app.route("/web_ticker", methods=["POST"])
 def web_ticker():
     """
     Route to receive and verify requests from my web-ticker
@@ -174,6 +178,8 @@ def web_ticker():
 
     request_data = request.get_json()
     if not request_data["verify"] == get_cron_verification_password():
-        return ''
+        return ""
 
-    send_message_to_me('cron ping received')
+    send_message_to_me("cron ping received")
+
+    return ""

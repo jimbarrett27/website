@@ -65,6 +65,7 @@ def get_telegram_user_id() -> int:
 
     return int(get_gcp_secret(secret))
 
+
 @lru_cache(maxsize=1)
 def get_cron_verification_password() -> int:
     """
@@ -72,7 +73,9 @@ def get_cron_verification_password() -> int:
     """
 
     secret = GCPSecret(
-        project_id="personal-website-318015", secret_id="CRON_VERIFICATION_PASSWORD", version=1
+        project_id="personal-website-318015",
+        secret_id="CRON_VERIFICATION_PASSWORD",
+        version=1,
     )
 
     return get_gcp_secret(secret)
