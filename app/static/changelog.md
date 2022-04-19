@@ -5,6 +5,9 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.5.1** - 19/04/2022
+* A script for mocking messages sent to the bot when running locally
+
 ## **v3.5.0** - 18/04/2022
 * Add functionality for tracking ⭐️
 * Add a permissive robots.txt
