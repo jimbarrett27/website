@@ -1,5 +1,12 @@
 [
 	{
+		"title": "The Many Faces of Disproportionality",
+		"date": "13/11/2022",
+		"author": "Jim Barrett",
+		"content_file": "disproportionalityAnalysis.md",
+		"post_id": 6
+	},
+	{
 		"title": "Gaussian Process Demo",
 		"date": "09/11/2020",
 		"author": "Jim Barrett",
