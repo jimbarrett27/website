@@ -21,33 +21,14 @@ Naturally, there already exist a number of good resources for understanding thes
 
 On an adverse event report, alongside the information about a patient, a list of drugs that the patient took, and a list of reactions the patient experienced, each coded to their own respective standardised dictionaries. Disproportionality analysis applied to signal detection operates on a _combination_ of a drug and a reaction. There are then 4 possible things that can happen on an adverse event report;
 
-* The report lists the drug **and** the reaction
-* The report lists the drug **but not** the reaction
-* The report lists the reaction **but not** the drug
-* The report lists **neither** the drug **nor** the reaction
+* \\(a\\) - The report lists the drug **and** the reaction
+* \\(b\\) - The report lists the drug **but not** the reaction
+* \\(c\\) - The report lists the reaction **but not** the drug
+* \\(d\\) - The report lists **neither** the drug **nor** the reaction
 
 These scenarios are typically visualised in terms of a "contingency matrix", like so;
 
-$$ 
-\begin{array}{l|cc}
-      & \textrm{DRUG} & \textrm{NOT DRUG} \\
-    \hline
-    \textrm{REACTION} & C_{xy} & C_{\overline{x}y} \\
-    \textrm{NOT REACTION} & C_{x\overline{y}} & C_{\overline{x}\overline{y}}
-\end{array}
-$$
-
-<!-- $$
-\begin{array}{c|lcr}
-n & \text{Left} & \text{Center} & \text{Right} \\
-\hline
-1 & 0.24 & 1 & 125 \\
-2 & -1 & 189 & -8 \\
-3 & -20 & 2000 & 1+10i
-\end{array}
-$$ -->
-
-
+$$ \begin{array}{l|cc}   & \textrm{DRUG} & \textrm{NOT DRUG} \\\\  \textrm{REACTION} & a & b \\\\  \textrm{NOT REACTION} & c & d\end{array} $$
 
 ## Odds ratios
 
@@ -59,4 +40,4 @@ $$ -->
 
 ## Bibliography
 
-
+* [Shrinkage observed-to-expected ratios for robust and transparent large-scale pattern discovery](https://journals.sagepub.com/doi/full/10.1177/0962280211403604)
