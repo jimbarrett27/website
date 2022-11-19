@@ -40,6 +40,7 @@ def send_message_to_me(message: str):
     requests.post(
         f"https://api.telegram.org/bot{get_telegram_bot_key()}/sendMessage",
         json=response_data,
+        timeout=1,
     )
 
 
