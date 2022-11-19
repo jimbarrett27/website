@@ -81,7 +81,12 @@ def generate_html_from_static_markdown(static_file_location: Path) -> HTML:
     """
 
     md_content = static_file_location.read_text()
-    html = markdown.markdown(md_content, extensions=["nl2br", "mdx_math"], extension_configs={'mdx_math': {'enable_dollar_delimiter': True}})
+    markdown_extension_configs = {"mdx_math": {"enable_dollar_delimiter": True}}
+    html = markdown.markdown(
+        md_content,
+        extensions=["nl2br", "mdx_math"],
+        extension_configs=markdown_extension_configs,
+    )
 
     return html
 
