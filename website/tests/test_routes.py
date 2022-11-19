@@ -14,7 +14,7 @@ def client():
     yield app.test_client()
 
 
-def test_routes(client): # pylint: disable=redefined-outer-name
+def test_routes(client):  # pylint: disable=redefined-outer-name
     """
     Tests all of the main routes return something without
     raising errors
