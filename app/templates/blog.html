@@ -1,6 +1,5 @@
 {% extends "main.html" %}
 {% block page_content %}
-<script type="text/javascript" async src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
 {% for blogPost in blogPosts %}
 	<h2><a href="/blog/{{ blogPost.post_id }}">{{ blogPost.title }}</a></h2>
 	<h4>{{ blogPost.date }} - {{ blogPost.author }} </h4>
