@@ -1,6 +1,7 @@
 Flask
 waitress
 markdown
+python-markdown-math
 numpy
 pylint
 mypy
