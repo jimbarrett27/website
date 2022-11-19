@@ -21,14 +21,20 @@ Naturally, there already exist a number of good resources for understanding thes
 
 On an adverse event report, alongside the information about a patient, a list of drugs that the patient took, and a list of reactions the patient experienced, each coded to their own respective standardised dictionaries. Disproportionality analysis applied to signal detection operates on a _combination_ of a drug and a reaction. There are then 4 possible things that can happen on an adverse event report;
 
-* \\(a\\) - The report lists the drug **and** the reaction
-* \\(b\\) - The report lists the drug **but not** the reaction
-* \\(c\\) - The report lists the reaction **but not** the drug
-* \\(d\\) - The report lists **neither** the drug **nor** the reaction
+* $a$ - The report lists the drug **and** the reaction
+* $b$ - The report lists the drug **but not** the reaction
+* $c$ - The report lists the reaction **but not** the drug
+* $d$ - The report lists **neither** the drug **nor** the reaction
 
 These scenarios are typically visualised in terms of a "contingency matrix", like so;
 
-$$ \begin{array}{l|cc}   & \textrm{DRUG} & \textrm{NOT DRUG} \\\\  \textrm{REACTION} & a & b \\\\  \textrm{NOT REACTION} & c & d\end{array} $$
+$$ \begin{array}{l|cc}  & \textrm{DRUG} & \textrm{NOT DRUG}\\ \hline   \textrm{REACTION} & a & b \\  \textrm{NOT REACTION} & c & d\end{array} $$
+
+In these terms, we can also express a few other useful quantities;
+
+* $C_x = a+c$ = The total number of reports with the drug
+* $C_y = a+b$ = The total number of reports with the reaction
+* $N = a+b+c+d$ = The total number of reports
 
 ## Odds ratios
 
