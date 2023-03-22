@@ -38,6 +38,7 @@ def extend_base_template(*args, **kwargs):
         {"name": "Publications", "route": "/publications"},
         {"name": "Blog", "route": "/blog"},
         {"name": "Changelog", "route": "/changelog"},
+        {"name": "Advent of Code", "route": "/advent_of_code"}
     ]
 
     if args[0].endswith(".html"):
@@ -140,6 +141,10 @@ def changelog() -> HTML:
 
     html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
     return extend_base_template(html)
+
+@app.route("/advent_of_code")
+def advent_of_code() -> HTML:
+    return extend_base_template("advent_of_code.html")
 
 
 @app.route("/telegram_webhook/<telegram_key>", methods=["POST"])
