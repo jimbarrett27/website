@@ -144,7 +144,20 @@ def changelog() -> HTML:
 
 @app.route("/advent_of_code")
 def advent_of_code() -> HTML:
-    return extend_base_template("advent_of_code.html")
+
+    completed_days = set()
+    half_completed_days = set()
+
+    for f in (STATIC_DIRECTORY / "code").iterdir():
+        if str(f.parts[-1]).startswith("solution"):
+            problem_number = int(f.parts[-1].split('.')[0].split("_")[1])
+            if all(part in f.read_text() for part in ["part_1", "part_2"]):
+                completed_days.add(problem_number)
+            else:
+                half_completed_days.add(problem_number)
+
+
+    return extend_base_template("advent_of_code.html", completed_days=completed_days, half_completed_days=half_completed_days)
 
 
 @app.route("/telegram_webhook/<telegram_key>", methods=["POST"])
