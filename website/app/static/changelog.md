@@ -5,6 +5,9 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.6.0** - 24/03/2023
+* Add a page to show my solutions to advent of code problems
+
 ## **v3.5.3** - 18/03/2023
 * Upgrade backend to Python 3.11
 
