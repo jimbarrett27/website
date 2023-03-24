@@ -1,3 +1,4 @@
+target/
 .flaskenv
 *__pycache__*
 app.db
