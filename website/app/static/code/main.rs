@@ -1,6 +1,6 @@
-mod solution_01;
+mod solution_1;
 
 fn main() {
-    let x = solution_01::part_2();
+    let x = solution_1::part_2();
     println!("Solution = {x}")
 }
