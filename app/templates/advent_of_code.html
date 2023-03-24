@@ -28,7 +28,12 @@ day, orange where I have only solved the first one and red where I haven't solve
 {% for i in range(5) %}
     {% for j in range(5) %}
         {% set problem_number = (i*5 + j) + 1 %}
-        <button onclick="populate_code_block({{problem_number}})">{{problem_number}}</button>
+        <button 
+            onclick="populate_code_block({{problem_number}})"
+            style="color: aliceblue !important; background-color: {% if problem_number in completed_days %} #00a32c {% elif problem_number in half_completed_days %} #e6a400 {% else %} #d90028 {% endif %} ; "
+        >
+            {{problem_number}}
+        </button>
     {% endfor %}
     <br>
 {% endfor %}'

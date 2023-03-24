@@ -142,9 +142,7 @@ def changelog() -> HTML:
     html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
     return extend_base_template(html)
 
-@app.route("/advent_of_code")
-def advent_of_code() -> HTML:
-
+def _get_completed_and_half_completed_advent_of_code():
     completed_days = set()
     half_completed_days = set()
 
@@ -156,11 +154,26 @@ def advent_of_code() -> HTML:
             else:
                 half_completed_days.add(problem_number)
 
+    return {"completed_days": completed_days, "half_completed_days": half_completed_days}
+
+@app.route("/advent_of_code")
+def advent_of_code() -> HTML:
+
+    completed_and_half_completed_days = _get_completed_and_half_completed_advent_of_code()
+    completed_days = completed_and_half_completed_days['completed_days']
+    half_completed_days = completed_and_half_completed_days['half_completed_days']
+
 
     return extend_base_template("advent_of_code.html", completed_days=completed_days, half_completed_days=half_completed_days)
 
-@app.route("/get_advent_solution/<problem_number>")
+@app.route("/get_advent_solution/<int:problem_number>")
 def get_advent_solution(problem_number: int): 
+    completed_and_half_completed_days = _get_completed_and_half_completed_advent_of_code()
+    all_valid_days = completed_and_half_completed_days['completed_days'] | completed_and_half_completed_days['half_completed_days']
+
+    if problem_number not in all_valid_days:
+        return f"// no solution for day {problem_number} yet"
+
     return (STATIC_DIRECTORY / f'code/solution_{problem_number}.rs').read_text()
 
 
