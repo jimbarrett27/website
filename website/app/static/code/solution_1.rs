@@ -28,7 +28,7 @@ pub fn part_2() -> i32 {
         match c {
             '(' => floor_count += 1,
             ')' => floor_count -= 1,
-            _ => floor_count += 0,
+            _ => (),
         }
 
         if floor_count == -1 {
