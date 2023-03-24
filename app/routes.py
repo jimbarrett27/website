@@ -159,6 +159,10 @@ def advent_of_code() -> HTML:
 
     return extend_base_template("advent_of_code.html", completed_days=completed_days, half_completed_days=half_completed_days)
 
+@app.route("/get_advent_solution/<problem_number>")
+def get_advent_solution(problem_number: int): 
+    return (STATIC_DIRECTORY / f'code/solution_{problem_number}.rs').read_text()
+
 
 @app.route("/telegram_webhook/<telegram_key>", methods=["POST"])
 def telegram_webhook(telegram_key: str):
