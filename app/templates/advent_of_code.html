@@ -9,9 +9,21 @@
         }).then(function(data) {
             let code_element = document.querySelector('code');
             code_element.innerHTML = data
+            hljs.highlightElement(code_element);
         });
     }
 </script>
+
+I have set myself a personal challenge in 2023 to try and get up to date with <a href="https://adventofcode.com/">advent of code</a>,
+ a set of programming challenges released each December. The plan is to finish all the problems before December 2023. 
+<p></p>
+I also thought it might be a nice opportunity to play around with a new language, so I settled on Rust. As such, bear in mind
+that all the code below is written by a Rust newbie 🤓
+<p></p>
+Each day has 2 related problems, for a total of 50 problems per year. 
+Each button below will show my code solving that problem. Green buttons where I have solved both problems of the
+day, orange where I have only solved the first one and red where I haven't solved either.
+<p></p>
 <div class="align-center">
 {% for i in range(5) %}
     {% for j in range(5) %}
@@ -21,7 +33,7 @@
     <br>
 {% endfor %}'
 
-<pre><code class="language-rust"></code></pre>
+<pre><code class="language-rust" style="text-align: left;"></code></pre>
 </div>
 
 
