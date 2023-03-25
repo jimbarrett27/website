@@ -6,6 +6,6 @@ mod solution_5;
 mod solution_6;
 
 fn main() {
-    let x = solution_6::part_1();
+    let x = solution_6::part_2();
     println!("Solution = {x}")
 }
