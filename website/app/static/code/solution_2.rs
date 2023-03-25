@@ -28,7 +28,7 @@ pub fn part_2() -> i32 {
         let mut sorted_dims: Vec<i32> = line.split('x').map(|x| x.parse().unwrap()).collect();
         sorted_dims.sort();
 
-        total_ribbon += 2*(sorted_dims[0] + sorted_dims[1]);
+        total_ribbon += 2 * (sorted_dims[0] + sorted_dims[1]);
         total_ribbon += sorted_dims[0] * sorted_dims[1] * sorted_dims[2];
     }
 
