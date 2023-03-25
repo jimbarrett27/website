@@ -3,8 +3,9 @@ mod solution_2;
 mod solution_3;
 mod solution_4;
 mod solution_5;
+mod solution_6;
 
 fn main() {
-    let x = solution_5::part_2();
+    let x = solution_6::part_1();
     println!("Solution = {x}")
 }
