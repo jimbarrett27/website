@@ -90,10 +90,7 @@ pub fn part_2() -> i32 {
             let end_coords = unpack_coords(words[4]);
             for i in start_coords.0..end_coords.0 + 1 {
                 for j in start_coords.1..end_coords.1 + 1 {
-                    lights[i][j] -= 1;
-                    if lights[i][j] < 0 {
-                        lights[i][j] = 0
-                    };
+                    lights[i][j] = cmp::max(lights[i][j] - 1, 0);
                 }
             }
         } else {
