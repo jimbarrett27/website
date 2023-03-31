@@ -10,6 +10,10 @@
             let code_element = document.querySelector('code');
             code_element.innerHTML = data
             hljs.highlightElement(code_element);
+
+            let problem_link = document.querySelector('.problem_link');
+            problem_link.href = "https://adventofcode.com/2015/day/"+problem_number;
+            problem_link.innerHTML = "Link to problem " + problem_number
         });
     }
 </script>
@@ -36,8 +40,11 @@ day, orange where I have only solved the first one and red where I haven't solve
         </button>
     {% endfor %}
     <br>
-{% endfor %}'
-
+    
+{% endfor %}
+<p></p>
+<a class="problem_link" style="text-align: left;"></a>
+<p></p>
 <pre><code class="language-rust" style="text-align: left;"></code></pre>
 </div>
 
