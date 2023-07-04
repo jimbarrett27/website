@@ -229,6 +229,13 @@ def robots():
     """
     return send_from_directory(STATIC_DIRECTORY, "robots.txt")
 
+@app.route("/sitemap.xml")
+def sitemap():
+    """
+    Serve up the sitemap
+    """
+    return send_from_directory(STATIC_DIRECTORY, "sitemap.xml")
+
 
 @app.route("/web_ticker", methods=["POST"])
 def web_ticker():
