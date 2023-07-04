@@ -5,6 +5,9 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.6.2** - 04/07/2023
+* Add a sitemap
+
 ## **v3.6.1** - 31/03/2023
 * Add a link to the relevant problem to the advent of code page
 

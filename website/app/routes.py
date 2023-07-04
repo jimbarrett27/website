@@ -229,6 +229,7 @@ def robots():
     """
     return send_from_directory(STATIC_DIRECTORY, "robots.txt")
 
+
 @app.route("/sitemap.xml")
 def sitemap():
     """
