@@ -5,6 +5,9 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.6.2** - 04/07/2023
+* Add a sitemap
+
 ## **v3.6.1** - 31/03/2023
 * Add a link to the relevant problem to the advent of code page
 
@@ -22,7 +25,7 @@ Here you can find the changelog for this website, which I shall update whenever 
 * Lay the groundwork for scheduled bot behaviour
 
 ## **v3.5.0** - 18/04/2022
-* Add functionality for tracking ⭐️
+* Add functionality for tracking gold stars
 * Add a permissive robots.txt
 
 ## **v3.4.0** - 18/04/2022
