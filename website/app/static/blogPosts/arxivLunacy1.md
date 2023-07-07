@@ -21,7 +21,7 @@ def records_gen() -> Generator[Dict[str,Any]]:
             yield record
 </code></pre>
 
-I decided to us a transformer model to produce embeddings of the narratives, and chose the most popular sentence embedding model from Huggingface for my MVP. It does say in the model description that the model is only designed for texts up to 256 word pieces, so we can undoubtedly do better at some point, but for now it's good enough. I did look into using one of Google's cloud based models for sentence embedding, but a back of the envelope calculation suggested it would be approximately $30 to produce the initial embeddings. I might do this at some point, but not for now. I train the model thus;
+I decided to use a transformer model to produce embeddings of the abstracts, and chose the [most popular sentence embedding model](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) from Huggingface for my MVP. It does say in the model description that the model is only designed for texts up to 256 word pieces, so we can undoubtedly do better at some point, but for now it's good enough. I did look into using one of Google's cloud based models for sentence embedding, but a back of the envelope calculation suggested it would be approximately $30 to produce the initial embeddings. I might do this at some point, but not for now. I train the model thus;
 
 <pre><code class="language-python" style="text-align: left;">
 
@@ -92,3 +92,11 @@ def get_closest_papers(paper_ids, top_n = 10):
 </code></pre>
 
 An annoying amount of this code is just rearranging the data from how I have it stored, so I might look to improve that at some point, but for now it only takes a second or so to produce all the cosine similarities and provide the top N, which is pretty good!
+
+The final thing to test is whether or not it actually works! I googled to find a paper broadly related to my current field of work, and found the paper *[Multi-Task Learning for Extraction of Adverse Drug Reaction Mentions from Tweets](https://arxiv.org/abs/1802.05130)*. I passed this into my similarity function and asked for the top 3 (well, top 4, since the paper always returns itself as a top match, which is good for a sanity check!). These were the papers it gave me back;
+
+* [Semi-Supervised Recurrent Neural Network for Adverse Drug Reaction Mention Extraction](https://arxiv.org/abs/1709.01687)
+* [Co-training for Extraction of Adverse Drug Reaction Mentions from Tweets](https://arxiv.org/abs/1802.05121)
+* [Multi-Task Pharmacovigilance Mining from Social Media Posts](https://arxiv.org/abs/1801.06294)
+
+Really cool! It seems to be working great! We'll have to see what more we can do with it in the next post!
