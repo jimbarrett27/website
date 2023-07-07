@@ -1,9 +1,16 @@
 [
 	{
+		"title": "arXiv Lunacy - Post 1",
+		"date": "08/07/2023",
+		"author":"Jim Barrett",
+		"content_file": "arxivLunacy1.md",
+		"post_id": 7
+	},
+	{
 		"title": "arXiv Lunacy - Introduction",
 		"date": "07/07/2023",
 		"author":"Jim Barrett",
-		"content_file": "arxivLunacy1.md",
+		"content_file": "arxivLunacyIntro.md",
 		"post_id": 6
 	},
 	{
