@@ -1,5 +1,12 @@
 [
 	{
+		"title": "arXiv Lunacy - Introduction",
+		"date": "07/07/2023",
+		"author":"Jim Barrett",
+		"content_file": "arxivLunacy1.md",
+		"post_id": 6
+	},
+	{
 		"title": "Gaussian Process Demo",
 		"date": "09/11/2020",
 		"author": "Jim Barrett",
