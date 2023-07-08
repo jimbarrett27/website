@@ -1,0 +1,1 @@
+This post relates to my arXiv lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit **TODO**.
