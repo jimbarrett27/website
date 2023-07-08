@@ -7,7 +7,7 @@ The first thing I needed to do was to get some data. Fortunately, arXiv themselv
 <pre><code class="language-python" style="text-align: left;">
 ARXIV_METADATA_SNAPSHOT_FILE =  Path('./arxiv-metadata-oai-snapshot.json')
 
-def records_gen() -> Generator[Dict[str,Any]]:
+def records_gen() -> Generator[Dict[str,Any], None, None]:
     """
     Generate the relevant records
     """
