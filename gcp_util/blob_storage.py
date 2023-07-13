@@ -37,7 +37,7 @@ def update_stored_json(
     existing_data.append(update_dict)
 
     bucket = client.bucket("jim_data")
-    blob = bucket.get_blob(blob_name)
+    blob = bucket.blob(blob_name)
     blob.upload_from_string(json.dumps(existing_data))
 
     new_json = get_stored_json(blob_name, client=client)
