@@ -8,7 +8,7 @@ I have mostly developed my personal projects on Google Cloud, and I will do the 
 
 After wrestling a little bit with getting Google authentication working reliably locally, and then spending even longer overcomplicating my solution using various `io` tricks with GCP's own Python tools, I discovered the wonderful, if slightly opaquely named, library `gcsfs`. With this, I was able to write the code to both load and dump dataframes to GCP storage buckets;
 
-<pre><code class="language-python" style="text-align: left;">
+```python
 
 import pandas as pd
 
@@ -34,7 +34,7 @@ def save_dataframe_to_blob(
 
     return False
 
-</code></pre>
+```
 
 We'll wait and see if this method is fast enough to work for when I start writing functionality using the dataframe, but for now I feel I can work with it.
 
@@ -42,7 +42,7 @@ The next step is to start regularly embedding any new papers and adding them to 
 
 I started by writing a function which reads the IDs and abstracts from the RSS feed into a format I can work with. I tried parsing the feed by hand for a while using the Python standard XML parsing library, but it quickly became evident that it would be much easier to have the `feedreader` package handle everything for me. I then noticed that the abstracts were HTML formatted, and so I found the simple `html2text` tool to parse things like `<p>` tags into whitespace. The function ultimately looked like this;
 
-<pre><code class="language-python" style="text-align: left;">
+```python
 
 from util.constants import INTERESTING_ARXIV_CATEGORIES
 import feedparser
@@ -65,11 +65,11 @@ def get_latest_ids_and_abstracts():
 
     return paper_id_to_abstract
 
-</code></pre>
+```
 
 Now, to embed them, we simply use the same libraries and code as we did for the inital embedding. I did a bit of refactoring to the original script to pull this functionality into a common place. At this point, I'm not especially happy with the structure of the repo. I'm hoping that when it matures a bit a more logical arrangement of the code will become obvious. In any case, the embedding code looks like so;
 
-<pre><code class="language-python" style="text-align: left;">
+```python
 
 def get_latest_embedding_df():
 
@@ -90,7 +90,7 @@ def get_latest_embedding_df():
 
     return embeddings_df
 
-</code></pre>
+```
 
 The final thing I want to set up in this post is the running of the code at regular intervals. I considered for a while putting an endpoint on this website, which tends to operate as my general purpose "always-on" machine. But I know that's not the best practice, and I want to start getting a bit better at the cloud infrastructure.
 
@@ -98,7 +98,7 @@ Ultimately, what I want is an ocassional, short running, scheduled job. It seems
 
 I don't really like the idea of cobbling together the relevant code every time I want to update the function, so I figured I'd try and write a script to put together the relevant files and zip them up. This was the script I came up with;
 
-<pre><code class="language-python" style="text-align: left;">
+```python
 
 import shutil
 import tempfile as tmp
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     create_and_upload_gcp_function_zipfile()
         
-</code></pre>
+```
 
 It took a few attempts to get it right. The main problems I ran into were making sure that the entrypoint function actually returned something (I have no idea if the JSON repsonse is necessary, but if it ain't broke, don't fix it), and making sure that the cloud scheduler has sufficient permissions to make the HTTP request to trigger the function. The function seems to take around a minute to execute (which might reduce if it's clever about caching the SentenceTransformer model). I will monitor it over the next few days, but for now it seems like a success!
 
