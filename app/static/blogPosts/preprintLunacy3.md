@@ -1,4 +1,4 @@
-This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit **TODO**.
+This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#d3917b6](https://github.com/jimbarrett27/arxiv-lunacy/commit/d3917b6c95cb201ad7a7b45eced72693d1e2e12c).
 
 The next item on the agenda is a frontend. I might be being a bit too ambitious, but I've been intending to learn ReactJS for a long time, and now feels like the perfect opportunity to do so. In this post I'm going to try and put together a simple web interface making use of the work I've done so far. I'll make the backend with Flask, since that's something I'm already very familiar with, and I'll try and make the frontend with React. I'm reserving the right to bail out and revert to Jinja2 at some point during this post 😇.
 
@@ -165,5 +165,133 @@ It feels a little bit weird to me how the responsibility for updating the state 
 
 The next step is to actually add the functionality to the backend, i.e., embedding the search term, finding the most similar papers and then returning their details. I realised pretty quickly that I currently don't store a bunch of the information that I want to display on the page (such as the actual text of the abstract, the paper title, publication date, authors etc). I have two options; download, store and then serve this information myself, or hook into the arxiv API to fetch it. I'm thinking that at least in the short term, hooking into the arxiv API is going to be the simplest solution (and might even be the best choice in the long term).
 
+Querying the arxiv api turned out to be very straightforward (I don't know why I struggled so much with it earlier). I wrote a few functions simple functions to facilitate what I need to do for now. I expect I might need to add a bit more sophistication in the future, so I left some space for that.
+
+```python
+from dataclasses import dataclass
+from typing import List, Dict, Any
+from urllib.parse import urlencode
+import feedparser
+from html2text import html2text
+
+@dataclass
+class ArxivPaper:
+
+    title: str
+    authors: List[str]
+    publish_date: str
+    abstract: str
+
+    def to_dict(self) -> Dict[str, Any]:
+
+        return {
+            "title": self.title,
+            "authorList": ", ".join(self.authors),
+            "publicationDate": self.publish_date,
+            "abstract": self.abstract
+        }
 
 
+ARXIV_API_URL = "http://export.arxiv.org/api/query"
+
+def get_formatted_arxiv_api_url(
+        search_query: str = None,
+        id_list: List[str] = None,
+        start: int = None,
+        max_results: int = None
+):
+    query_params = {}
+    if search_query is not None:
+        query_params['search_query'] = search_query
+    if id_list is not None:
+        query_params['id_list'] = ','.join(map(str,id_list))
+    if start is not None:
+        query_params['start'] = start
+    if max_results is not None:
+        query_params['max_results'] = max_results
+            
+    return f"{ARXIV_API_URL}?{urlencode(query_params)}"
+
+def fetch_arxiv_papers(id_list: List[str]) -> List[ArxivPaper]:
+
+    url = get_formatted_arxiv_api_url(id_list=id_list)
+
+    paper_details = feedparser.parse(url)['entries']
+
+    arxiv_papers = [
+        ArxivPaper(
+        title=paper['title'],
+        abstract=html2text(paper['summary']),
+        publish_date=paper['published'],
+        authors=[author['name'] for author in paper['authors']]
+        )
+        for paper in paper_details
+    ]
+
+    return arxiv_papers
+```
+
+Then I could replace my dummy papers route to actually have the functionality I need from my earlier work embedding papers;
+
+```python
+@app.route('/get_closest_papers', methods=['POST'])
+def get_closest_papers():
+
+    if not request.method == "POST":
+        return ""
+
+    request_data = request.get_json()
+
+    search_term = request_data['search_term']
+
+    embedding = embed_abstract(search_term).squeeze()
+    paper_ids = get_closest_papers_to_embedding(embedding)
+
+    arxiv_papers = fetch_arxiv_papers(paper_ids)
+
+    return [paper.to_dict() for paper in arxiv_papers]
+```
+
+and update the frontend component to make the proper POST request
+
+```javascript
+function SearchField({ setPapersInView }) {
+
+  const fetchPapersForSearchTerm = async () => {
+    let searchBox = document.getElementById("searchBox");
+    let searchTerm = searchBox.value;
+
+    let postBody = {
+      "search_term": searchTerm
+    }
+
+    fetch(
+      "/get_closest_papers",
+      {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify(postBody)
+      }
+    )
+    .then( (resp) => {
+      return resp.json()
+    })
+    .then((papers) => {
+      setPapersInView(papers)
+    })
+
+  }
+
+  return (
+    <>
+    <input id="searchBox" type="text" />
+    <button onClick={fetchPapersForSearchTerm} >Search</button>
+    </>
+  )
+}
+```
+and everything works, or at least functionally. It's not the prettiest, and isn't reactive at all, but those are problems for the future. I'm quite pleased with it so far, here's how it looks for now;
+
+![The current appearance of the app](/static/images/pl3_im1.png)
+
+In the next post, I want to add some more features. Top of my list is a "show me similar papers" feature, but I may also start working on the paper favouriting feature. I also want to do a bit of repo maintenance, setting up stylecheckers and linters, and writing docstrings, before that job becomes unmanageable.
