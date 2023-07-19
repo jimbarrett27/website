@@ -115,10 +115,10 @@ def random_dummy_paper():
         }
     ]
 
-    return list(np.random.choice(papers, size=2))s
+    return list(np.random.choice(papers, size=2))
 ```
 
-It took me a little while to get my head around handling state properly, and figuring out which component should be responsible for what. I managed to get it working by a top level state variable to the app, representing the papers currently in the PaperSummaries component. I then pass the setter for this component to the search bar. The search bar then sends the request to the backend and uses the setter to update the visible papers. The changed components look like so;
+It took me a little while to get my head around handling state properly, and figuring out which component should be responsible for what. I managed to get it working by adding a top level state variable to the app, representing the papers currently in the PaperSummaries component. I then pass the setter for this component to the search bar. The search bar then sends the request to the backend and uses the setter to update the visible papers. The changed components look like so;
 
 ```javascript
 
@@ -161,11 +161,11 @@ export default function MyApp() {
 }
 ```
 
-It feels a little bit weird to me how the responsibility for updating the state of the papers component is somehow so far away from that component, but perhaps this is how it's supposed to be with React. I'll see how it feels as I get more used to the framework.
+It feels a little bit weird to me how the responsibility for updating the state of the papers component is so far away from that component, but perhaps this is how it's supposed to be with React. I'll see how it feels as I get more used to the framework.
 
 The next step is to actually add the functionality to the backend, i.e., embedding the search term, finding the most similar papers and then returning their details. I realised pretty quickly that I currently don't store a bunch of the information that I want to display on the page (such as the actual text of the abstract, the paper title, publication date, authors etc). I have two options; download, store and then serve this information myself, or hook into the arxiv API to fetch it. I'm thinking that at least in the short term, hooking into the arxiv API is going to be the simplest solution (and might even be the best choice in the long term).
 
-Querying the arxiv api turned out to be very straightforward (I don't know why I struggled so much with it earlier). I wrote a few functions simple functions to facilitate what I need to do for now. I expect I might need to add a bit more sophistication in the future, so I left some space for that.
+Querying the arxiv api turned out to be very straightforward (I don't know why I struggled so much with it earlier). I wrote a few simple functions to facilitate what I need to do for now. I expect I might need to add a bit more sophistication in the future, so I left some space for that.
 
 ```python
 from dataclasses import dataclass
@@ -290,8 +290,6 @@ function SearchField({ setPapersInView }) {
   )
 }
 ```
-and everything works, or at least functionally. It's not the prettiest, and isn't reactive at all, but those are problems for the future. I'm quite pleased with it so far, here's how it looks for now;
-
-![The current appearance of the app](/static/images/pl3_im1.png)
+and everything works, or at least functionally. It's not the prettiest, and isn't reactive at all, but those are problems for the future. 
 
 In the next post, I want to add some more features. Top of my list is a "show me similar papers" feature, but I may also start working on the paper favouriting feature. I also want to do a bit of repo maintenance, setting up stylecheckers and linters, and writing docstrings, before that job becomes unmanageable.
