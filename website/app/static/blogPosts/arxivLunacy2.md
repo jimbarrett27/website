@@ -1,3 +1,8 @@
+title: arXiv Lunacy - Post 2
+date: 13/07/2023
+author: Jim Barrett
+post_id: 8
+
 This post relates to my arXiv lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#ec11477](https://github.com/jimbarrett27/arxiv-lunacy/commit/ec114777cfb5da2f6d79e965105c67e353a134ab).
 
 I feel like the next step in development of the project should be to implement functionality to be able to add new embeddings to my dataset. This will be necessary when fetching the latest preprints, screening them for papers which might be interesting to me and then saving them for future reference.

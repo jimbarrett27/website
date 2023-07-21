@@ -1,3 +1,8 @@
+title: arXiv Lunacy - Post 1
+date: 08/07/2023
+author: Jim Barrett
+post_id: 7
+
 This post relates to my arXiv lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#fd091c1](https://github.com/jimbarrett27/arxiv-lunacy/commit/fd091c1d737ef458145dbd2b40408ba600d2bd5f).
 
 In this post I cover the simple MVP I have built for finding the N papers most similar to a paper input by the user.

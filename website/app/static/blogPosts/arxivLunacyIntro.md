@@ -1,3 +1,8 @@
+title: arXiv Lunacy - Introduction
+date: 07/07/2023
+author: Jim Barrett
+post_id: 6
+
 I miss the old [Arxiv-Sanity](https://arxiv-sanity-lite.com/about). For me, it was one of the most effective ways of keeping on top of the latest developments in my fields of interest. Not that I blame the author for no longer hosting the old version, but I do miss it.
 
 I have therefore decided to look into creating my own version, a journey which I plan to document in a sporadic series of blog posts here. The features I want to eventually include are;
