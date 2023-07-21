@@ -5,7 +5,6 @@ The various routes for the webserver
 import json
 import logging
 from pathlib import Path
-from typing import Dict
 
 import markdown
 from flask import render_template, request, send_from_directory
@@ -68,6 +67,7 @@ def publications() -> HTML:
         publications=json.loads(publications_json.read_text()),
     )
 
+
 def generate_blog_post_from_markdown_file(static_file_location: Path) -> HTML:
     """
     Takes a markdown file and generates a HTML string from it
@@ -75,16 +75,16 @@ def generate_blog_post_from_markdown_file(static_file_location: Path) -> HTML:
 
     md_content = static_file_location.read_text()
     markdown_extension_configs = {"mdx_math": {"enable_dollar_delimiter": True}}
-    md = markdown.Markdown(
+    md_converter = markdown.Markdown(
         extensions=["nl2br", "mdx_math", "fenced_code", "meta"],
         extension_configs=markdown_extension_configs,
     )
-    html = md.convert(md_content)
+    html = md_converter.convert(md_content)
     # metadata allows multiple values per key, take the first one
-    blog_post = {k: v[0] for k, v in md.Meta.items()}
-    blog_post['content'] = html
+    post = {k: v[0] for k, v in md_converter.Meta.items()}  # pylint: disable=no-member
+    post["content"] = html
 
-    return blog_post
+    return post
 
 
 @app.route("/blog")
@@ -94,10 +94,10 @@ def blog() -> HTML:
     """
     blog_posts = []
     for blog_file in BLOG_POST_DIRECTORY.iterdir():
-        blog_post = generate_blog_post_from_markdown_file(blog_file)
-        blog_posts.append(blog_post)
+        post = generate_blog_post_from_markdown_file(blog_file)
+        blog_posts.append(post)
 
-    blog_posts.sort(key=lambda blog_post: blog_post['post_id'], reverse=True)
+    blog_posts.sort(key=lambda post: post["post_id"], reverse=True)
 
     return extend_base_template("blog.html", blogPosts=blog_posts)
 
@@ -109,10 +109,10 @@ def blog_post(post_id: int) -> HTML:
     """
 
     for blog_file in BLOG_POST_DIRECTORY.iterdir():
-        blog_post = generate_blog_post_from_markdown_file(blog_file)
-        if int(blog_post["post_id"]) == int(post_id):
-            return extend_base_template("blog_post.html", blogPost=blog_post)
-        
+        post = generate_blog_post_from_markdown_file(blog_file)
+        if int(post["post_id"]) == int(post_id):
+            return extend_base_template("blog_post.html", blogPost=post)
+
     return four_oh_four()
 
 
@@ -132,6 +132,7 @@ def changelog() -> HTML:
 
     html = generate_blog_post_from_markdown_file(STATIC_DIRECTORY / "changelog.md")
     return extend_base_template(html)
+
 
 @app.route("/404")
 def four_oh_four() -> HTML:
