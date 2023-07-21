@@ -1,3 +1,8 @@
+title: Gaussian Process Update Equations
+date: 14/07/2017
+author: Jim Barrett
+post_id: 4
+
 When you start to learn about Gaussian processes, you come across the update equations fairly early on. The update equations are fairly intimidating to look at, and are typically dismissed as trivial to derive (for example, Rasmussen and Williams simply point you towards a statistics book from the 1930's, which is neither available online nor in our university library...). I had a go at the derivation, and promptly realised it wasn't trivial at all from a cold start.
 
 Fortuitously, at the PEN emulators workshop I recently attended, there was an introductory lecture from Jochen Voss, where he went through a univariate case, and then gave us the structure of the derivation for the full multivariate case. Luckily, this gave me the push I needed to try the derivation again, so I went away and filled in the gaps.

@@ -1,3 +1,8 @@
+title: Random Samples from a Sphere
+date: 26/07/2017
+author: Jim Barrett
+post_id: 2
+
 During my work today, at some point I had to draw samples uniformly from a sphere, and made an observation I hadn't really appreciated before. The name of the game is to make sure that every infinitesimal shell has the same density of samples, on average.
 
 $$ \frac{4\pi r^2}{\left< N_{samp} \right>} = \mathrm{constant} $$

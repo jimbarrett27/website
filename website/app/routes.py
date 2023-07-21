@@ -5,7 +5,6 @@ The various routes for the webserver
 import json
 import logging
 from pathlib import Path
-from typing import Dict
 
 import markdown
 from flask import render_template, request, send_from_directory
@@ -69,27 +68,23 @@ def publications() -> HTML:
     )
 
 
-def get_blog_metadata() -> Dict:
-    """
-    grabs the static metadata file for blogs
-    """
-    return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
-
-
-def generate_html_from_static_markdown(static_file_location: Path) -> HTML:
+def generate_blog_post_from_markdown_file(static_file_location: Path) -> HTML:
     """
     Takes a markdown file and generates a HTML string from it
     """
 
     md_content = static_file_location.read_text()
     markdown_extension_configs = {"mdx_math": {"enable_dollar_delimiter": True}}
-    html = markdown.markdown(
-        md_content,
-        extensions=["nl2br", "mdx_math", "fenced_code"],
+    md_converter = markdown.Markdown(
+        extensions=["nl2br", "mdx_math", "fenced_code", "meta"],
         extension_configs=markdown_extension_configs,
     )
+    html = md_converter.convert(md_content)
+    # metadata allows multiple values per key, take the first one
+    post = {k: v[0] for k, v in md_converter.Meta.items()}  # pylint: disable=no-member
+    post["content"] = html
 
-    return html
+    return post
 
 
 @app.route("/blog")
@@ -97,14 +92,12 @@ def blog() -> HTML:
     """
     Renders the blog index page
     """
-
-    blog_metadata = get_blog_metadata()
-
     blog_posts = []
-    for metadata in blog_metadata:
-        post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-        metadata["content"] = generate_html_from_static_markdown(post_location)
-        blog_posts.append(metadata)
+    for blog_file in BLOG_POST_DIRECTORY.iterdir():
+        post = generate_blog_post_from_markdown_file(blog_file)
+        blog_posts.append(post)
+
+    blog_posts.sort(key=lambda post: post["post_id"], reverse=True)
 
     return extend_base_template("blog.html", blogPosts=blog_posts)
 
@@ -115,14 +108,12 @@ def blog_post(post_id: int) -> HTML:
     Renders an individual page from the blog
     """
 
-    post_metadata = {}
-    for metadata in get_blog_metadata():
-        if metadata["post_id"] == int(post_id):
-            post_location = BLOG_POST_DIRECTORY / metadata["content_file"]
-            metadata["content"] = generate_html_from_static_markdown(post_location)
-            post_metadata = metadata
+    for blog_file in BLOG_POST_DIRECTORY.iterdir():
+        post = generate_blog_post_from_markdown_file(blog_file)
+        if int(post["post_id"]) == int(post_id):
+            return extend_base_template("blog_post.html", blogPost=post)
 
-    return extend_base_template("blog_post.html", blogPost=post_metadata)
+    return four_oh_four()
 
 
 @app.route("/notebooks/<notebook_file>")
@@ -139,8 +130,16 @@ def changelog() -> HTML:
     Renders the changelog page
     """
 
-    html = generate_html_from_static_markdown(STATIC_DIRECTORY / "changelog.md")
+    html = generate_blog_post_from_markdown_file(STATIC_DIRECTORY / "changelog.md")
     return extend_base_template(html)
+
+
+@app.route("/404")
+def four_oh_four() -> HTML:
+    """
+    Custom 404 page
+    """
+    return extend_base_template("404.html")
 
 
 def _get_completed_and_half_completed_advent_of_code():
