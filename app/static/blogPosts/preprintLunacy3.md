@@ -1,3 +1,8 @@
+title: Preprint Lunacy - Post 3
+date: 19/07/2023
+author: Jim Barrett
+post_id: 9
+
 This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#d3917b6](https://github.com/jimbarrett27/arxiv-lunacy/commit/d3917b6c95cb201ad7a7b45eced72693d1e2e12c).
 
 The next item on the agenda is a frontend. I might be being a bit too ambitious, but I've been intending to learn ReactJS for a long time, and now feels like the perfect opportunity to do so. In this post I'm going to try and put together a simple web interface making use of the work I've done so far. I'll make the backend with Flask, since that's something I'm already very familiar with, and I'll try and make the frontend with React. I'm reserving the right to bail out and revert to Jinja2 at some point during this post 😇.
