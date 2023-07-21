@@ -1,3 +1,8 @@
+title: New Paper - Accuracy of Inference
+date: 04/12/2017
+author: Jim Barrett
+post_id: 1
+
 A couple of weeks ago I put my newest paper on to the arXiv, which you can find here; [https://arxiv.org/abs/1711.06287](https://arxiv.org/abs/1711.06287)
 
 The paper describes how much we can hope to learn from gravitational-wave observations of black holes, focusing in particular on how well we can constrain our models of the evolution of binary stars. In order to calculate this I used COMPAS, the binary evolution simulation software we are developing here in Birmingham, and a technique called Fisher information matrices.
