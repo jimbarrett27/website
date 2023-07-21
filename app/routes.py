@@ -130,8 +130,10 @@ def changelog() -> HTML:
     Renders the changelog page
     """
 
-    html = generate_blog_post_from_markdown_file(STATIC_DIRECTORY / "changelog.md")
-    return extend_base_template(html)
+    changelog_content = generate_blog_post_from_markdown_file(
+        STATIC_DIRECTORY / "changelog.md"
+    )
+    return extend_base_template(changelog_content["content"])
 
 
 @app.route("/404")
