@@ -19,7 +19,8 @@ def test_routes(client):  # pylint: disable=redefined-outer-name
     raising errors
     """
 
-    routes_to_test = ["/", "/publications", "/blog"]
+    routes_to_test = ["/", "/publications", "/blog", "/advent_of_code", "/robots.txt", "/sitemap.xml", "/changelog"]
+    routes_to_test += [f'/blog/{i}' for i in range(50)]
 
     routes_to_test += [
         f"/notebooks/{f.parts[-1]}"
