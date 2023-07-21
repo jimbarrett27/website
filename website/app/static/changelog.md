@@ -5,6 +5,10 @@
 
 Here you can find the changelog for this website, which I shall update whenever I merge a pull request to the `main` branch, regardless of whether it introduces a front facing feature or not.
 
+## **v3.7.0** - 21/07/2023
+* Rework how blog posts are loaded to no longer require a separate index file
+* Add a custom 404 page for missing blog posts
+
 ## **v3.6.2** - 04/07/2023
 * Add a sitemap
 
