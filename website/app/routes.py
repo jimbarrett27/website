@@ -68,14 +68,6 @@ def publications() -> HTML:
         publications=json.loads(publications_json.read_text()),
     )
 
-
-def get_blog_metadata() -> Dict:
-    """
-    grabs the static metadata file for blogs
-    """
-    return json.loads((BLOG_POST_DIRECTORY / "blogMetadata.json").read_text())
-
-
 def generate_blog_post_from_markdown_file(static_file_location: Path) -> HTML:
     """
     Takes a markdown file and generates a HTML string from it
@@ -88,7 +80,8 @@ def generate_blog_post_from_markdown_file(static_file_location: Path) -> HTML:
         extension_configs=markdown_extension_configs,
     )
     html = md.convert(md_content)
-    blog_post = md.Meta
+    # metadata allows multiple values per key, take the first one
+    blog_post = {k: v[0] for k, v in md.Meta.items()}
     blog_post['content'] = html
 
     return blog_post
@@ -104,6 +97,8 @@ def blog() -> HTML:
         blog_post = generate_blog_post_from_markdown_file(blog_file)
         blog_posts.append(blog_post)
 
+    blog_posts.sort(key=lambda blog_post: blog_post['post_id'], reverse=True)
+
     return extend_base_template("blog.html", blogPosts=blog_posts)
 
 
@@ -115,7 +110,7 @@ def blog_post(post_id: int) -> HTML:
 
     for blog_file in BLOG_POST_DIRECTORY.iterdir():
         blog_post = generate_blog_post_from_markdown_file(blog_file)
-        if blog_post["post_id"] == int(post_id):
+        if int(blog_post["post_id"]) == int(post_id):
             return extend_base_template("blog_post.html", blogPost=blog_post)
         
     return four_oh_four()
@@ -143,7 +138,7 @@ def four_oh_four() -> HTML:
     """
     Custom 404 page
     """
-    html = extend_base_template("404.html")
+    return extend_base_template("404.html")
 
 
 def _get_completed_and_half_completed_advent_of_code():
