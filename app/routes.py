@@ -94,10 +94,12 @@ def blog() -> HTML:
     """
     blog_posts = []
     for blog_file in BLOG_POST_DIRECTORY.iterdir():
+        if not blog_file.suffix == '.md':
+            continue
         post = generate_blog_post_from_markdown_file(blog_file)
         blog_posts.append(post)
 
-    blog_posts.sort(key=lambda post: post["post_id"], reverse=True)
+    blog_posts.sort(key=lambda post: int(post["post_id"]), reverse=True)
 
     return extend_base_template("blog.html", blogPosts=blog_posts)
 
