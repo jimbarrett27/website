@@ -148,3 +148,11 @@ Since the bot provided by the competition repo is so weak, I don't know how well
 
 <div style="width:100%;height:0;padding-bottom:56%;position:relative;"><iframe src="https://giphy.com/embed/l2YWo1dSvTwkaiwPm" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/filmeditor-mean-girls-movie-l2YWo1dSvTwkaiwPm">via GIPHY</a></p>
 
+### Bot 2 - Common Sense Evaluation
+
+There's more to a chess position than the value of the pieces. For the next iteration of the bot I want to take other factors into account. 
+
+From my limited chess experience, I feel like there are different considerations depending on which phase of the game you're in. In the opening, piece development is important. In the endgame, piece activity, and limiting the activity of the openents pieces is important. In the middlegame, its kind of a mixture of both. 
+
+I expect there'll be several iterations of the position evaluation function, so for this first iteration I'm going to just dump down everything I can think of.
+
