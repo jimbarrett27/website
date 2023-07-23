@@ -3,7 +3,7 @@ date: TODO
 author: Jim Barrett
 post_id: 10
 
-There's a YouTuber who I've been following some time called [SebastianLague](https://www.youtube.com/@SebastianLague). He makes really great content aroud coding, particularly of games. I came to his channel via a video he made on writing a chess engine, and he recently [announced a competition](https://www.youtube.com/watch?v=iScy18pVR58). The challenge is the write a chess engine, but with a restricted amount of real estate with which to write the code. I thought this sounded like it could be fun, so I downloaded and setup the competition repo.
+There's a YouTuber who I've been following some time called [SebastianLague](https://www.youtube.com/@SebastianLague). He makes really great content aroud coding, particularly of games. I came to his channel via a video he made on writing a chess engine, and he recently [announced a competition](https://www.youtube.com/watch?v=iScy18pVR58). The challenge is to write a chess engine, but with a restricted amount of real estate with which to write the code. I thought this sounded like it could be fun, so I downloaded and setup the competition repo.
 
 He encourages both serious and silly submissions, so I thought I'd go for somewhere in between. The name of my bot is going to be Ms Norbury, because it's a pusher. It pushes pawns.
 
@@ -144,7 +144,7 @@ I also wanted to try a different approach to the pusher philosophy. I made a sma
 | Draws | 70 |
 | Losses | 0 | 
 
-Since the bot provided by the competition repo is so weak, I don't know how well I'm going to be able to discern improvements I'm making in my bot. I am therefore opting to make this bot the opponent for future experiments. I'm going to call it the Marymount Prep bot.
+Since the bot provided by the competition repo is so weak, I don't know how well I'm going to be able to discern improvements I'm making in my bot. I am therefore opting to make this bot the opponent for future experiments. I'm going to call it the Marymount Prep bot, for the Mathlete's opponents in the movie.
 
 <div style="width:100%;height:0;padding-bottom:56%;position:relative;"><iframe src="https://giphy.com/embed/l2YWo1dSvTwkaiwPm" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe></div><p><a href="https://giphy.com/gifs/filmeditor-mean-girls-movie-l2YWo1dSvTwkaiwPm">via GIPHY</a></p>
 
@@ -154,5 +154,102 @@ There's more to a chess position than the value of the pieces. For the next iter
 
 From my limited chess experience, I feel like there are different considerations depending on which phase of the game you're in. In the opening, piece development is important. In the endgame, piece activity, and limiting the activity of the openents pieces is important. In the middlegame, its kind of a mixture of both. 
 
-I expect there'll be several iterations of the position evaluation function, so for this first iteration I'm going to just dump down everything I can think of.
+I expect there'll be several iterations of the position evaluation function, so for this first iteration I'm going to just dump down the basics. In this step I really felt my lack of C# experience, since it really feels like there should be more consise ways of writing things, but here are the new bits of code;
 
+```csharp
+private int getGamePhase(Board board) {
+    // 0 = opening, 1 = middlegame, 2 = endgame
+    if (board.PlyCount < 16) return 0;
+    else if (board.PlyCount < 60) return 1;
+    else return 2;
+}
+
+private double scoreKing(Board board, Piece king) {
+
+    double score = 0.0;
+    int goodRank = king.IsWhite ? 0 : 7;
+    if (getGamePhase(board) < 3) {
+        score += Math.Abs(king.Square.Rank - goodRank) == 0 ? 0.1 : -0.5; 
+    }
+    return score;
+
+}
+
+private double scoreQueen(Board board, Piece queen) {
+    return 9.0 + ((1.0/64.0) * BitboardHelper.GetNumberOfSetBits(
+        BitboardHelper.GetSliderAttacks(PieceType.Queen, queen.Square, board)
+    ));
+}
+
+private double scoreRook(Board board, Piece rook) {
+    return 5.0 + ((1.0/64.0) * BitboardHelper.GetNumberOfSetBits(
+        BitboardHelper.GetSliderAttacks(PieceType.Rook, rook.Square, board)
+    ));
+}
+
+private double scoreBishop(Board board, Piece bishop) {
+    return 3.0 + ((1.0/64.0) * BitboardHelper.GetNumberOfSetBits(
+        BitboardHelper.GetSliderAttacks(PieceType.Bishop, bishop.Square, board)
+    ));
+}
+
+private double scoreKnight(Board board, Piece knight) {
+    return 3.0 + ((1.0/64.0) * Math.Abs(knight.Square.Index - 31));
+}
+
+private double scorePawn(Board board, Piece pawn) {
+    return 1.0;
+}
+
+private double EvaluatePosition(Board board) {
+
+    if (board.IsInCheckmate()) return board.IsWhiteToMove ? double.NegativeInfinity : double.PositiveInfinity;
+    
+    double score = 0.0;
+    PieceList[] allPieceList = board.GetAllPieceLists();
+    for (int i=0; i<allPieceList.Length; i++) {
+        PieceList pieceList = allPieceList[i];
+        foreach (Piece piece in pieceList) {
+            double pieceScore = 0.0;
+            switch (pieceList.TypeOfPieceInList){
+                case PieceType.King:
+                    pieceScore += scoreKing(board, piece);
+                    break;
+                case PieceType.Queen:
+                    pieceScore += scoreQueen(board, piece);
+                    break;
+                case PieceType.Rook:
+                    pieceScore += scoreRook(board, piece);
+                    break;
+                case PieceType.Bishop:
+                    pieceScore += scoreBishop(board, piece);
+                    break;
+                case PieceType.Knight:
+                    pieceScore += scoreKnight(board, piece);
+                    break;
+                case PieceType.Pawn:
+                    pieceScore += scorePawn(board, piece);
+                    break;
+            }
+
+            score += pieceScore * (pieceList.IsWhitePieceList ? 1.0 : -1.0);
+        }
+        if (pieceList.TypeOfPieceInList == PieceType.King) continue;
+    }
+    return score;
+}
+```
+
+Running it against the Marymount Prep Bot, the results were as follows; 
+
+| Result | # |
+| --- | --- |
+| Wins | 279 |
+| Draws | 634 |
+| Losses | 87 | 
+
+It's good to see that there's plenty of room for improvement, so this model is going to be a good baseline to build off of. A lot of the draws are repetitions where the bot starts making random moves because none of its moves look any better to the depth 1 search I've hard coded, so a better search function will be the next step.
+
+I have also thought up an extra fun rule I can add to the bot to stick with the theme;
+
+* On wednesdays we wear pink - keep track of the move number modulo 7 to represent the days of the week. On the 3rd day, the queen must wear pink (but she can't), so she can't sit with us, so she has to move.
