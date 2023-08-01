@@ -250,6 +250,18 @@ Running it against the Marymount Prep Bot, the results were as follows;
 
 It's good to see that there's plenty of room for improvement, so this model is going to be a good baseline to build off of. A lot of the draws are repetitions where the bot starts making random moves because none of its moves look any better to the depth 1 search I've hard coded, so a better search function will be the next step.
 
-I have also thought up an extra fun rule I can add to the bot to stick with the theme;
+I have also thought up an extra couple of fun rules I can add to the bot to stick with the theme;
 
 * On wednesdays we wear pink - keep track of the move number modulo 7 to represent the days of the week. On the 3rd day, the queen must wear pink (but she can't), so she can't sit with us, so she has to move.
+* She doesn't even go here - When a pawn promotes, she just has a lot of feelings, but for the rest of the game she can't reenter the promotion rank.
+
+# Bot 3 - A better search function
+
+Only having the engine look to depth 1 is obviously not ideal, since the bot will often miss even relatively simple mate in twos. However, the search space quickly blows up if one tries to search any deeper than that. There are a few things I want to implement for this bot;
+
+* Arbitrary calculation depth - Depth 1 is hard coded, the bot needs to traverse the tree as far as it needs
+* Evaluation caching - as it is coded now, the bot looks at positions multiple times, so it makes sense to save on computation and cache the results
+* Early stopping - if a move chain looks shit, don't go any deeper
+* I'm a pusher - move chains involving pawns are always evaluated to maximum depth
+
+I'll do these in order.
