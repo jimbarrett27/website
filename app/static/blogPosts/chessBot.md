@@ -260,8 +260,70 @@ I have also thought up an extra couple of fun rules I can add to the bot to stic
 Only having the engine look to depth 1 is obviously not ideal, since the bot will often miss even relatively simple mate in twos. However, the search space quickly blows up if one tries to search any deeper than that. There are a few things I want to implement for this bot;
 
 * Arbitrary calculation depth - Depth 1 is hard coded, the bot needs to traverse the tree as far as it needs
-* Evaluation caching - as it is coded now, the bot looks at positions multiple times, so it makes sense to save on computation and cache the results
 * Early stopping - if a move chain looks shit, don't go any deeper
-* I'm a pusher - move chains involving pawns are always evaluated to maximum depth
+* Evaluation caching - as it is coded now, the bot looks at positions multiple times, so it makes sense to save on computation and cache the results
 
-I'll do these in order.
+For the first two things, I decided to take a leaf out of Stockfish's book and implement [alpha-beta pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning) as the basis for my search function. The basic idea is that you don't bother evaluating moves if you see that the opponent has a good reply, so you look deeper moves which continue to look good at higher depth. I implemented it following the psuedocode on the wikipedia page. The code for searching now looks as follows;
+
+```csharp
+private double EvaluateMove(Board board, int depth, double alpha, double beta, bool playerIsMaximising) {
+
+        if (depth == 0 || board.IsInCheckmate() || board.IsDraw()) return EvaluatePosition(board);
+
+        else if (playerIsMaximising) {
+            double val = double.NegativeInfinity;
+            foreach (Move move in board.GetLegalMoves()) {
+                board.MakeMove(move);
+                val = Math.Max(val, EvaluateMove(board, depth-1, alpha, beta, false));
+                if (val > beta) {
+                    board.UndoMove(move);
+                    break;
+                }
+                alpha = Math.Max(alpha, val);
+                board.UndoMove(move);
+            }
+            return val;
+        }
+        else {
+            double val = double.PositiveInfinity;
+            foreach (Move move in board.GetLegalMoves()) {
+                board.MakeMove(move);
+                val = Math.Min(val, EvaluateMove(board, depth-1, alpha, beta, true));
+                if (val < alpha) {
+                    board.UndoMove(move);
+                    break;
+                }
+                beta = Math.Min(beta, val);
+                board.UndoMove(move);
+            }
+            return val;
+        }
+    }
+
+    public Move Think(Board board, Timer timer)
+    {   
+        Move[] candidateMoves = board.GetLegalMoves();
+        double[] evals = new double[candidateMoves.Length];
+        for (int i=0; i<candidateMoves.Length; i++){
+            board.MakeMove(candidateMoves[i]);
+            evals[i] = EvaluateMove(board, 2, double.NegativeInfinity, double.PositiveInfinity, board.IsWhiteToMove);
+            board.UndoMove(candidateMoves[i]);
+        }
+
+        Array.Sort(evals, candidateMoves);
+
+        return board.IsWhiteToMove ? candidateMoves[candidateMoves.Length - 1] : candidateMoves[0];  
+    }
+```
+
+The bot timed out a couple of times with a depth greater than 2, so I will need to implement something a bit more sophisticated, but for now I will test the bot with depth 2. For the evaluations caching, I went for something extremely simple. I simply take the hash of the position (the zobrist key, available through the challenge API), and store the score in a hashmap that I check at the beginning of each call to EvaluatePosition.
+
+I ran the bot against Marymount, and the results were overwhelming;
+
+| Result | # |
+| --- | --- |
+| Wins | 937 |
+| Draws | 49 |
+| Losses | 14 | 
+
+It has some quirks. I'm pretty sure I saw it miss mate in 1 a couple of times, and it seems to really like promoting to bishop, but it so thoroughly outperforms Marymount that I think I need to make this bot the new baseline. I thought about calling it Regina George, but I want to save that in case I need another baseline (which feels rather likely until I have implemented a bot without fixed depths). With its quirks, I think it makes sense to name it Karen Smith.
