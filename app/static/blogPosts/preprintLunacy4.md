@@ -3,7 +3,7 @@ date: 29/10/2023
 author: Jim Barrett
 post_id: 10
 
-This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit TODO.
+This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#534f2a0](https://github.com/jimbarrett27/arxiv-lunacy/commit/534f2a0cc8cb74ce4896ca23e91dd997d05c7068).
 
 For the next step in building this thing, I want to sure up the repo a bit with some better practises, since I've been playing pretty fast and loose with coding style so far. I'm starting to get pretty excited about the prospect of getting recommended papers. There are a few steps between now and then, the rough plan is;
 
