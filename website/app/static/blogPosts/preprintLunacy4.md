@@ -1,5 +1,5 @@
 title: Preprint Lunacy - Post 4
-date: TODO
+date: 29/10/2023
 author: Jim Barrett
 post_id: 10
 
