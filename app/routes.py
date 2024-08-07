@@ -36,7 +36,6 @@ def extend_base_template(*args, **kwargs):
         {"name": "Home", "route": "/"},
         {"name": "Publications", "route": "/publications"},
         {"name": "Blog", "route": "/blog"},
-        {"name": "Advent of Code", "route": "/advent_of_code"},
         {"name": "Changelog", "route": "/changelog"},
     ]
 
