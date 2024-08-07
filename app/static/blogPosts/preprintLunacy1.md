@@ -1,4 +1,4 @@
-title: arXiv Lunacy - Post 1
+title: Preprint Lunacy - Post 1
 date: 08/07/2023
 author: Jim Barrett
 post_id: 7
