@@ -1,4 +1,4 @@
-title: arXiv Lunacy - Introduction
+title: Preprint Lunacy - Introduction
 date: 07/07/2023
 author: Jim Barrett
 post_id: 6

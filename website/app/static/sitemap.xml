@@ -23,11 +23,6 @@
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>http://jimbarrett.phd/advent_of_code</loc>
-  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
   <loc>http://jimbarrett.phd/changelog</loc>
   <lastmod>2023-07-04T08:21:24+00:00</lastmod>
   <priority>0.80</priority>
@@ -36,6 +31,31 @@
   <loc>http://jimbarrett.phd/static/data/cv.pdf</loc>
   <lastmod>1980-01-01T00:00:01+00:00</lastmod>
   <priority>0.80</priority>
+</url>
+<url>
+  <loc>http://jimbarrett.phd/blog/10</loc>
+  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>http://jimbarrett.phd/blog/9</loc>
+  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>http://jimbarrett.phd/blog/8</loc>
+  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>http://jimbarrett.phd/blog/7</loc>
+  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>http://jimbarrett.phd/blog/6</loc>
+  <lastmod>2023-07-04T08:21:24+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>http://jimbarrett.phd/blog/5</loc>
