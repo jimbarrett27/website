@@ -155,8 +155,8 @@ def _get_completed_and_half_completed_advent_of_code():
             half_completed_days.add((int(year), int(day)))
 
     return {
-        "completed_days": completed_days,
-        "half_completed_days": half_completed_days,
+        "completed_days": ','.join(completed_days),
+        "half_completed_days": ','.join(half_completed_days),
     }
 
 
