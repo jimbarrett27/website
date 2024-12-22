@@ -4,7 +4,9 @@ The various routes for the webserver
 
 import json
 import logging
+from functools import lru_cache
 from pathlib import Path
+import requests
 
 import markdown
 from flask import render_template, request, send_from_directory
@@ -13,12 +15,6 @@ from flask.templating import render_template_string
 
 from app import app
 from app.constants import BLOG_POST_DIRECTORY, NOTEBOOK_DIRECTORY, STATIC_DIRECTORY
-from gcp_util.secrets import (
-    get_cron_verification_password,
-    get_telegram_bot_key,
-    get_telegram_user_id,
-)
-from telegram_bot.bot import handle_bot_request, send_message_to_me
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = create_logger(app)
@@ -34,9 +30,9 @@ def extend_base_template(*args, **kwargs):
 
     tab_contents = [
         {"name": "Home", "route": "/"},
+        {"name": "Advent of Code", "route": "/advent_of_code"},
         {"name": "Publications", "route": "/publications"},
         {"name": "Blog", "route": "/blog"},
-        {"name": "Changelog", "route": "/changelog"},
     ]
 
     if args[0].endswith(".html"):
@@ -143,17 +139,20 @@ def four_oh_four() -> HTML:
     return extend_base_template("404.html")
 
 
+@lru_cache
 def _get_completed_and_half_completed_advent_of_code():
     completed_days = set()
     half_completed_days = set()
 
-    for f in (STATIC_DIRECTORY / "code").iterdir():
-        if str(f.parts[-1]).startswith("solution"):
-            problem_number = int(f.parts[-1].split(".")[0].split("_")[1])
-            if all(part in f.read_text() for part in ["part_1", "part_2"]):
-                completed_days.add(problem_number)
-            else:
-                half_completed_days.add(problem_number)
+    solution_status_url = "https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/solution_status.txt"
+    solution_status = requests.get(solution_status_url).text
+
+    for line in solution_status.splitlines():
+        year, day, part1, part2 = line.split()
+        if part1 == "*" and part2 == "*":
+            completed_days.add((int(year), int(day)))
+        elif part1 == "*" or part2 == "*":
+            half_completed_days.add((int(year), int(day)))
 
     return {
         "completed_days": completed_days,
@@ -179,47 +178,14 @@ def advent_of_code() -> HTML:
     )
 
 
-@app.route("/get_advent_solution/<int:problem_number>")
-def get_advent_solution(problem_number: int):
+@app.route("/get_advent_solution/<int:year>/<int:day>")
+def get_advent_solution(year: int, day: int) -> str:
     """
     Endpoint to fetch the code for a day of advent of code
     """
-    completed_and_half_completed_days = (
-        _get_completed_and_half_completed_advent_of_code()
-    )
-    all_valid_days = (
-        completed_and_half_completed_days["completed_days"]
-        | completed_and_half_completed_days["half_completed_days"]
-    )
-
-    if problem_number not in all_valid_days:
-        return f"// no solution for day {problem_number} yet"
-
-    return (STATIC_DIRECTORY / f"code/solution_{problem_number}.rs").read_text()
-
-
-@app.route("/telegram_webhook/<telegram_key>", methods=["POST"])
-def telegram_webhook(telegram_key: str):
-    """
-    Simple hello world route to act as a webhook for my telegram bot.
-    Simply echos the message I send it back to me
-    """
-
-    if not telegram_key == get_telegram_bot_key():
-        return ""
-
-    if not request.method == "POST":
-        return ""
-
-    request_data = request.get_json()
-    message = request_data["message"]
-
-    if not message["from"]["id"] == get_telegram_user_id():
-        return ""
-
-    handle_bot_request(message["text"].lower())
-
-    return ""
+    
+    solution_url = f"https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/{year}/ex_{day}.py"
+    return requests.get(solution_url).text
 
 
 @app.route("/robots.txt")
@@ -236,19 +202,3 @@ def sitemap():
     Serve up the sitemap
     """
     return send_from_directory(STATIC_DIRECTORY, "sitemap.xml")
-
-
-@app.route("/web_ticker", methods=["POST"])
-def web_ticker():
-    """
-    Route to receive and verify requests from my web-ticker
-    cron job, which periodically pings this website
-    """
-
-    request_data = request.get_json()
-    if not request_data["verify"] == get_cron_verification_password():
-        return ""
-
-    send_message_to_me("cron ping received")
-
-    return ""
