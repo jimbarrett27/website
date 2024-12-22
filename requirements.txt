@@ -9,6 +9,3 @@ black
 isort
 pytest
 pytest-cov
-google-cloud-secret-manager
-google-cloud-storage
-python-telegram-bot
