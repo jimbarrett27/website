@@ -2,7 +2,7 @@ steps:
   - name: python
     entrypoint: curl
     args: [
-     "-LsSf", "https://astral.sh/uv/install.sh", "|", "sh"
+     "-LsSf https://astral.sh/uv/install.sh | sh"
     ]
 
   # Install dependencies
