@@ -1,13 +1,10 @@
 steps:
-  # Install universal-vendoring
   - name: python
     entrypoint: python
-    args: ["-m", "pip", "install", "uv"]
-
-  # Use uv to install vendored dependencies
-  - name: python
-    entrypoint: python
-    args: ["-m", "uv", "install"]
+    args: [
+      "-c", 
+      "import subprocess; subprocess.run(['pip', 'install', 'uv']); subprocess.run(['python', '-m', 'uv', 'install'])"
+    ]
 
   # Check import formatting
   - name: python
