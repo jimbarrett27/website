@@ -4,13 +4,13 @@ The various routes for the webserver
 
 import json
 import logging
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
-import requests
-from collections import defaultdict
 
 import markdown
-from flask import render_template, request, send_from_directory
+import requests
+from flask import render_template, send_from_directory
 from flask.logging import create_logger
 from flask.templating import render_template_string
 
@@ -143,9 +143,8 @@ def four_oh_four() -> HTML:
 @lru_cache
 def _get_solution_status_dict() -> dict[int, dict[int, str]]:
 
-
-    solution_status_url = "https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/solution_status.txt"
-    solution_status = requests.get(solution_status_url).text
+    solution_status_url = "https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/solution_status.txt"  # pylint: disable=line-too-long
+    solution_status = requests.get(solution_status_url, timeout=200).text
 
     solution_status_dict = defaultdict(dict)
 
@@ -180,9 +179,9 @@ def get_advent_solution(year: int, day: int) -> str:
     """
     Endpoint to fetch the code for a day of advent of code
     """
-    
-    solution_url = f"https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/{year}/ex_{day}.py"
-    return requests.get(solution_url).text
+
+    solution_url = f"https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/{year}/ex_{day}.py"  # pylint: disable=line-too-long
+    return requests.get(solution_url, timeout=200).text
 
 
 @app.route("/robots.txt")
