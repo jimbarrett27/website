@@ -1,13 +1,8 @@
 steps:
-  # Install uv
+  # Install dependencies
   - name: python
-    entrypoint: python
-    args: ["-m", "pip", "install", "uv"]
-
-  # Use uv to install vendored dependencies
-  - name: python
-    entrypoint: python
-    args: ["-m", "uv", "install"]
+    entrypoint: pip
+    args: ["install", "-r", "requirements.txt", "--user"]
 
   # Check import formatting
   - name: python
@@ -19,7 +14,7 @@ steps:
     entrypoint: python
     args: ["-m", "black", "--check", "app"]
 
-  # Check linting
+  # Check formatting
   - name: python
     entrypoint: python
     args: ["-m", "pylint", "app"]

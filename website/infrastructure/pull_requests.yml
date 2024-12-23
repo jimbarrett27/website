@@ -1,26 +1,20 @@
 steps:
-  - name: python
-    entrypoint: curl
-    args: [
-     "-LsSf https://astral.sh/uv/install.sh | sh"
-    ]
-
   # Install dependencies
   - name: python
-    entrypoint: uv
-    args: ["sync"]
+    entrypoint: pip
+    args: ["install", "-r", "requirements.txt", "--user"]
 
   # Check import formatting
   - name: python
-    entrypoint: uv
-    args: ["run", "isort", "--check", "app"]
+    entrypoint: python
+    args: ["-m", "isort", "--check", "app"]
 
   # Check formatting
   - name: python
     entrypoint: python
     args: ["-m", "black", "--check", "app"]
 
-  # Check linting
+  # Check formatting
   - name: python
     entrypoint: python
     args: ["-m", "pylint", "app"]
@@ -29,5 +23,5 @@ steps:
   - name: python
     entrypoint: python
     args: ["-m", "pytest"]
-
+  
 timeout: "1600s"
