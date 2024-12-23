@@ -8,8 +8,8 @@ steps:
 
   # Check import formatting
   - name: python
-    entrypoint: python
-    args: ["-m", "isort", "--check", "app"]
+    entrypoint: uv
+    args: ["run", "python", "-m", "isort", "--check", "app"]
 
   # Check formatting
   - name: python
