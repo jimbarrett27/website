@@ -1,8 +1,13 @@
 steps:
-  # Install dependencies
+  # Install universal-vendoring
   - name: python
-    entrypoint: pip
-    args: ["install", "-r", "requirements.txt", "--user"]
+    entrypoint: python
+    args: ["-m", "pip", "install", "uv"]
+
+  # Use uv to install vendored dependencies
+  - name: python
+    entrypoint: python
+    args: ["-m", "uv", "install"]
 
   # Check import formatting
   - name: python
@@ -14,7 +19,7 @@ steps:
     entrypoint: python
     args: ["-m", "black", "--check", "app", "gcp_util", "telegram_bot"]
 
-  # Check formatting
+  # Check linting
   - name: python
     entrypoint: python
     args: ["-m", "pylint", "app", "gcp_util", "telegram_bot"]
@@ -23,5 +28,5 @@ steps:
   - name: python
     entrypoint: python
     args: ["-m", "pytest"]
-  
+
 timeout: "1600s"
