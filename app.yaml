@@ -1,2 +1,2 @@
-runtime: python313
+runtime: python312
 entrypoint: waitress-serve --port=$PORT app:app 
