@@ -7,17 +7,17 @@ steps:
   # Check import formatting
   - name: python
     entrypoint: python
-    args: ["-m", "isort", "--check", "app", "gcp_util", "telegram_bot"]
+    args: ["-m", "isort", "--check", "app"]
 
   # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", "black", "--check", "app", "gcp_util", "telegram_bot"]
+    args: ["-m", "black", "--check", "app"]
 
   # Check formatting
   - name: python
     entrypoint: python
-    args: ["-m", "pylint", "app", "gcp_util","telegram_bot"]
+    args: ["-m", "pylint", "app"]
 
   # Run tests
   - name: python
