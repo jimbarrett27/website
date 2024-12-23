@@ -7,6 +7,7 @@ import logging
 from functools import lru_cache
 from pathlib import Path
 import requests
+from collections import defaultdict
 
 import markdown
 from flask import render_template, request, send_from_directory
@@ -140,24 +141,25 @@ def four_oh_four() -> HTML:
 
 
 @lru_cache
-def _get_completed_and_half_completed_advent_of_code():
-    completed_days = set()
-    half_completed_days = set()
+def _get_solution_status_dict() -> dict[int, dict[int, str]]:
+
 
     solution_status_url = "https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/solution_status.txt"
     solution_status = requests.get(solution_status_url).text
 
+    solution_status_dict = defaultdict(dict)
+
     for line in solution_status.splitlines():
         year, day, part1, part2 = line.split()
-        if part1 == "*" and part2 == "*":
-            completed_days.add((int(year), int(day)))
-        elif part1 == "*" or part2 == "*":
-            half_completed_days.add((int(year), int(day)))
 
-    return {
-        "completed_days": ','.join(completed_days),
-        "half_completed_days": ','.join(half_completed_days),
-    }
+        if part1 == "*" and part2 == "*":
+            solution_status_dict[year][day] = "both"
+        elif part1 == "*" or part2 == "*":
+            solution_status_dict[year][day] = "half"
+        else:
+            solution_status_dict[year][day] = "neither"
+
+    return solution_status_dict
 
 
 @app.route("/advent_of_code")
@@ -165,16 +167,11 @@ def advent_of_code() -> HTML:
     """
     Renders the advent of code page
     """
-    completed_and_half_completed_days = (
-        _get_completed_and_half_completed_advent_of_code()
-    )
-    completed_days = completed_and_half_completed_days["completed_days"]
-    half_completed_days = completed_and_half_completed_days["half_completed_days"]
+    solution_status_dict = _get_solution_status_dict()
 
     return extend_base_template(
         "advent_of_code.html",
-        completed_days=completed_days,
-        half_completed_days=half_completed_days,
+        solution_status_dict=solution_status_dict,
     )
 
 

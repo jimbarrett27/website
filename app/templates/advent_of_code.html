@@ -33,13 +33,18 @@
         const year_heading = document.getElementById('year-heading');
         const year = parseInt(year_heading.innerHTML.split(' ')[0]);
 
-        const completed_days = {{ completed_days }};
-        const half_completed_days = {{ half_completed_days }};
+        const solution_status = {{ solution_status_dict | tojson }};
+
         for (let i = 1; i <= 25; i++){
             const button = document.getElementById('problem-' + i);
-            button.style.backgroundColor = completed_days.includes((year, i)) ? '#00a32c' : half_completed_days.includes((year,i)) ? '#e6a400' : '#d90028';
+            if (solution_status[year][i] == 'both') button.style.backgroundColor = '#00a32c';
+            else if (solution_status[year][i] == 'half') button.style.backgroundColor = '#e6a400';
+            else button.style.backgroundColor = '#c42939';
         }
     }
+
+    window.onload = setup_buttons;
+
 </script>
 
 I have set myself a personal challenge to try and get up to date with <a href="https://adventofcode.com/">advent of code</a>,
@@ -51,7 +56,7 @@ day, orange where I have only solved the first one and red where I haven't solve
 <p></p>
 <h2 id="year-heading">2015 Solutions</h2>
 <div style="display: flex; align-items: center;">
-<button onclick="change_year('left')">←</button>
+<button onclick="change_year('left')">◀</button>
 <div class="align-center">
 {% for i in range(5) %}
     {% for j in range(5) %}
@@ -59,14 +64,7 @@ day, orange where I have only solved the first one and red where I haven't solve
         <button
             id="problem-{{problem_number}}"
             onclick="populate_code_block({{problem_number}})"
-            style="
-                color: aliceblue !important; 
-                background-color: 
-                {% if problem_number in completed_days %} #00a32c 
-                {% elif problem_number in half_completed_days %} #e6a400 
-                {% else %} #d90028 
-                {% endif %}; 
-            "
+            style="color: aliceblue !important; "
         >
             {{problem_number}}
         </button>
@@ -74,7 +72,7 @@ day, orange where I have only solved the first one and red where I haven't solve
     <br>
 {% endfor %}
 </div>
-<button onclick="change_year('right')">→</button>
+<button onclick="change_year('right')">▶</button>
 </div>
 <p></p>
 <pre><code class="language-python" style="text-align: left;"></code></pre>
