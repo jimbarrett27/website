@@ -1,15 +1,19 @@
 steps:
   - name: python
-    entrypoint: python
+    entrypoint: curl
     args: [
-      "-c", 
-      "import subprocess; subprocess.run(['pip', 'install', 'uv']); subprocess.run(['python', '-m', 'uv', 'sync'])"
+     "-LsSf", "https://astral.sh/uv/install.sh", "|", "sh"
     ]
+
+  # Install dependencies
+  - name: python
+    entrypoint: uv
+    args: ["sync"]
 
   # Check import formatting
   - name: python
-    entrypoint: python
-    args: ["-m", "uv", "run", "python", "-m", "isort", "--check", "app"]
+    entrypoint: uv
+    args: ["run", "isort", "--check", "app"]
 
   # Check formatting
   - name: python
