@@ -3,7 +3,7 @@ steps:
     entrypoint: python
     args: [
       "-c", 
-      "import subprocess; subprocess.run(['pip', 'install', 'uv']); subprocess.run(['python', '-m', 'uv', 'install'])"
+      "import subprocess; subprocess.run(['pip', 'install', 'uv']); subprocess.run(['python', '-m', 'uv', 'pip', 'install'])"
     ]
 
   # Check import formatting
