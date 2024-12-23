@@ -1,0 +1,20 @@
+[project]
+name = "website"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "black>=24.10.0",
+    "flask>=3.1.0",
+    "isort>=5.13.2",
+    "markdown>=3.7",
+    "mypy>=1.14.0",
+    "numpy>=2.2.1",
+    "pylint>=3.3.2",
+    "pytest-cov>=6.0.0",
+    "pytest>=8.3.4",
+    "python-markdown-math>=0.8",
+    "waitress>=3.0.2",
+    "requests>=2.32.3",
+]
