@@ -1,2 +1,2 @@
-runtime: python312
-entrypoint: waitress-serve --port=$PORT app:app 
+runtime: nodejs22
+entrypoint: PORT=$PORT node ./dist/server/entry.mjs
