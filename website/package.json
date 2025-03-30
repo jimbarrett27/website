@@ -1,23 +1,19 @@
 {
-  "name": "website",
-  "version": "1.0.0",
-  "description": "Jim's very own website",
-  "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {
-    "jshint": "^2.11.0"
-  },
+  "name": "astro-website",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jimbarrett27/website.git"
-  },
-  "author": "Jim Barrett",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jimbarrett27/website/issues"
-  },
-  "homepage": "https://github.com/jimbarrett27/website#readme"
+  "dependencies": {
+    "@astrojs/mdx": "^4.2.2",
+    "@astrojs/rss": "^4.0.11",
+    "@astrojs/sitemap": "^3.3.0",
+    "astro": "^5.5.5",
+    "rehype-mathjax": "^7.1.0",
+    "remark-math": "^6.0.0"
+  }
 }

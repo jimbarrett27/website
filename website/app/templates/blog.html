@@ -1,9 +1,0 @@
-{% extends "main.html" %}
-{% block page_content %}
-<h2> List of Blog Posts </h2>
-{% for blogPost in blogPosts %}
-<ul>
-<li><a href="/blog/{{ blogPost.post_id }}">{{ blogPost.title }}</a> - {{ blogPost.date }}
-</ul>
-{% endfor %}
-{% endblock %}
