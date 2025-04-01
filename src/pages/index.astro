@@ -1,28 +1,31 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>Welcome!</h1>
-			<p>
-				I'm a System Developer based in Stockholm, Sweden, working at Uppsala Monitoring Centre. 
-				This site is intended to be a playground for me to mess around with various web related things, as
-				well as teaching myself a bit about cloud infrastructure.
-				I also use it to host an occassional blog, as and when I have some interesting stuff to write about.
-				<p></p>
-				You can see all the source of this website on <a href="https://github.com/jimbarrett27/website">GitHub</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <h1>Welcome!</h1>
+      <p>
+        I'm a System Developer based in Stockholm, Sweden, working at Uppsala
+        Monitoring Centre. This site is intended to be a playground for me to
+        mess around with various web related things, as well as teaching myself
+        a bit about cloud infrastructure. I also use it to host an occassional
+        blog, as and when I have some interesting stuff to write about.
+        <p></p>
+        You can see all the source of this website on <a
+          href="https://github.com/jimbarrett27/website">GitHub</a
+        >.
+      </p>
+    </main>
+    <Footer />
+  </body>
 </html>

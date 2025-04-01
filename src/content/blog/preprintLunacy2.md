@@ -1,15 +1,15 @@
 ---
-title:  Preprint Lunacy - Post 2
-description: ''
-pubDate: '13 Jul 2023'
-heroImage: '/blog-placeholder-3.jpg'
+title: Preprint Lunacy - Post 2
+description: ""
+pubDate: "13 Jul 2023"
+heroImage: "/blog-placeholder-3.jpg"
 ---
 
 This post relates to my arXiv lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#ec11477](https://github.com/jimbarrett27/arxiv-lunacy/commit/ec114777cfb5da2f6d79e965105c67e353a134ab).
 
 I feel like the next step in development of the project should be to implement functionality to be able to add new embeddings to my dataset. This will be necessary when fetching the latest preprints, screening them for papers which might be interesting to me and then saving them for future reference.
 
-It feels like I should probably be using a relational database or something similar in order to store the embeddings and update them. Honestly though, since this app is in all likelihood only going to be used by me, I don't really care about a few seconds of latency. Instead, I will opt for simply storing the tables I produce as blobs in container storage, then download them and load them into pandas when I need them. I will try and design the schema of the tables such that I could theoretically transform things over to a relational database if I ever need to. 
+It feels like I should probably be using a relational database or something similar in order to store the embeddings and update them. Honestly though, since this app is in all likelihood only going to be used by me, I don't really care about a few seconds of latency. Instead, I will opt for simply storing the tables I produce as blobs in container storage, then download them and load them into pandas when I need them. I will try and design the schema of the tables such that I could theoretically transform things over to a relational database if I ever need to.
 
 I have mostly developed my personal projects on Google Cloud, and I will do the same here. The plan is that I will put the `feather` encoded table of embeddings into blob storage into a Google Cloud Storage bucket. I happen to already have some code in the backend of this website (where you're reading this blog) which solves some of these problems. One day I might look into a good way of separating out some of these general purpose utilities I write between projects and making them available across all my projects (by having my own package index or something), but for now I will shamelessly copy-paste and modify the code for the new use case.
 
@@ -132,7 +132,7 @@ def update_embeddings_df(_):
     all_embeddings_df = all_embeddings_df.drop_duplicates(subset='id').reset_index().drop(columns='index')
     save_dataframe_to_blob(all_embeddings_df, EMBEDDINGS_DF_FILENAME)
 
-    return '{"status":"200", "data": "OK"}' 
+    return '{"status":"200", "data": "OK"}'
 
 
 def create_and_upload_gcp_function_zipfile():
@@ -149,7 +149,7 @@ def create_and_upload_gcp_function_zipfile():
             if not str(f).endswith('.py'):
                 continue
             zf.write(str(f), f'{dir}/{f.name}')
-    
+
     zf.write(REPO_ROOT / 'requirements.txt', 'requirements.txt')
     zf.write(REPO_ROOT / 'scripts/produce_gcp_functions.py', 'main.py')
     zf.close()
@@ -161,7 +161,7 @@ def create_and_upload_gcp_function_zipfile():
 if __name__ == '__main__':
 
     create_and_upload_gcp_function_zipfile()
-        
+
 ```
 
 It took a few attempts to get it right. The main problems I ran into were making sure that the entrypoint function actually returned something (I have no idea if the JSON repsonse is necessary, but if it ain't broke, don't fix it), and making sure that the cloud scheduler has sufficient permissions to make the HTTP request to trigger the function. The function seems to take around a minute to execute (which might reduce if it's clever about caching the SentenceTransformer model). I will monitor it over the next few days, but for now it seems like a success!

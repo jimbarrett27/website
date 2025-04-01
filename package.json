@@ -16,5 +16,9 @@
     "astro": "^5.5.5",
     "rehype-mathjax": "^7.1.0",
     "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.5.3",
+    "prettier-plugin-astro": "0.14.1"
   }
 }

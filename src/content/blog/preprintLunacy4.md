@@ -1,18 +1,18 @@
 ---
-title:  Preprint Lunacy - Post 4
-description: ''
-pubDate: '29 Oct 2023'
-heroImage: '/blog-placeholder-3.jpg'
+title: Preprint Lunacy - Post 4
+description: ""
+pubDate: "29 Oct 2023"
+heroImage: "/blog-placeholder-3.jpg"
 ---
 
 This post relates to my preprint lunacy project. You can find the introduction post [here](https://jimbarrett.phd/blog/6). This post covers my progress up to commit [#534f2a0](https://github.com/jimbarrett27/arxiv-lunacy/commit/534f2a0cc8cb74ce4896ca23e91dd997d05c7068).
 
 For the next step in building this thing, I want to sure up the repo a bit with some better practises, since I've been playing pretty fast and loose with coding style so far. I'm starting to get pretty excited about the prospect of getting recommended papers. There are a few steps between now and then, the rough plan is;
 
-* Add functionality for favouriting papers
-* Build a simple model or heuristic to find papers close to a set of papers
-* Decide on some heuristic for papers being "close enough" to warrant a recommendation
-* A page to present the recommendations
+- Add functionality for favouriting papers
+- Build a simple model or heuristic to find papers close to a set of papers
+- Decide on some heuristic for papers being "close enough" to warrant a recommendation
+- A page to present the recommendations
 
 But, before all that fun stuff, time to eat my vegetables. My usual setup for quality control on a repo is formatting, linting and tests. I set up a CI/CD pipeline to run these for every pull request, and not allow merging without them passing. I also forbid pushing directly to the `main` branch.
 
@@ -51,6 +51,7 @@ function SearchField({setPapersInView}: {setPapersInView : (papers: Paper[]) => 
 ```
 
 whilst also changing my usage of the `useState` declaration in my entrypoint component;
+
 ```typescript
 // before
 const [papersInView, setPapersInView] = useState([]);

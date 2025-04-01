@@ -1,8 +1,8 @@
 ---
-title:  Gaussian Process Update Equations
-description: ''
-pubDate: '14 Jul 2017'
-heroImage: '/blog-placeholder-3.jpg'
+title: Gaussian Process Update Equations
+description: ""
+pubDate: "14 Jul 2017"
+heroImage: "/blog-placeholder-3.jpg"
 ---
 
 When you start to learn about Gaussian processes, you come across the update equations fairly early on. The update equations are fairly intimidating to look at, and are typically dismissed as trivial to derive (for example, Rasmussen and Williams simply point you towards a statistics book from the 1930's, which is neither available online nor in our university library...). I had a go at the derivation, and promptly realised it wasn't trivial at all from a cold start.
@@ -31,13 +31,13 @@ $$ \Sigma^{-1} = \left(\begin{array}{cc}T^{-1} + T^{-1}C^T M CT^{-1} & -T^{-1}C^
 
 Where $M = (P-CT^{-1}C^T)^{-1}$. So, we can directly compute our Gaussian density
 
-$$ 
+$$
 \begin{align}
     P(y_p|y_t) \propto \exp\Bigg[&-\frac{1}{2} y_t^T(T^{-1} + T^{-1}C^T M CT^{-1})y_t \\
-    &+ \frac{1}{2}y_t^T (T^{-1}C^TM)y_p \\ 
-    &+ \frac{1}{2}y_p^T (MCT^{-1})y_t\\ 
-    &- \frac{1}{2}y_p^TMy_p\Bigg] 
-\end{align}    
+    &+ \frac{1}{2}y_t^T (T^{-1}C^TM)y_p \\
+    &+ \frac{1}{2}y_p^T (MCT^{-1})y_t\\
+    &- \frac{1}{2}y_p^TMy_p\Bigg]
+\end{align}
 $$
 
 However, the only thing that isn't a constant here is $y_p$, so we can drop a bunch of terms (since we're only interested in the density, not absolute values)
