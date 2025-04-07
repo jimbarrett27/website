@@ -1,0 +1,71 @@
+---
+import BaseHead from "../../../components/BaseHead.astro";
+import Header from "../../../components/Header.astro";
+import Footer from "../../../components/Footer.astro";
+import ProblemGrid from "../../../components/ProblemGrid.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../../consts";
+import { Code } from 'astro:components';
+
+
+const solutionStatusUrl = "https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/solution_status.txt";
+const response = await fetch(solutionStatusUrl).then(res => res.text());
+const lines = response.split('\n');
+
+const {pageYear, pageDay} = Astro.params;
+
+let solutionStatus = 'no-puzzle';  
+for (const line of lines) {
+    const [year, day, part1, part2] = line.split(' ');
+    if (year === pageYear && day === pageDay) {
+        if (part2 === "*") {
+            solutionStatus = "both";
+    } else if (part1 === "*") {
+            solutionStatus = "half";
+    } else {
+        solutionStatus = "neither";
+    }
+    }
+    
+}
+
+export async function getStaticPaths() {
+
+    const paths = [];
+    for (let i = 2015; i <= 2023; i++) {
+        for (let j = 1; j <= 25; j++) {
+            paths.push({ params: { pageYear: i.toString(), pageDay: j.toString() } });
+        }
+    }
+    return paths;
+}
+
+const code_location = `https://raw.githubusercontent.com/jimbarrett27/AdventOfCode/refs/heads/main/${pageYear}/ex_${pageDay}.py`;
+const code = await fetch(code_location)
+.then(function(response) {
+    return response.text();
+});
+
+console.log(solutionStatus);
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    </head>
+    <body>
+        <Header />
+        <main>
+        I have set myself a personal challenge to try and get up to date with <a href="https://adventofcode.com/">advent of code</a>,
+        a set of programming challenges released each December. 
+        <p></p>
+        Each day has 2 related problems, for a total of 50 problems per year. 
+        Each button below will show my code solving that problem. Green buttons where I have solved both problems of the
+        day, orange where I have only solved the first one and red where I haven't solved either.
+        <p></p>
+        <ProblemGrid year="2015" />
+        <Code lang="python" code={code} />
+    </main>
+        <Footer />
+    </body>
+</html>

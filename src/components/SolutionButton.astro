@@ -1,0 +1,20 @@
+---
+const { solutionNumber, solutionStatus, codeBlockId } = Astro.props;
+
+let bgColor = "#c42939";
+if (solutionStatus === "half") bgColor = "#e6a400";
+else if (solutionStatus === "both") bgColor = "#00a32c";
+
+function handleClick() {
+    const codeBlock = document.getElementById(codeBlockId);
+
+    codeBlock.code = `print('Solution for ${solutionNumber}')`;
+
+    if (codeBlock) {
+        codeBlock.scrollIntoView({ behavior: "smooth" });
+    }
+}
+---
+<button style={`background-color: ${bgColor}`} class="solution-button">
+    {solutionNumber}
+</button>

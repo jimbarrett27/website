@@ -1,0 +1,34 @@
+---
+const {year, solutionStatus, codeBlockId} = Astro.props
+
+import SolutionButton from "./SolutionButton.astro";
+---
+
+
+<div class="grid">
+    {
+    
+    Array.from({length: 5}, (_, i) => {
+      const row = i + 1;
+      return (
+        <div class="grid-row">
+          {Array.from({ length: 5 }, (_, j) => {
+            const col = j + 1;
+            const problemNumber = (row - 1) * 5 + col;
+            const status = 'both'
+            
+            return (
+              <SolutionButton
+                solutionNumber={problemNumber}
+                year={year}
+                solutionStatus={status}
+                class="grid-item"
+                codeBlockId={codeBlockId}
+              />
+            )
+          })}
+        </div>
+      );
+    })
+  }
+  </div>
