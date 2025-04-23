@@ -1,0 +1,72 @@
+---
+type Status = 'neither' | 'half' | 'both';
+
+interface Props {
+  year: number;
+  solutionStatuses: Map<number, Status>;
+  activeDay: number;
+}
+
+const { year, solutionStatuses, activeDay } = Astro.props as Props;
+                              
+const statusColors = {
+  "neither": "bg-gray-200 hover:bg-gray-300 text-gray-700", // No parts solved
+  "half": "bg-yellow-200 hover:bg-yellow-300 text-yellow-800", // 1 part solved
+  "both": "bg-green-200 hover:bg-green-300 text-green-800", // Both parts solved
+};
+
+
+// Create a 5x5 grid array
+const grid = [];
+for (let row = 0; row < 5; row++) {
+  const currentRow = [];
+  for (let col = 0; col < 5; col++) {
+    const dayNumber = row * 5 + col + 1;
+    currentRow.push(dayNumber);
+  }
+  grid.push(currentRow);
+}
+
+---
+
+<div class="max-w-2xl mx-auto my-8">
+  
+  <div class="grid grid-cols-5 gap-4">
+    {grid.map(row =>
+      row.map(day => {
+        const status = solutionStatuses.get(day) ?? "neither";
+        const isActive = day === activeDay;
+        return (
+          <a
+            href={`/advent_of_code/${year}/${day}`}
+            class={`
+              ${statusColors[status]}
+              ${isActive ? "ring-4 ring-blue-400 scale-105 shadow-lg z-10" : ""}
+              rounded-lg p-4 text-center font-medium
+              transition duration-300 transform hover:scale-105 hover:shadow-md
+              flex items-center justify-center text-lg
+            `}
+          >
+            {day}
+          </a>
+        );
+      })
+    )}
+  </div>
+  
+  <div class="mt-8 flex justify-center gap-6">
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 bg-gray-200 rounded-full"></div>
+      <span class="text-sm">Not started</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 bg-yellow-200 rounded-full"></div>
+      <span class="text-sm">Part 1 completed</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-4 h-4 bg-green-200 rounded-full"></div>
+      <span class="text-sm">Both parts completed</span>
+    </div>
+  </div>
+</div>
+

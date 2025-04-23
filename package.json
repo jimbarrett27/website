@@ -13,8 +13,10 @@
     "@astrojs/node": "^9.1.3",
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.3.0",
+    "@tailwindcss/vite": "^4.1.4",
     "astro": "^5.5.5",
     "rehype-mathjax": "^7.1.0",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "tailwindcss": "^4.1.4"
   }
 }
