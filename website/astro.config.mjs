@@ -8,6 +8,8 @@ import remarkMath from 'remark-math';
 
 import node from '@astrojs/node';
 
+import tailwindcss from '@tailwindcss/vite';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://example.com',
@@ -16,9 +18,13 @@ export default defineConfig({
   markdown: {
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeMathjax],
-	  },
+      },
 
   adapter: node({
     mode: 'standalone',
   }),
+
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });
