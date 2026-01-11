@@ -12,6 +12,18 @@ handlers:
     upload: dist/website/browser/favicon.ico
     secure: always
 
+  # Serve JS bundles
+  - url: /(.*\.js)
+    static_files: dist/website/browser/\1
+    upload: dist/website/browser/.*\.js
+    secure: always
+
+  # Serve CSS bundles
+  - url: /(.*\.css)
+    static_files: dist/website/browser/\1
+    upload: dist/website/browser/.*\.css
+    secure: always
+
   # All other routes go to index.html (SPA routing)
   - url: /.*
     static_files: dist/website/browser/index.html
