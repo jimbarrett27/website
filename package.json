@@ -1,22 +1,55 @@
 {
-  "name": "astro-website",
-  "type": "module",
-  "version": "0.0.1",
+  "name": "website",
+  "version": "0.0.0",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "ng": "ng",
+    "start": "ng serve",
+    "prebuild": "node build-scripts/process-markdown.js",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "lint": "ng lint"
   },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
   "dependencies": {
-    "@astrojs/mdx": "^4.2.2",
-    "@astrojs/node": "^9.1.3",
-    "@astrojs/rss": "^4.0.11",
-    "@astrojs/sitemap": "^3.3.0",
-    "@tailwindcss/vite": "^4.1.4",
-    "astro": "^5.5.5",
-    "rehype-mathjax": "^7.1.0",
-    "remark-math": "^6.0.0",
-    "tailwindcss": "^4.1.4"
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/router": "^21.0.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular-eslint/builder": "^21.1.0",
+    "@angular-eslint/eslint-plugin": "^21.1.0",
+    "@angular-eslint/eslint-plugin-template": "^21.1.0",
+    "@angular-eslint/schematics": "^21.1.0",
+    "@angular-eslint/template-parser": "^21.1.0",
+    "@angular/build": "^21.0.5",
+    "@angular/cli": "^21.0.5",
+    "@angular/compiler-cli": "^21.0.0",
+    "@eslint/js": "^9.39.2",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "eslint": "^9.39.2",
+    "gray-matter": "^4.0.3",
+    "marked": "^17.0.1",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.52.0"
   }
 }

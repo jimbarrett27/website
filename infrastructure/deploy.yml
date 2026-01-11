@@ -1,6 +1,13 @@
 steps:
-  # build and deploy the webapp
-  - name: "gcr.io/cloud-builders/gcloud"
-    args: ["app", "deploy"]
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['ci']
 
-timeout: "1600s"
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy']
+
+timeout: '1600s'
