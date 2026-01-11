@@ -1,0 +1,14 @@
+steps:
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'lint']
+
+  - name: 'node:22'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+timeout: '1200s'
