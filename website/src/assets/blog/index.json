@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "gaussianProcessDemo",
+    "title": "Gaussian Process Demo",
+    "description": "",
+    "pubDate": "2020-11-09T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  },
+  {
+    "slug": "unpredictabilityOfSports",
+    "title": "(un-)Predictability of Sports",
+    "description": "",
+    "pubDate": "2017-12-31T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  },
+  {
+    "slug": "accuracyOfInferencePaper",
+    "title": "New Paper - Accuracy of Inference",
+    "description": "",
+    "pubDate": "2017-12-04T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  },
+  {
+    "slug": "samplesFromASphere",
+    "title": "Random Samples from a Sphere",
+    "description": "",
+    "pubDate": "2017-07-26T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  },
+  {
+    "slug": "gaussianProcessUpdateEquations",
+    "title": "Gaussian Process Update Equations",
+    "description": "",
+    "pubDate": "2017-07-14T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  },
+  {
+    "slug": "itsJimsLife",
+    "title": "It's Jim's life, but not as we know it!",
+    "description": "",
+    "pubDate": "2016-06-07T00:00:00.000Z",
+    "updatedDate": null,
+    "heroImage": "/blog-placeholder-3.jpg"
+  }
+]
