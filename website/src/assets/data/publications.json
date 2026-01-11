@@ -1,0 +1,100 @@
+{
+  "firstAuthor": [
+    {
+      "title": "A Scalable Predictive Modelling Approach to Identifying Duplicate Adverse Event Reports for Drugs and Vaccines",
+      "authors": "Jim W. Barrett, Nils Erlanson, Joana Félix China, G. Niklas Norén",
+      "url": "https://arxiv.org/abs/2504.03729"
+    },
+    {
+      "title": "Accuracy of inference on the physics of binary evolution from gravitational-wave observations",
+      "authors": "Jim W. Barrett, Sebastian M. Gaebel, Coenraad J. Neijssel, Alejandro Vigna-Gómez, Simon Stevenson, Christopher P. L. Berry, Will M. Farr, Ilya Mandel",
+      "url": "https://doi.org/10.1093/mnras/sty908"
+    },
+    {
+      "title": "Topics in astrostatistics: stellar binary evolution, gravitational-wave source modelling and stochastic processes",
+      "authors": "Jim W. Barrett",
+      "url": "https://inspirehep.net/literature/1841969"
+    },
+    {
+      "title": "Exploring the Parameter Space of Compact Binary Population Synthesis",
+      "authors": "Jim W. Barrett, Ilya Mandel, Coenraad J. Neijssel, Simon Stevenson, Alejandro Vigna-Gomez",
+      "url": "https://doi.org/10.1017/S1743921317000059"
+    }
+  ],
+  "other": [
+    {
+      "title": "Exploring the Reliability of Detecting Drug–Drug Interactions that Increase the Risk of Gestational Diabetes in Adverse Event Reporting Systems",
+      "authors": "Robiyanto Robiyanto, Jim W. Barrett, Lovisa Sandberg, Boukje C. Raemaekers, G. Niklas Norén, Catharina C. M. Schuiling-Veninga, Eelko Hak, Eugène P. van Puijenbroek",
+      "url": "https://link.springer.com/article/10.1007/s40264-025-01607-9"
+    },
+    {
+      "title": "Decision Support for Signal Assessment of Large Case Series in Pharmacovigilance",
+      "authors": "Lucy Quirant, Lovisa Sandberg, Jim W. Barrett, Johan Ellenius",
+      "url": "https://dx.doi.org/10.3233/SHTI230213"
+    },
+    {
+      "title": "Global safety monitoring of COVID-19 vaccines: how pharmacovigilance rose to the challenge",
+      "authors": "Annette Rudolph, Joseph Mitchell, Jim Barrett, Helena Sköld, Henric Taavola, Nils Erlanson, Carlos Melgarejo-González, Qun-Ying Yue",
+      "url": "https://journals.sagepub.com/doi/10.1177/20420986221118972"
+    },
+    {
+      "title": "Rapid stellar and binary population synthesis with COMPAS",
+      "authors": "Team COMPAS: Jeff Riley, Poojan Agrawal, Jim W. Barrett, Kristan N. K. Boyett, Floor S. Broekgaarden, Debatri Chattopadhyay, Sebastian M. Gaebel, Fabian Gittins, Ryosuke Hirai, George Howitt, Stephen Justham, Lokesh Khandelwal, Floris Kummer, Mike Y. M. Lau, Ilya Mandel, Selma E. de Mink, Coenraad Neijssel, Tim Riley, Lieke van Son, Simon Stevenson, Alejandro Vigna-Gomez, Serena Vinciguerra, Tom Wagg, Reinhold Willcox",
+      "url": "https://arxiv.org/abs/2109.10352"
+    },
+    {
+      "title": "On the formation history of Galactic double neutron stars",
+      "authors": "Alejandro Vigna-Gómez, Coenraad J. Neijssel, Simon Stevenson, Jim W. Barrett, Krzysztof Belczynski, Stephen Justham, Selma E. de Mink, Bernhard Müller, Philipp Podsiadlowski, Mathieu Renzo, Dorottya Szécsi, Ilya Mandel",
+      "url": "https://doi.org/10.1093/mnras/sty2463"
+    },
+    {
+      "title": "Optimizing spectroscopic follow-up strategies for supernova photometric classification with active learning",
+      "authors": "E. E. O. Ishida, R. Beck, S. Gonzalez-Gaitan, R. S. de Souza, A. Krone-Martins, J. W. Barrett, N. Kennamer, R. Vilalta, J. M. Burgess, B. Quint, A. Z. Vitorelli, A. Mahabal, E. Gangler",
+      "url": "https://doi.org/10.1093/mnras/sty3015"
+    },
+    {
+      "title": "Aldebaran b's temperate past uncovered in planet search data",
+      "authors": "Will M. Farr, Benjamin J. S. Pope, Guy R. Davies, Thomas S. H. North, Timothy R. White, Jim W. Barrett, Andrea Miglio, Mikkel N. Lund, Victoria Antoci, Mads Fredslund Andersen, Frank Grundahl, Daniel Huber",
+      "url": "https://doi.org/10.3847/2041-8213/aadfde"
+    },
+    {
+      "title": "Formation of the first three gravitational-wave observations through isolated binary evolution",
+      "authors": "Simon Stevenson, Alejandro Vigna-Gomez, Ilya Mandel, Jim W. Barrett, Coenraad J. Neijssel, David Perkins, Selma E. de Mink",
+      "url": "https://doi.org/10.1038/ncomms14906"
+    },
+    {
+      "title": "STROOPWAFEL: simulating rare outcomes from astrophysical populations, with application to gravitational-wave sources",
+      "authors": "Floor S Broekgaarden, Stephen Justham, Selma E de Mink, Jonathan Gair, Ilya Mandel, Simon Stevenson, Jim W Barrett, Alejandro Vigna-Gómez, Coenraad J Neijssel",
+      "url": "https://academic.oup.com/mnras/article-abstract/490/4/5228/5575207"
+    }
+  ],
+  "mastersTheses": [
+    {
+      "title": "Free-text Informed Duplicate Detection of COVID-19 Vaccine Adverse Event Reports",
+      "authors": "Erik Turesson",
+      "url": "https://uu.diva-portal.org/smash/record.jsf?pid=diva2%3A1670567&dswid=-6663"
+    },
+    {
+      "title": "Utilizing Transformers with Domain-Specific Pretraining and Active Learning to Enable Mining of Product Labels",
+      "authors": "Erik Norén",
+      "url": "https://uu.diva-portal.org/smash/record.jsf?pid=diva2%3A1802827&dswid=7830"
+    },
+    {
+      "title": "Extracting Known Side Effects from Summaries of Product Characteristics (SmPCs) Provided in PDF Format by the European Medicines Agency (EMA) using BERT and Python",
+      "authors": "Rinyarat Buakhao",
+      "url": "https://uu.diva-portal.org/smash/record.jsf?pid=diva2%3A1860745&dswid=1062"
+    }
+  ],
+  "patents": [
+    {
+      "title": "Extraction and restoration of option selections in a user interface",
+      "authors": "James W. Barrett, Oliver Edholm",
+      "url": "https://patents.google.com/patent/US20210141499A1"
+    },
+    {
+      "title": "Real-time interface classification in an application",
+      "authors": "Vladimir Curic, James W. Barrett, Andrey Melentyev, Melody Ju",
+      "url": "https://patents.google.com/patent/US11550602B2"
+    }
+  ]
+}
