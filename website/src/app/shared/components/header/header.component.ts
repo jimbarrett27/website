@@ -13,6 +13,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
           <a routerLink="/publications" routerLinkActive="active">Publications</a>
           <a routerLink="/blog" routerLinkActive="active">Blog</a>
+          <a routerLink="/advent-of-code" routerLinkActive="active">AoC</a>
         </div>
       </nav>
     </header>
