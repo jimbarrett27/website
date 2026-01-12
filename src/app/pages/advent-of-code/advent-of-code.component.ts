@@ -58,7 +58,15 @@ import { forkJoin } from 'rxjs';
         <div class="modal-overlay" (click)="closeModal()">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <h2>{{ selectedYear() }} - Day {{ selectedDay() }}</h2>
+              <div class="modal-title">
+                <h2>{{ selectedYear() }} - Day {{ selectedDay() }}</h2>
+                <a
+                  [href]="'https://adventofcode.com/' + selectedYear() + '/day/' + selectedDay()"
+                  target="_blank"
+                  rel="noopener"
+                  class="problem-link"
+                >View problem</a>
+              </div>
               <button class="close-btn" (click)="closeModal()" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
@@ -207,9 +215,25 @@ import { forkJoin } from 'rxjs';
       border-bottom: 1px solid var(--color-gray-light);
     }
 
+    .modal-title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
     .modal-header h2 {
       margin: 0;
       font-size: 1.25rem;
+    }
+
+    .problem-link {
+      font-size: 0.875rem;
+      color: var(--color-gray);
+      text-decoration: underline;
+    }
+
+    .problem-link:hover {
+      color: var(--color-black);
     }
 
     .close-btn {
