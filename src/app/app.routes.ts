@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/blog-post/blog-post.component').then(m => m.BlogPostComponent)
   },
   {
+    path: 'advent-of-code',
+    loadComponent: () => import('./pages/advent-of-code/advent-of-code.component').then(m => m.AdventOfCodeComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }
