@@ -1,7 +1,9 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
 import { AdventOfCodeService } from '../../core/services/advent-of-code.service';
 import { AocSolution } from '../../core/models/advent-of-code.interface';
 import { forkJoin } from 'rxjs';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-python';
 
 @Component({
   selector: 'app-advent-of-code',
@@ -73,7 +75,7 @@ import { forkJoin } from 'rxjs';
               @if (loading()) {
                 <div class="loading">Loading solution...</div>
               } @else if (currentSolution()) {
-                <pre><code>{{ currentSolution()!.content }}</code></pre>
+                <pre><code class="language-python">{{ currentSolution()!.content }}</code></pre>
               } @else {
                 <div class="not-solved">
                   <p>I haven't solved this problem yet.</p>
@@ -258,16 +260,20 @@ import { forkJoin } from 'rxjs';
 
     .modal-body pre {
       margin: 0;
-      background: var(--color-gray-lighter);
-      padding: 1rem;
+      padding: 0;
       border-radius: 4px;
       overflow-x: auto;
-      font-size: 0.875rem;
-      line-height: 1.5;
+    }
+
+    .modal-body pre[class*="language-"] {
+      margin: 0;
+      border-radius: 4px;
     }
 
     .modal-body code {
       font-family: var(--font-family);
+      font-size: 0.875rem;
+      line-height: 1.5;
     }
 
     .loading, .not-solved {
@@ -309,6 +315,17 @@ export class AdventOfCodeComponent implements OnInit {
   loading = signal(false);
 
   selectedYear = computed(() => this.allYears[this.currentYearIndex()]);
+
+  constructor() {
+    // Highlight code whenever the solution changes
+    effect(() => {
+      const solution = this.currentSolution();
+      if (solution) {
+        // Use setTimeout to ensure DOM is updated before highlighting
+        setTimeout(() => Prism.highlightAll(), 0);
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadSolvedDays();
