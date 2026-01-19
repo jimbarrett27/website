@@ -59,11 +59,18 @@ export class AdventOfCodeService {
 
   /**
    * Get all years from 2015 to current year
+   * Excludes current year if before December 1st
    */
   getAllYears(): number[] {
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed (0 = January, 11 = December)
+
+    // Start from current year, but exclude it if we're before December
+    const startYear = currentMonth < 11 ? currentYear - 1 : currentYear;
+
     const years: number[] = [];
-    for (let year = currentYear; year >= 2015; year--) {
+    for (let year = startYear; year >= 2015; year--) {
       years.push(year);
     }
     return years;
