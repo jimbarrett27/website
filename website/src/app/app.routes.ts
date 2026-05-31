@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/advent-of-code/advent-of-code.component').then(m => m.AdventOfCodeComponent)
   },
   {
+    path: 'triage',
+    loadChildren: () => import('./triage/triage.routes').then(m => m.TRIAGE_ROUTES)
+  },
+  {
     path: '**',
     redirectTo: ''
   }
