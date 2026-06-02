@@ -24,6 +24,11 @@ export class TriageApiService {
     return this.http.get<Paper[]>(`${this.base}/queue`, this.opts);
   }
 
+  /** Already-decided papers, newest decision first (history view). */
+  getHistory(): Observable<Paper[]> {
+    return this.http.get<Paper[]>(`${this.base}/history`, this.opts);
+  }
+
   /** Record a triage decision for a paper. */
   decide(paperId: number, decision: Decision): Observable<Paper> {
     return this.http.post<Paper>(

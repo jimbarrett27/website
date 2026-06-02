@@ -40,12 +40,22 @@ const UNDO_WINDOW_MS = 30_000;
       <header class="queue-head">
         <h1>Triage</h1>
         <div class="head-right">
-          <span class="counter">{{ papers().length }} pending</span>
+          <div class="view-toggle">
+            <button class="vt" [class.active]="view() === 'queue'" (click)="setView('queue')">
+              Queue
+            </button>
+            <button class="vt" [class.active]="view() === 'history'" (click)="setView('history')">
+              History
+            </button>
+          </div>
+          <span class="counter">
+            {{ papers().length }} {{ view() === 'queue' ? 'pending' : 'decided' }}
+          </span>
           <button class="help-btn" (click)="toggleHelp()" title="Keyboard shortcuts (?)">?</button>
         </div>
       </header>
 
-      @if (lastDecision(); as last) {
+      @if (view() === 'queue' && lastDecision(); as last) {
         <p class="undo-hint">
           {{ decisionLabel(last.decision) }} “{{ last.paper.title }}” —
           <button class="link" (click)="undo()">undo</button> <kbd>u</kbd>
@@ -63,7 +73,9 @@ const UNDO_WINDOW_MS = 30_000;
         }
         @case ('ready') {
           @if (papers().length === 0) {
-            <p class="status">Queue empty — nothing to triage. 🎉</p>
+            <p class="status">
+              {{ view() === 'queue' ? 'Queue empty — nothing to triage. 🎉' : 'No decisions yet.' }}
+            </p>
           } @else {
             <div class="cards">
               @for (paper of papers(); track paper.id; let i = $index) {
@@ -106,6 +118,28 @@ const UNDO_WINDOW_MS = 30_000;
         display: flex;
         align-items: center;
         gap: 1rem;
+      }
+      .view-toggle {
+        display: inline-flex;
+        border: 1px solid var(--color-gray-light);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .vt {
+        font-family: var(--font-family);
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 0.3rem 0.75rem;
+        border: none;
+        background: var(--color-white);
+        color: var(--color-gray);
+      }
+      .vt:hover {
+        background: var(--color-gray-lighter);
+      }
+      .vt.active {
+        background: var(--color-black);
+        color: var(--color-white);
       }
       .counter {
         color: var(--color-gray);
@@ -172,6 +206,8 @@ export class QueueComponent implements OnInit, OnDestroy {
   focusedIndex = signal(0);
   showHelp = signal(false);
   lastDecision = signal<LastDecision | null>(null);
+  /** Which list is shown: the pending queue or the decided-paper history. */
+  view = signal<'queue' | 'history'>('queue');
 
   private undoTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -190,7 +226,14 @@ export class QueueComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.api.getQueue().subscribe({
+    this.load();
+  }
+
+  /** Fetch the list for the current view. */
+  private load(): void {
+    this.state.set('loading');
+    const source = this.view() === 'queue' ? this.api.getQueue() : this.api.getHistory();
+    source.subscribe({
       next: (papers) => {
         this.papers.set(papers);
         this.focusedIndex.set(0);
@@ -198,6 +241,14 @@ export class QueueComponent implements OnInit, OnDestroy {
       },
       error: () => this.state.set('error'),
     });
+  }
+
+  /** Switch between the pending queue and the decided-paper history. */
+  setView(view: 'queue' | 'history'): void {
+    if (view === this.view()) return;
+    this.clearDecision();
+    this.view.set(view);
+    this.load();
   }
 
   ngOnDestroy(): void {
@@ -222,6 +273,8 @@ export class QueueComponent implements OnInit, OnDestroy {
 
   /** Apply a decision to a specific paper (from a card button or keyboard). */
   decideOn(paper: Paper, decision: Decision): void {
+    // History is read-only; decisions only apply to the pending queue.
+    if (this.view() === 'history') return;
     const index = this.papers().findIndex((p) => p.id === paper.id);
     if (index < 0) return;
 

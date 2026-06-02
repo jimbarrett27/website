@@ -20,6 +20,15 @@ export interface Paper {
   status: TriageStatus;
   /** ISO 8601 UTC timestamp of the triage decision; null while pending. */
   decided_at: string | null;
+  // --- Routing outcomes (populated as papers are routed to Zotero/Obsidian) ---
+  zotero_key: string | null;
+  zotero_error: string | null;
+  obsidian_path: string | null;
+  obsidian_error: string | null;
+  /** How many routing attempts have been made (initial + retries). */
+  routing_attempts: number;
+  /** ISO 8601 UTC time of the next scheduled retry; null when done or given up. */
+  next_retry_at: string | null;
 }
 
 /** The decisions a paper can be routed to (the `pending` status is the absence of a decision). */
