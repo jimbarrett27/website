@@ -29,17 +29,21 @@ export class TriageApiService {
     return this.http.get<Paper[]>(`${this.base}/history`, this.opts);
   }
 
+  // Writes send an empty body and pass data via query params so the browser
+  // treats them as "simple" cross-origin requests and skips the CORS preflight
+  // (Cloudflare's edge rejects the OPTIONS preflight; the Access cookie still
+  // rides along on the actual request via withCredentials).
+
   /** Record a triage decision for a paper. */
   decide(paperId: number, decision: Decision): Observable<Paper> {
-    return this.http.post<Paper>(
-      `${this.base}/papers/${paperId}/decide`,
-      { decision },
-      this.opts,
-    );
+    return this.http.post<Paper>(`${this.base}/papers/${paperId}/decide`, null, {
+      ...this.opts,
+      params: { decision },
+    });
   }
 
   /** Revert the most recent decision (only succeeds within the undo window). */
   undo(paperId: number): Observable<Paper> {
-    return this.http.post<Paper>(`${this.base}/papers/${paperId}/undo`, {}, this.opts);
+    return this.http.post<Paper>(`${this.base}/papers/${paperId}/undo`, null, this.opts);
   }
 }
