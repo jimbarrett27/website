@@ -2,6 +2,14 @@ import { Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Decision, Paper } from '../../models/paper.model';
 
+type RoutingState = 'ok' | 'pending' | 'retrying' | 'failed';
+
+interface RoutingBadge {
+  target: string;
+  state: RoutingState;
+  detail: string;
+}
+
 /**
  * Presentational card for a single paper in the triage queue.
  *
@@ -54,28 +62,41 @@ import { Decision, Paper } from '../../models/paper.model';
         </p>
       }
 
+      @if (isDecided()) {
+        <p class="routing">
+          <span class="decided-as decided-{{ paper().status }}">{{ statusLabel() }}</span>
+          @for (b of routingBadges(); track b.target) {
+            <span class="rbadge rbadge-{{ b.state }}" [title]="b.detail">
+              {{ b.target }} {{ stateIcon(b.state) }}
+            </span>
+          }
+        </p>
+      }
+
       <div class="actions">
-        <button
-          class="act act-deep"
-          (click)="$event.stopPropagation(); decide.emit('deep')"
-          title="Mark for deep reading (d)"
-        >
-          Deep
-        </button>
-        <button
-          class="act"
-          (click)="$event.stopPropagation(); decide.emit('filed')"
-          title="File for later (f)"
-        >
-          File
-        </button>
-        <button
-          class="act act-dismiss"
-          (click)="$event.stopPropagation(); decide.emit('dismissed')"
-          title="Dismiss (x)"
-        >
-          Dismiss
-        </button>
+        @if (!isDecided()) {
+          <button
+            class="act act-deep"
+            (click)="$event.stopPropagation(); decide.emit('deep')"
+            title="Mark for deep reading (d)"
+          >
+            Deep
+          </button>
+          <button
+            class="act"
+            (click)="$event.stopPropagation(); decide.emit('filed')"
+            title="File for later (f)"
+          >
+            File
+          </button>
+          <button
+            class="act act-dismiss"
+            (click)="$event.stopPropagation(); decide.emit('dismissed')"
+            title="Dismiss (x)"
+          >
+            Dismiss
+          </button>
+        }
         <button
           class="act act-open"
           (click)="$event.stopPropagation(); open.emit()"
@@ -181,6 +202,58 @@ import { Decision, Paper } from '../../models/paper.model';
         padding: 0.05rem 0.4rem;
       }
 
+      .routing {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0.2rem 0 0;
+        font-size: 0.8rem;
+      }
+      .decided-as {
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-gray-light);
+        color: var(--color-gray);
+      }
+      .decided-deep {
+        background: var(--color-black);
+        color: var(--color-white);
+        border-color: var(--color-black);
+      }
+      .decided-dismissed {
+        color: var(--color-gray);
+      }
+      .rbadge {
+        font-size: 0.75rem;
+        padding: 0.05rem 0.45rem;
+        border-radius: 4px;
+        border: 1px solid var(--color-gray-light);
+        cursor: default;
+      }
+      .rbadge-ok {
+        color: #15803d;
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+      }
+      .rbadge-pending {
+        color: var(--color-gray);
+        background: var(--color-gray-lighter);
+      }
+      .rbadge-retrying {
+        color: #b45309;
+        border-color: #fde68a;
+        background: #fffbeb;
+      }
+      .rbadge-failed {
+        color: #b91c1c;
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
       .actions {
         display: flex;
         flex-wrap: wrap;
@@ -238,6 +311,55 @@ export class PaperCardComponent {
     if (authors.length <= 3) return authors.join(', ');
     return `${authors.slice(0, 3).join(', ')} et al.`;
   });
+
+  /** A paper is decided once it has left the `pending` state. */
+  isDecided = computed(() => this.paper().status !== 'pending');
+
+  statusLabel = computed(
+    () =>
+      ({ deep: 'Deep', filed: 'Filed', dismissed: 'Dismissed', pending: 'Pending' })[
+        this.paper().status
+      ],
+  );
+
+  /**
+   * Per-target routing status, shown on decided cards. A target only appears
+   * when the decision routes to it (`deep` → Zotero + Obsidian, `filed` →
+   * Obsidian, `dismissed` → neither). State is derived from the success key,
+   * the recorded error, and whether a retry is still scheduled.
+   */
+  routingBadges = computed<RoutingBadge[]>(() => {
+    const p = this.paper();
+    const badges: RoutingBadge[] = [];
+    const add = (
+      target: string,
+      applies: boolean,
+      success: string | null,
+      error: string | null,
+    ) => {
+      if (!applies) return;
+      if (success) {
+        badges.push({ target, state: 'ok', detail: `${target}: ${success}` });
+      } else if (error) {
+        badges.push({
+          target,
+          state: p.next_retry_at ? 'retrying' : 'failed',
+          detail: p.next_retry_at
+            ? `${error} (retry scheduled; attempt ${p.routing_attempts})`
+            : `${error} (gave up after ${p.routing_attempts} attempts)`,
+        });
+      } else {
+        badges.push({ target, state: 'pending', detail: `${target} routing in progress…` });
+      }
+    };
+    add('Zotero', p.status === 'deep', p.zotero_key, p.zotero_error);
+    add('Obsidian', p.status === 'deep' || p.status === 'filed', p.obsidian_path, p.obsidian_error);
+    return badges;
+  });
+
+  stateIcon(state: RoutingState): string {
+    return { ok: '✓', pending: '…', retrying: '↻', failed: '✗' }[state];
+  }
 
   toggleAbstract(): void {
     this.expanded.update((v) => !v);
