@@ -39,6 +39,15 @@ interface RoutingBadge {
         <time>{{ paper().discovered_at | date: 'mediumDate' }}</time>
       </p>
 
+      @if (paper().surfaced_by.length) {
+        <p class="signals">
+          <span class="signals-label">surfaced by</span>
+          @for (s of paper().surfaced_by; track s) {
+            <span class="signal" [title]="signalHint(s)">{{ s }}</span>
+          }
+        </p>
+      }
+
       @if (paper().abstract) {
         <p
           class="abstract"
@@ -169,6 +178,30 @@ interface RoutingBadge {
       }
       .sep {
         margin: 0 0.4rem;
+      }
+
+      .signals {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+        margin: 0 0 0.6rem;
+      }
+      .signals-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-gray);
+      }
+      .signal {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--color-black);
+        background: var(--color-gray-lighter);
+        border: 1px solid var(--color-gray-light);
+        border-radius: 999px;
+        padding: 0.05rem 0.5rem;
       }
 
       .abstract {
@@ -363,6 +396,23 @@ export class PaperCardComponent {
 
   toggleAbstract(): void {
     this.expanded.update((v) => !v);
+  }
+
+  signalHint(signal: string): string {
+    switch (signal) {
+      case 'keyword':
+        return 'Matched a pharmacovigilance keyword';
+      case 'topic':
+        return 'Classified under a watched OpenAlex topic';
+      case 'author':
+        return 'Authored by a monitored author';
+      case 'citation':
+        return 'Cites a watched seed paper';
+      case 'institution':
+        return "Cites a watched institution's work";
+      default:
+        return '';
+    }
   }
 
   depthHint(depth: string): string {

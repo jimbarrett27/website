@@ -16,6 +16,8 @@ export interface Paper {
   /** The "why this surfaced" reason shown on the card. */
   llm_reasoning: string | null;
   llm_tags: string[];
+  /** Discovery signal(s) that surfaced the paper: keyword | topic | author | citation | institution. */
+  surfaced_by: string[];
   suggested_depth: SuggestedDepth | null;
   status: TriageStatus;
   /** ISO 8601 UTC timestamp of the triage decision; null while pending. */
