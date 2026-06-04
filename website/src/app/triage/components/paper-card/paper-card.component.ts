@@ -39,7 +39,7 @@ interface RoutingBadge {
         <time>{{ paper().discovered_at | date: 'mediumDate' }}</time>
       </p>
 
-      @if (paper().surfaced_by.length) {
+      @if (paper().surfaced_by?.length) {
         <p class="signals">
           <span class="signals-label">surfaced by</span>
           @for (s of paper().surfaced_by; track s) {
