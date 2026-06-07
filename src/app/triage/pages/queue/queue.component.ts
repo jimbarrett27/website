@@ -68,7 +68,7 @@ const UNDO_WINDOW_MS = 30_000;
         }
         @case ('error') {
           <p class="status error">
-            Couldn’t reach the triage backend. Is it running on :8077?
+            Error displaying triage. If you're not Jim, this is intended. If you are Jim, go <a href="https://triage-api.jimbarrett.dev/">here</a>.
           </p>
         }
         @case ('ready') {

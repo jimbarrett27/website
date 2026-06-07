@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Personal website (jimbarrett.dev) — an Angular 21 single-page app deployed as static files to **Google App Engine**. Standalone-component architecture (no NgModules), all routes lazy-loaded. Most of the site is content-driven (home, publications, blog, advent-of-code); the `/triage` route is a self-contained feature app that talks to a separate FastAPI backend.
+Personal website (jimbarrett.dev) — an Angular 21 single-page app deployed as static files to **Google App Engine**. Standalone-component architecture (no NgModules), all routes lazy-loaded. Most of the site is content-driven (home, publications, blog); the `/triage` route is a self-contained feature app that talks to a separate FastAPI backend.
 
 ## Commands
 
