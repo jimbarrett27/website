@@ -7,7 +7,8 @@ import { Component } from '@angular/core';
     <div class="home">
       <h1>Welcome!</h1>
       <p>
-        I'm a System Developer based in Stockholm, Sweden, working at Uppsala Monitoring Centre.
+        I'm a Data Scientist and System Developer based in Stockholm, Sweden, working at Uppsala Monitoring Centre. 
+        I'm currently stepping up as interim Science and Innovation lead, helping to coordinate and implement UMCs strategic mission.
         This site is intended to be a playground for me to mess around with various web related things, as
         well as teaching myself a bit about cloud infrastructure.
         I also use it to host an occasional blog, as and when I have some interesting stuff to write about.
