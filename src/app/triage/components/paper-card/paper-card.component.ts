@@ -24,11 +24,6 @@ interface RoutingBadge {
     <article class="card" [class.focused]="focused()">
       <header class="card-head">
         <h2 class="title">{{ paper().title }}</h2>
-        @if (paper().suggested_depth; as depth) {
-          <span class="badge" [class]="'badge-' + depth" [title]="depthHint(depth)">
-            {{ depth }}
-          </span>
-        }
       </header>
 
       <p class="meta">
@@ -85,18 +80,11 @@ interface RoutingBadge {
       <div class="actions">
         @if (!isDecided()) {
           <button
-            class="act act-deep"
-            (click)="$event.stopPropagation(); decide.emit('deep')"
-            title="Mark for deep reading (d)"
+            class="act act-keep"
+            (click)="$event.stopPropagation(); decide.emit('kept')"
+            title="Keep — routes to Zotero + Obsidian (d / f)"
           >
-            Deep
-          </button>
-          <button
-            class="act"
-            (click)="$event.stopPropagation(); decide.emit('filed')"
-            title="File for later (f)"
-          >
-            File
+            Keep
           </button>
           <button
             class="act act-dismiss"
@@ -146,29 +134,6 @@ interface RoutingBadge {
         font-size: 1.15rem;
         line-height: 1.35;
         margin: 0;
-      }
-
-      .badge {
-        flex-shrink: 0;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        padding: 0.15rem 0.5rem;
-        border-radius: 999px;
-        border: 1px solid transparent;
-      }
-      .badge-deep {
-        background: var(--color-black);
-        color: var(--color-white);
-      }
-      .badge-skim {
-        background: var(--color-gray);
-        color: var(--color-white);
-      }
-      .badge-file {
-        background: var(--color-gray-lighter);
-        color: var(--color-gray);
-        border-color: var(--color-gray-light);
       }
 
       .meta {
@@ -252,6 +217,11 @@ interface RoutingBadge {
         border: 1px solid var(--color-gray-light);
         color: var(--color-gray);
       }
+      .decided-kept {
+        background: var(--color-black);
+        color: var(--color-white);
+        border-color: var(--color-black);
+      }
       .decided-deep {
         background: var(--color-black);
         color: var(--color-white);
@@ -311,12 +281,12 @@ interface RoutingBadge {
       .act:hover {
         background: var(--color-gray-lighter);
       }
-      .act-deep {
+      .act-keep {
         background: var(--color-black);
         color: var(--color-white);
         border-color: var(--color-black);
       }
-      .act-deep:hover {
+      .act-keep:hover {
         opacity: 0.85;
         background: var(--color-black);
       }
@@ -350,9 +320,14 @@ export class PaperCardComponent {
 
   statusLabel = computed(
     () =>
-      ({ deep: 'Deep', filed: 'Filed', dismissed: 'Dismissed', pending: 'Pending' })[
-        this.paper().status
-      ],
+      ({
+        kept: 'Kept',
+        deep: 'Deep',
+        filed: 'Filed',
+        dismissed: 'Dismissed',
+        auto_rejected: 'Auto-rejected',
+        pending: 'Pending',
+      })[this.paper().status],
   );
 
   /**
@@ -385,8 +360,13 @@ export class PaperCardComponent {
         badges.push({ target, state: 'pending', detail: `${target} routing in progress…` });
       }
     };
-    add('Zotero', p.status === 'deep', p.zotero_key, p.zotero_error);
-    add('Obsidian', p.status === 'deep' || p.status === 'filed', p.obsidian_path, p.obsidian_error);
+    add('Zotero', p.status === 'kept' || p.status === 'deep', p.zotero_key, p.zotero_error);
+    add(
+      'Obsidian',
+      p.status === 'kept' || p.status === 'deep' || p.status === 'filed',
+      p.obsidian_path,
+      p.obsidian_error,
+    );
     return badges;
   });
 
@@ -415,16 +395,4 @@ export class PaperCardComponent {
     }
   }
 
-  depthHint(depth: string): string {
-    switch (depth) {
-      case 'deep':
-        return 'Worth reading in full';
-      case 'skim':
-        return 'Worth a quick read of key sections';
-      case 'file':
-        return 'File the reference; not worth reading now';
-      default:
-        return '';
-    }
-  }
 }
