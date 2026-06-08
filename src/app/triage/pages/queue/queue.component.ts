@@ -260,9 +260,7 @@ export class QueueComponent implements OnInit, OnDestroy {
   }
 
   decisionLabel(decision: Decision): string {
-    return { deep: 'Marked for deep reading', filed: 'Filed', dismissed: 'Dismissed' }[
-      decision
-    ];
+    return { kept: 'Kept', dismissed: 'Dismissed' }[decision] ?? decision;
   }
 
   /** Keyboard entry point: decide on the currently focused paper. */
@@ -369,11 +367,8 @@ export class QueueComponent implements OnInit, OnDestroy {
         event.preventDefault();
         break;
       case 'd':
-        this.decide('deep');
-        event.preventDefault();
-        break;
       case 'f':
-        this.decide('filed');
+        this.decide('kept');
         event.preventDefault();
         break;
       case 'x':

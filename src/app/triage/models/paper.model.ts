@@ -1,6 +1,6 @@
 export type SuggestedDepth = 'deep' | 'skim' | 'file';
 
-export type TriageStatus = 'pending' | 'deep' | 'filed' | 'dismissed';
+export type TriageStatus = 'pending' | 'kept' | 'dismissed' | 'auto_rejected' | 'deep' | 'filed';
 
 /** Mirrors the backend `PaperOut` schema (GET /api/triage/queue). */
 export interface Paper {
@@ -34,4 +34,4 @@ export interface Paper {
 }
 
 /** The decisions a paper can be routed to (the `pending` status is the absence of a decision). */
-export type Decision = Exclude<TriageStatus, 'pending'>;
+export type Decision = 'kept' | 'dismissed';
