@@ -26,8 +26,8 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
         <p>
           A Bayeux-style tapestry of the day's news, woven one panel at a time.
           Each morning three top stories are handed to a model that illustrates
-          them as a single continuous scene, stitched seamlessly onto the day
-          before. It grows downward &mdash; the newest section is at the bottom.
+          them as a single continuous scene with SVG elements, which then "stitches" it into the day
+          before. It grows downward, so the newest section is at the bottom.
         </p>
         @if (panels().length) {
           <button type="button" class="jump" (click)="jumpToLatest()">
