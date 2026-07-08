@@ -50,12 +50,13 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
              paints over — that's what keeps the seam invisible. -->
         <div class="layout"
              [style.--panel-w]="geo().panel_width"
-             [style.--step]="step()">
-          @for (panel of panels(); track panel.date) {
-            <div class="day-art" [id]="'panel-' + panel.date">
+             [style.--step]="step()"
+             [style.--n]="panels().length">
+          @for (panel of panels(); track panel.date; let i = $index) {
+            <div class="day-art" [id]="'panel-' + panel.date" [style.--i]="i">
               <img [src]="panel.svgUrl" [alt]="'News tapestry panel for ' + panel.date">
             </div>
-            <div class="day-stories">
+            <div class="day-stories" [style.--i]="i">
               <div class="inner">
                 <span class="day-date">{{ panel.date | date:'MMM d' }}</span>
                 @for (story of panel.stories; track story.link) {
@@ -128,6 +129,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
     .day-art {
       position: relative;
       grid-column: 1;
+      grid-row: calc(var(--i) + 1);
       aspect-ratio: var(--panel-w) / var(--step);
     }
 
@@ -145,6 +147,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
     .day-stories {
       position: relative;
       grid-column: 2;
+      grid-row: calc(var(--i) + 1);
     }
 
     .day-stories .inner {
@@ -224,8 +227,10 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
       color: #6b7280;
     }
 
-    /* Stacked layout on narrow screens: panels stack full-height (no overlap)
-       with their stories beneath, so nothing is cramped into a tiny gutter. */
+    /* Narrow screens: the panels are far too short to align stories beside them,
+       so the seamless ribbon runs full-width (overlap preserved) and every day's
+       stories flow in a date-labelled list below it. Explicit grid rows move the
+       story blocks from column 2 down to rows after the whole ribbon. */
     @media (max-width: 720px) {
       .tapestry {
         padding: 2rem 1rem;
@@ -238,17 +243,12 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
 
       .day-art {
         grid-column: 1;
-        aspect-ratio: auto;
-      }
-
-      .day-art img {
-        position: static;
-        width: 100%;
       }
 
       .day-stories {
         grid-column: 1;
-        margin: 0.75rem 0 1.75rem;
+        grid-row: calc(var(--n) + var(--i) + 1);
+        margin-top: 1.5rem;
       }
 
       .day-stories .inner {
