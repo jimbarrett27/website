@@ -9,4 +9,7 @@
 export const environment = {
   production: true,
   triageApiBase: 'https://triage-api.jimbarrett.dev/api/triage',
+  // Public GCS bucket the telegram_bot tapestry job writes to. Same URL in dev
+  // and prod: the objects are public-read and the bucket allows cross-origin GET.
+  tapestryBucketBase: 'https://storage.googleapis.com/personal-website-318015-tapestry/tapestry',
 };

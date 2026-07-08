@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/blog-post/blog-post.component').then(m => m.BlogPostComponent)
   },
   {
+    path: 'tapestry',
+    loadComponent: () => import('./pages/tapestry/tapestry.component').then(m => m.TapestryComponent)
+  },
+  {
     path: 'triage',
     loadChildren: () => import('./triage/triage.routes').then(m => m.TRIAGE_ROUTES)
   },
