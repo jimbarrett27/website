@@ -178,8 +178,19 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
       inset: 0;
       display: flex;
       flex-direction: column;
+    }
+
+    .day-model .inner {
       justify-content: center;
       gap: 0.15rem;
+    }
+
+    /* The date + three headlines are distributed across the full panel height so
+       the column keeps the same vertical rhythm as the woven strip beside it,
+       rather than clustering in the middle (which crowds the next day's text). */
+    .day-stories .inner {
+      justify-content: space-between;
+      padding: 0.05rem 0 0.15rem;
     }
 
     /* Left column: which model drew this day's panel, with its reasoning on
@@ -269,7 +280,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 0.8rem;
-      line-height: 1.5;
+      line-height: 1.25;
       color: #6b7280;
       text-decoration: none;
     }
