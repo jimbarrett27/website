@@ -7,10 +7,9 @@ import { Component } from '@angular/core';
     <div class="home">
       <h1>Welcome!</h1>
       <p>
-        I'm a Data Scientist and System Developer based in Stockholm, Sweden, working at Uppsala Monitoring Centre. 
-        I'm currently stepping up as interim Science and Innovation lead, helping to coordinate and implement UMCs strategic mission.
-        This site is intended to be a playground for me to mess around with various web related things, as
-        well as teaching myself a bit about cloud infrastructure.
+        I'm a Data Scientist and System Developer based in Stockholm, Sweden, working at Uppsala Monitoring Centre.
+        I'm currently stepping up as interim Science and Innovation lead, helping to coordinate and implement UMCs strategic mission. I'm also building agentic AI systems for signal assessment.
+        This site is intended to be a playground for me to mess around with various web related things, and host some of my silly AI hobby projects (e.g., the Bayeux tapestry bot, linked above).
         I also use it to host an occasional blog, as and when I have some interesting stuff to write about.
       </p>
       <p>
