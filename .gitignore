@@ -1,0 +1,10 @@
+**/__pycache__/**
+build/
+*.db
+*.db.bak
+*.db.bak-*
+instructions.md
+.hypothesis/
+dnd/adventures/
+diary/entries/
+memes/recent_templates.json
