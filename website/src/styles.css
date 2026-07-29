@@ -1,16 +1,11 @@
-/* Comic Shanns Mono font */
+/* Comic Shanns Mono (MIT — see assets/fonts/ComicShannsMono-LICENSE.md).
+   Upstream ships a Regular face only, so bold text is left to the browser's
+   synthetic bold. Declaring a 700 face here that pointed at the Regular file
+   would suppress that and render bold text at normal weight. */
 @font-face {
   font-family: 'Comic Shanns Mono';
   src: url('/assets/fonts/ComicShannsMono-Regular.otf') format('opentype');
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Comic Shanns Mono';
-  src: url('/assets/fonts/ComicShannsMono-Bold.otf') format('opentype');
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
