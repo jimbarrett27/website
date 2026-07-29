@@ -17,6 +17,21 @@ marked.setOptions({
   breaks: false
 });
 
+// Frontmatter dates are calendar dates ('04 Dec 2017'), which `new Date()` reads as
+// local midnight. Calling toISOString() on that shifts the day backwards anywhere east
+// of UTC, so the generated JSON depended on the machine doing the build. Reinterpret the
+// local year/month/day as UTC midnight to keep output identical everywhere.
+function toUtcIsoDate(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return new Date(Date.UTC(
+    parsed.getFullYear(),
+    parsed.getMonth(),
+    parsed.getDate()
+  )).toISOString();
+}
+
 // Get all markdown files
 const files = fs.readdirSync(CONTENT_DIR).filter(file =>
   file.endsWith('.md') || file.endsWith('.mdx')
@@ -53,8 +68,8 @@ files.forEach(file => {
     slug,
     title: frontmatter.title || 'Untitled',
     description: frontmatter.description || '',
-    pubDate: frontmatter.pubDate ? new Date(frontmatter.pubDate).toISOString() : null,
-    updatedDate: frontmatter.updatedDate ? new Date(frontmatter.updatedDate).toISOString() : null,
+    pubDate: toUtcIsoDate(frontmatter.pubDate),
+    updatedDate: toUtcIsoDate(frontmatter.updatedDate),
     heroImage: frontmatter.heroImage || null,
     content: htmlContent
   };
