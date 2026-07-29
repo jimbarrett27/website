@@ -1,6 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in
+`website/`. It is scoped to this directory — see the repo-root `CLAUDE.md` for the
+Python side and for the triage/tapestry contracts that span both.
+
+All paths and commands below are relative to `website/`.
 
 ## What this is
 

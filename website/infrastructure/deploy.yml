@@ -1,13 +1,16 @@
 steps:
   - name: 'node:22'
+    dir: 'website'
     entrypoint: 'npm'
     args: ['ci']
 
   - name: 'node:22'
+    dir: 'website'
     entrypoint: 'npm'
     args: ['run', 'build']
 
   - name: 'gcr.io/cloud-builders/gcloud'
+    dir: 'website'
     args: ['app', 'deploy']
 
 timeout: '1600s'

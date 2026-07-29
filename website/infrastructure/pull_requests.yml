@@ -1,13 +1,16 @@
 steps:
   - name: 'node:22'
+    dir: 'website'
     entrypoint: 'npm'
     args: ['ci']
 
   - name: 'node:22'
+    dir: 'website'
     entrypoint: 'npm'
     args: ['run', 'lint']
 
   - name: 'node:22'
+    dir: 'website'
     entrypoint: 'npm'
     args: ['run', 'build']
 
