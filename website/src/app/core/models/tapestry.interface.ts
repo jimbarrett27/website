@@ -31,7 +31,11 @@ export interface TapestryIndex {
 export interface TapestryPanel {
   date: string;
   generated_at: string;
+  /** OpenRouter id of the model that drew this panel (varies day to day). */
   model: string;
+  /** The model's stated plan/reasoning before drawing. Absent on older panels
+   *  written before plans were recorded. */
+  plan?: string;
   prompt_template: string;
   stories: TapestryStory[];
   svg: string;

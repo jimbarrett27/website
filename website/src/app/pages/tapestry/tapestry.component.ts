@@ -9,6 +9,12 @@ import { TapestryGeometry, TapestryStory } from '../../core/models/tapestry.inte
 interface PanelView {
   date: string;
   generatedAt: string;
+  /** Full OpenRouter model id (e.g. "moonshotai/kimi-k2.7-code"). */
+  model: string;
+  /** Short display label for the model (id without its vendor prefix). */
+  modelLabel: string;
+  /** The model's reasoning for the day, or null if none was recorded. */
+  plan: string | null;
   stories: TapestryStory[];
   svgUrl: SafeUrl;
 }
@@ -53,6 +59,22 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
              [style.--step]="step()"
              [style.--n]="panels().length">
           @for (panel of panels(); track panel.date; let i = $index) {
+            <div class="day-model" [style.--i]="i">
+              <div class="inner">
+                <span class="model" tabindex="0">
+                  <span class="model-label">Drawn by</span>
+                  <span class="model-name">{{ panel.modelLabel }}</span>
+                  <span class="tip model-tip">
+                    <span class="tip-title">{{ panel.model }}</span>
+                    @if (panel.plan) {
+                      <span class="tip-summary plan">{{ panel.plan }}</span>
+                    } @else {
+                      <span class="tip-summary muted">No reasoning was recorded for this day.</span>
+                    }
+                  </span>
+                </span>
+              </div>
+            </div>
             <div class="day-art" [id]="'panel-' + panel.date" [style.--i]="i">
               <img [src]="panel.svgUrl" [alt]="'News tapestry panel for ' + panel.date">
             </div>
@@ -119,7 +141,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 240px;
+      grid-template-columns: 116px minmax(0, 1fr) 240px;
       column-gap: 1.5rem;
       align-items: stretch;
       margin-top: 2rem;
@@ -128,7 +150,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
     /* The tapestry section: one step tall, the <img> overflows by the overlap. */
     .day-art {
       position: relative;
-      grid-column: 1;
+      grid-column: 2;
       grid-row: calc(var(--i) + 1);
       aspect-ratio: var(--panel-w) / var(--step);
     }
@@ -146,17 +168,97 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
        height can never grow the grid row (which would open a seam). */
     .day-stories {
       position: relative;
-      grid-column: 2;
+      grid-column: 3;
       grid-row: calc(var(--i) + 1);
     }
 
-    .day-stories .inner {
+    .day-stories .inner,
+    .day-model .inner {
       position: absolute;
       inset: 0;
       display: flex;
       flex-direction: column;
+    }
+
+    .day-model .inner {
       justify-content: center;
       gap: 0.15rem;
+    }
+
+    /* The date + three headlines are distributed across the full panel height so
+       the column keeps the same vertical rhythm as the woven strip beside it,
+       rather than clustering in the middle (which crowds the next day's text). */
+    .day-stories .inner {
+      justify-content: space-between;
+      padding: 0.05rem 0 0.15rem;
+    }
+
+    /* Left column: which model drew this day's panel, with its reasoning on
+       hover. Mirrors .day-stories (absolutely-filled so it can't grow the row
+       and open a seam). */
+    .day-model {
+      position: relative;
+      grid-column: 1;
+      grid-row: calc(var(--i) + 1);
+    }
+
+    .day-model .inner {
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .model {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.05rem;
+      cursor: help;
+      outline: none;
+    }
+
+    .model-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+    }
+
+    .model-name {
+      font-size: 0.78rem;
+      line-height: 1.3;
+      color: #6b7280;
+      word-break: break-word;
+      border-bottom: 1px dotted #cbd5e1;
+    }
+
+    .model:hover .model-name,
+    .model:focus .model-name {
+      color: #0f1219;
+      border-bottom-color: #9ca3af;
+    }
+
+    /* The reasoning tip is wider than a story tip and can hold a paragraph. */
+    .model-tip {
+      width: min(340px, 80vw);
+    }
+
+    .model:hover .tip,
+    .model:focus .tip {
+      display: block;
+    }
+
+    .tip-summary.plan {
+      display: block;
+      -webkit-line-clamp: unset;
+      max-height: 42vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .tip-summary.muted {
+      color: #9ca3af;
+      font-style: italic;
     }
 
     .day-date {
@@ -178,7 +280,7 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 0.8rem;
-      line-height: 1.5;
+      line-height: 1.25;
       color: #6b7280;
       text-decoration: none;
     }
@@ -245,15 +347,39 @@ const DEFAULT_GEOMETRY: TapestryGeometry = { panel_width: 1600, panel_height: 20
         grid-column: 1;
       }
 
+      /* Below the full-width ribbon each day gets two stacked rows: its model
+         note, then its stories. (Rows n+1 .. n+2n, interleaved per day.) */
+      .day-model {
+        grid-column: 1;
+        grid-row: calc(var(--n) + 2 * var(--i) + 1);
+        margin-top: 1.5rem;
+      }
+
+      .day-model .inner {
+        position: static;
+      }
+
+      .day-model .model {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.4rem;
+        cursor: default;
+      }
+
       .day-stories {
         grid-column: 1;
-        grid-row: calc(var(--n) + var(--i) + 1);
-        margin-top: 1.5rem;
+        grid-row: calc(var(--n) + 2 * var(--i) + 2);
+        margin-top: 0.4rem;
       }
 
       .day-stories .inner {
         position: static;
         gap: 0.35rem;
+      }
+
+      .tip-summary.plan {
+        max-height: none;
+        overflow: visible;
       }
 
       .story > a {
@@ -312,6 +438,9 @@ export class TapestryComponent implements OnInit, OnDestroy {
             this.panels.set(fetched.map(p => ({
               date: p.date,
               generatedAt: p.generated_at,
+              model: p.model,
+              modelLabel: this.toModelLabel(p.model),
+              plan: p.plan ?? null,
               stories: p.stories ?? [],
               svgUrl: this.toSvgUrl(p.svg),
             })));
@@ -337,6 +466,14 @@ export class TapestryComponent implements OnInit, OnDestroy {
 
   scrollTo(date: string): void {
     document.getElementById(`panel-${date}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /** Short label for a model id: drop the "vendor/" prefix so the narrow left
+   *  column shows e.g. "kimi-k2.7-code" rather than "moonshotai/kimi-k2.7-code".
+   *  The full id is still shown in the hover tip. */
+  private toModelLabel(model: string): string {
+    const slash = model.indexOf('/');
+    return slash === -1 ? model : model.slice(slash + 1);
   }
 
   /** Wrap a raw SVG string as an <img>-loadable Blob URL. Loading each panel as
