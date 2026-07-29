@@ -13,8 +13,8 @@ import { Component } from '@angular/core';
         I also use it to host an occasional blog, as and when I have some interesting stuff to write about.
       </p>
       <p>
-        You can see all the source of this website on
-        <a href="https://github.com/jimbarrett27/website" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        You can see all the source of this website — and the bots behind the hobby projects — on
+        <a href="https://github.com/jimbarrett27/jimbarrett.dev" target="_blank" rel="noopener noreferrer">GitHub</a>.
       </p>
     </div>
   `,
