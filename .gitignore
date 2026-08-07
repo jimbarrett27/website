@@ -8,3 +8,8 @@ instructions.md
 dnd/adventures/
 diary/entries/
 memes/recent_templates.json
+pokemon/states/
+**/__marimo__/
+*.gb
+*.gbc
+*.ram
