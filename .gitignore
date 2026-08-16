@@ -8,3 +8,6 @@ instructions.md
 dnd/adventures/
 diary/entries/
 memes/recent_templates.json
+*.hi
+*.o
+*.out
