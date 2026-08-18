@@ -1,3 +1,3 @@
-Import Primes (primes)
+import Primes (primes)
 
-main = print $ take 5 primes
+main = print $ primes !! 10000

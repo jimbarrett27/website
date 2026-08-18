@@ -1,4 +1,6 @@
-module Primes (primes primeFactors)
+module Primes (primes, primeFactors) where
+
+import Data.List (find)
 
 primesFromCandidates :: [Int] -> [Int]
 primesFromCandidates (p:xs) = p : primesFromCandidates (filter (\y -> (mod y p) /= 0) xs)
