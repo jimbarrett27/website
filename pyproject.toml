@@ -26,6 +26,7 @@ dependencies = [
     "pyzotero>=1.13.0",
     "marimo>=0.23.16",
     "pyboy>=2.7.0",
+    "langchain-deepseek>=1.1.0",
 ]
 
 [project.optional-dependencies]

@@ -6,6 +6,16 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
+    import sys, os
+
+    REPO_ROOT = os.getcwd()
+    if REPO_ROOT not in sys.path:
+        sys.path.insert(0, REPO_ROOT)
+    return
+
+
+@app.cell
+def _():
     import marimo as mo
 
     return (mo,)
@@ -18,13 +28,14 @@ def _():
     import requests
     from enum import StrEnum
     import json
+    from dataclasses import dataclass
 
-    return Path, PyBoy, StrEnum, json, requests
+    return Path, PyBoy, StrEnum, dataclass, requests
 
 
 @app.cell
 def _(Path):
-    rom_path = Path('~/Downloads/pkmsil.gbc').expanduser()
+    rom_path = Path('./pokemon/roms/pkmsil.gbc').expanduser()
     return (rom_path,)
 
 
@@ -50,25 +61,24 @@ def _(pyboy):
 
 
 @app.cell
-def _(requests):
+def _(dataclass, requests):
     import base64
     import io
 
-    OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-    OLLAMA_MODEL = "qwen3.6:35b"
+    LLAMACPP_URL = "http://127.0.0.1:8080/v1/chat/completions"
+    LLAMACPP_MODEL = "qwen3.6-35b-vision"
 
-    # measured on this box: 10 threads is the peak (13.5 tok/s), the default is
-    # 7.6 and 32 collapses to 1.1 — dual socket, so threads must stay off the
-    # second NUMA node. num_ctx has to hold a whole thinking pass, which runs to
-    # ~6k tokens; ollama's 4096 default silently truncates it to nothing.
-    OLLAMA_OPTIONS = {"num_thread": 10, "num_ctx": 16384}
+    @dataclass
+    class QwenResponse:
+        response: str
+        reasoning: str
 
 
-    def _as_base64(image) -> str:
-        """A PIL image as the bare base64 png that ollama's images field wants"""
+    def _as_data_uri(image) -> str:
+        """A PIL image as the base64 data: URI the OpenAI-style image_url wants"""
         buffer = io.BytesIO()
         image.save(buffer, format="PNG")
-        return base64.b64encode(buffer.getvalue()).decode()
+        return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}"
 
 
     def prompt_qwen(
@@ -78,31 +88,40 @@ def _(requests):
         schema: dict | None = None,
         image=None,
         options: dict | None = None,
+        verbose: bool = False
     ) -> str:
 
-        user_message = {"role": "user", "content": user_prompt}
         if image is not None:
-            user_message["images"] = [_as_base64(image)]
+            user_content = [
+                {"type": "text", "text": user_prompt},
+                {"type": "image_url", "image_url": {"url": _as_data_uri(image)}},
+            ]
+        else:
+            user_content = user_prompt
 
         body = {
-            "model": OLLAMA_MODEL,
+            "model": LLAMACPP_MODEL,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                user_message,
+                {"role": "user", "content": user_content},
             ],
-            # ollama keeps reasoning in its own field, so it coexists with format
-            "think": thinking,
+            "chat_template_kwargs": {"enable_thinking": thinking},
             "stream": False,
-            "options": OLLAMA_OPTIONS | (options or {}),
-        }
+        } | (options or {})
         if schema is not None:
-            body["format"] = schema
+            body["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": "response", "schema": schema},
+            }
 
-        response = requests.post(OLLAMA_URL, json=body, timeout=1800)
+        response = requests.post(LLAMACPP_URL, json=body, timeout=1800)
         response.raise_for_status()
-        return response.json()["message"]["content"]
 
-    return (prompt_qwen,)
+        first_response = response.json()["choices"][0]["message"]
+
+        return QwenResponse(first_response["content"], first_response["reasoning_content"])
+
+    return LLAMACPP_MODEL, base64, io
 
 
 @app.cell
@@ -126,41 +145,77 @@ def _(StrEnum):
         "required": ["button"],
         "additionalProperties": False,
     }
-    return BUTTON_LIST, BUTTON_SCHEMA
+    return (BUTTON_LIST,)
 
 
 @app.cell
-def _(BUTTON_LIST):
-    NAVIGATION_PROMPT = f"""
-    You are playing pokemon silver on the gameboy colour. You will be given an image of the current situation and your goal, and should propose button presses to get you closer to your goal. 
+def _(BUTTON_LIST, pyboy):
+    from langchain_core.tools import tool
 
-    You should respond with JSON of the form {{"button": "A"}}, where the button is one of the following
-    {BUTTON_LIST}
-    """
 
-    return (NAVIGATION_PROMPT,)
+    @tool
+    def press_button(button: str) -> str:
+        """Press a button on the Game Boy and advance the emulator a few frames.
+
+        button must be one of: A, B, Start, Up, Down, Left, Right
+        """
+        if button not in BUTTON_LIST.split("\n"):
+            return f"'{button}' is not a valid button. Choose one of: {BUTTON_LIST}"
+        pyboy.button(button, delay=10)
+        pyboy.tick(120)
+        return f"Pressed {button}."
+
+    return press_button, tool
 
 
 @app.cell
-def _(StrEnum):
-    class Situation(StrEnum):
+def _(tool):
+    @tool
+    def finish_task(summary: str) -> str:
+        """Call this once, instead of press_button, when the screen shows the goal has been achieved.
 
-        NAVIGATION = 'Navigation'
-        BATTLE = 'Battle'
-        DIALOGUE = 'Dialogue'
-        MENU = 'Menu'
-        OTHER = 'Other'
+        summary should briefly describe what on screen confirms it.
+        """
+        return f"Task marked finished: {summary}"
 
-    SITUATION_LIST = "\n".join(Situation)
-    SITUATION_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "situation": {"type": "string", "enum": [_situation.value for _situation in Situation]}
-        },
-        "required": ["situation"],
-        "additionalProperties": False,
-    }
-    return (SITUATION_LIST,)
+    return (finish_task,)
+
+
+@app.cell
+def _(HumanMessage, base64, io, mo, pokemon_agent, pyboy):
+    def _image_to_data_uri(image) -> str:
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}"
+
+
+    def navigate(goal: str, max_steps: int = 15) -> None:
+        for step in range(max_steps):
+            img = pyboy.screen.image
+
+            step_events = []
+            pokemon_agent.set_on_event(lambda name, kind, data, ev=step_events: ev.append((kind, data)))
+
+            message = HumanMessage(content=[
+                {"type": "text", "text": f"Goal: {goal}"},
+                {"type": "image_url", "image_url": {"url": _image_to_data_uri(img)}},
+            ])
+            result = pokemon_agent.invoke([message])
+            final_text = result["messages"][-1].content
+
+            tool_calls = [d for kind, d in step_events if kind == "tool_call"]
+            finish_calls = [d for d in tool_calls if d['tool'] == 'finish_task']
+
+            summary = "; ".join(f"{d['tool']}({d['args']})" for d in tool_calls) or final_text[:200]
+            mo.output.append(mo.hstack([mo.image(img, width=320), mo.md(f"**step {step}**: {summary}")], align="center"))
+
+            if finish_calls:
+                print(f"finished after {step + 1} step(s): {finish_calls[0]['args'].get('summary')}")
+                return
+
+        print(f"stopped after {max_steps} steps without finishing")
+
+    return
 
 
 @app.cell
@@ -177,38 +232,24 @@ def _(SITUATION_LIST):
 
 
 @app.cell
-def _():
-    test_user_prompt = """
-    Your current long term goal is to: Get to professor Elm
-    Your current immediate goal is to: Get out of the bedroom
-    """
-    return (test_user_prompt,)
+def _(LLAMACPP_MODEL, finish_task, press_button):
+    from agents import Agent
+    from langchain_core.messages import HumanMessage
+    from langchain_deepseek import ChatDeepSeek
 
+    local_llm = ChatDeepSeek(
+        model=LLAMACPP_MODEL,
+        api_base="http://127.0.0.1:8080/v1",
+        api_key="not-needed",
+    ).bind(extra_body={"chat_template_kwargs": {"enable_thinking": True}})
 
-@app.cell
-def _(
-    BUTTON_SCHEMA,
-    NAVIGATION_PROMPT,
-    json,
-    mo,
-    prompt_qwen,
-    pyboy,
-    test_user_prompt,
-):
-    img = pyboy.screen.image
-    for _ in range(10):
-        img = pyboy.screen.image
-        resp = prompt_qwen(NAVIGATION_PROMPT, test_user_prompt, schema=BUTTON_SCHEMA, image=img, thinking=True) 
-        resp_parsed = json.loads(resp)
-        pyboy.button(resp_parsed['button'], delay=10)
-        mo.output.append(mo.hstack([mo.image(img, width=320), mo.md(f"### {resp_parsed['button']}")], align="center"))
-        pyboy.tick(120)
-    return
-
-
-@app.cell
-def _():
-    return
+    pokemon_agent = Agent(
+        name="pokemon_agent",
+        system_prompt='You are playing Pokemon Silver on a Game Boy Color. Each turn you are shown the current screen and a goal. Decide the single next button press that makes progress toward the goal and call press_button exactly once. You will be shown a fresh screenshot after it takes effect, so do not call press_button more than once per turn or guess ahead. If the screenshot already shows the goal achieved, call finish_task instead of press_button.',
+        tools=[press_button, finish_task],
+        llm=local_llm,
+    )
+    return HumanMessage, pokemon_agent
 
 
 if __name__ == "__main__":

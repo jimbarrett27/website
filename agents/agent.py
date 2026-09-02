@@ -110,8 +110,14 @@ class Agent:
                     self.name,
                 )
 
-        # Emit thinking blocks (chain-of-thought summaries)
-        thinking = _extract_thinking(response.content)
+        # Emit thinking blocks (chain-of-thought summaries). Covers both
+        # Anthropic-style thinking content blocks and the `reasoning_content`
+        # field OpenAI-compatible local servers (vLLM, llama.cpp, sglang) use —
+        # langchain_openai.ChatOpenAI drops the latter, so providers that
+        # preserve it (e.g. ChatDeepSeek) surface it via additional_kwargs.
+        thinking = _extract_thinking(response.content) or response.additional_kwargs.get(
+            "reasoning_content"
+        )
         if thinking:
             logger.info("Agent '%s' thinking (%d chars): %.500s", self.name, len(thinking), thinking)
             self._emit("thinking", {"text": thinking})
