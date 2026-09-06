@@ -27,6 +27,9 @@ dependencies = [
     "marimo>=0.23.16",
     "pyboy>=2.7.0",
     "langchain-deepseek>=1.1.0",
+    "jupyter>=1.1.1",
+    "langchain>=1.4.0",
+    "langchain-ollama>=1.1.0",
 ]
 
 [project.optional-dependencies]
