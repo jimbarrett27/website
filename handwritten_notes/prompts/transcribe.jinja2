@@ -25,8 +25,15 @@ When a word cannot be read, write `[illegible]`. If you are unsure of a word but
 have a good guess, write it followed by `[?]`; do this especially for names,
 numbers and technical terms, where a plausible-looking guess is easy to miss.
 Never invent text to fill a gap.
-For a drawing or diagram, write `[sketch: <a short description>]` and transcribe
-any words inside it.
+For a drawing or diagram, write a marker on a line of its own, chosen by what it is.
+The description is a caption of a few words naming what it shows (e.g. "loss vs
+epochs", "deploy pipeline"), not a description of how it is drawn:
+- `[figure:flowchart: <a short description>]` for a flowchart or any boxes-and-arrows
+  diagram (processes, architectures, mind maps, trees).
+- `[figure:plot: <a short description>]` for a graph or chart drawn on axes.
+- `[sketch: <a short description>]` for anything else, such as a doodle or picture.
+Words written inside a figure belong to the figure: do not transcribe them separately.
+For a `[sketch: ...]`, transcribe any words inside it after the marker.
 {% if pages > 1 %}
 Put a line containing only `---` between pages. If a sentence runs across a page
 break, still put the `---` between the pages.

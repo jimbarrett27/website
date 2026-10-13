@@ -22,9 +22,13 @@ class FakeMessage:
         self.caption = caption
         self.date = datetime(2026, 10, 9, 12, 32, tzinfo=timezone.utc)
         self.replies = []
+        self.photos = []
 
     async def reply_text(self, text, **kwargs):
         self.replies.append(text)
+
+    async def reply_photo(self, photo, caption=None, **kwargs):
+        self.photos.append((photo, caption))
 
 
 class FakeBot:
@@ -176,3 +180,72 @@ async def test_transcript_still_sent_when_vault_write_fails(monkeypatch, fakes):
     await bot.handle_image(_update(message), _context())
     assert message.replies[1] == "- [ ] Remember the milk"
     assert message.replies[2] == "⚠️ Couldn't save to Obsidian: disk on fire"
+
+
+@pytest.mark.asyncio
+async def test_figures_are_redrawn_into_the_note(monkeypatch, fakes):
+    monkeypatch.setattr(bot.transcribe, "transcribe",
+                        lambda pages, caption=None: "- idea\n[figure:plot: loss curve]")
+    redraws = []
+
+    def fake_redraw(text, pages):
+        redraws.append((text, pages))
+        return bot.figures.Redrawn("- idea\n![[{{figure-1}}]]\n*loss curve*", [b"<svg/>"],
+                                   [bot.figures.Preview("loss curve", b"png")])
+    monkeypatch.setattr(bot.figures, "redraw_all", fake_redraw)
+
+    message = _photo()
+    await bot.handle_image(_update(message), _context())
+
+    assert message.replies[:3] == ["Transcribing…", "Redrawing the figure…",
+                                   "- idea"]
+    assert redraws == [("- idea\n[figure:plot: loss curve]", [(b"img-big", "image/jpeg")])]
+    assert message.photos == [(b"png", "loss curve")]
+    assert (fakes.vault / "images" / "2026-10-09 1432 fig1.svg").read_bytes() == b"<svg/>"
+    assert "![[2026-10-09 1432 fig1.svg]]" in (fakes.vault / "2026-10-09 1432.md").read_text()
+
+
+@pytest.mark.asyncio
+async def test_unexpected_redraw_failure_still_files_the_transcript(monkeypatch, fakes):
+    monkeypatch.setattr(bot.transcribe, "transcribe",
+                        lambda pages, caption=None: "[figure:flowchart: loop]")
+
+    def broken(text, pages):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(bot.figures, "redraw_all", broken)
+
+    message = _photo()
+    await bot.handle_image(_update(message), _context())
+    assert message.replies[2] == "[figure:flowchart: loop]"
+    assert "[figure:flowchart: loop]" in (fakes.vault / "2026-10-09 1432.md").read_text()
+
+
+@pytest.mark.asyncio
+async def test_a_failed_preview_send_still_saves_the_note(monkeypatch, fakes):
+    monkeypatch.setattr(bot.transcribe, "transcribe",
+                        lambda pages, caption=None: "[figure:plot: loss curve]")
+    monkeypatch.setattr(bot.figures, "redraw_all", lambda text, pages: bot.figures.Redrawn(
+        "![[{{figure-1}}]]", [b"<svg/>"], [bot.figures.Preview("loss curve", b"png")]))
+
+    message = _photo()
+
+    async def broken(photo, caption=None, **kwargs):
+        raise RuntimeError("telegram said no")
+    message.reply_photo = broken
+
+    await bot.handle_image(_update(message), _context())
+    assert message.replies[-1] == f"📝 Saved to {FOLDER}/2026-10-09 1432.md"
+
+
+@pytest.mark.asyncio
+async def test_a_page_that_is_only_a_figure_sends_just_the_preview(monkeypatch, fakes):
+    monkeypatch.setattr(bot.transcribe, "transcribe",
+                        lambda pages, caption=None: "[figure:plot: loss curve]")
+    monkeypatch.setattr(bot.figures, "redraw_all", lambda text, pages: bot.figures.Redrawn(
+        "![[{{figure-1}}]]\n*loss curve*", [b"<svg/>"], [bot.figures.Preview("loss curve", b"png")]))
+
+    message = _photo()
+    await bot.handle_image(_update(message), _context())
+    assert message.replies == ["Transcribing…", "Redrawing the figure…",
+                               f"📝 Saved to {FOLDER}/2026-10-09 1432.md"]
+    assert message.photos == [(b"png", "loss curve")]

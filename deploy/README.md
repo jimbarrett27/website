@@ -81,3 +81,13 @@ photo, an image sent as a file, or an album of pages becomes one note in
 Unlike voice notes, transcription is **not** local: the pages are sent to a vision
 model on OpenRouter (`handwritten_notes.transcribe.MODEL`), using the existing
 OpenRouter key, so no new secret is needed.
+
+Flowcharts and plots sketched on a page are redrawn into the note (Mermaid and SVG,
+`handwritten_notes/figures.py`), and previewed in the chat as PNGs. The flowchart
+preview renders Mermaid in headless Chromium via Playwright, which needs a one-off
+browser install for the `jim` user (it lands in `~/.cache/ms-playwright`, so it
+survives re-cloning the deploy directory):
+
+    uv run playwright install chromium-headless-shell
+
+Without it, flowchart previews are skipped (logged) and everything else still works.
