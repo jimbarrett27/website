@@ -27,6 +27,8 @@ dependencies = [
     "av>=19.0.1",
     "numpy>=2.5.3",
     "faster-whisper>=1.2.1",
+    "matplotlib>=3.11.2",
+    "playwright>=1.63.0",
 ]
 
 [project.optional-dependencies]

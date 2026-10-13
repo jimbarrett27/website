@@ -1,0 +1,36 @@
+The attached photo is a page of handwritten notes. Somewhere on it is a hand-sketched
+plot, described as: "{{ description }}".
+
+Describe that plot, and only that plot, as JSON so it can be redrawn cleanly. It is a
+sketch, so capture its shape and labels, not precise data: choose x and y values on
+whatever scale the axes show (or 0–10 if they show none) and give each curve enough
+points (typically 10–30) to follow its shape, including peaks, kinks and asymptotes.
+
+The JSON has this shape:
+
+{
+  "title": "title written above the plot, or null",
+  "x_label": "x-axis label as written, or null",
+  "y_label": "y-axis label as written, or null",
+  "x_range": [min, max] or null,
+  "y_range": [min, max] or null,
+  "show_ticks": true only if the writer marked numbers on the axes,
+  "x_log": true if the x-axis is marked as logarithmic,
+  "y_log": true if the y-axis is marked as logarithmic,
+  "curves": [
+    {
+      "label": "the curve's label or legend entry, or null",
+      "kind": "line" or "scatter",
+      "style": "solid", "dashed" or "dotted",
+      "points": [[x, y], ...]
+    }
+  ],
+  "annotations": [
+    {"x": x, "y": y, "text": "a note written on the plot, placed where it was written"}
+  ]
+}
+
+Use the writer's words exactly; do not correct spelling. If a word cannot be read,
+write `[illegible]`; for an unsure guess, add `[?]`.
+
+Reply with the JSON only: no preamble, no commentary, no code fences.

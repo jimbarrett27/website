@@ -1,0 +1,15 @@
+The attached photo is a page of handwritten notes. Somewhere on it is a hand-drawn
+diagram, described as: "{{ description }}".
+
+Redraw that diagram, and only that diagram, as a Mermaid diagram.
+
+- Use `flowchart` (with `TD` or `LR`, whichever matches the drawing's direction) unless
+  another Mermaid diagram type clearly fits better (e.g. `mindmap`, `sequenceDiagram`).
+- Keep every box, label and arrow the writer drew, with their words exactly as written.
+  Do not correct spelling, add steps, or tidy up the logic.
+- Match shapes where they are clear: diamonds for decisions, rounded boxes for start/end.
+- Put labels written on arrows on the arrows.
+- Quote node labels (`A["label"]`) so punctuation can't break the syntax.
+- If a word cannot be read, write `[illegible]`; for an unsure guess, add `[?]`.
+
+Reply with the Mermaid source only: no preamble, no commentary, no code fences.

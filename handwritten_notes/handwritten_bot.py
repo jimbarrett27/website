@@ -13,7 +13,7 @@ from telegram import Message, Update
 from telegram.ext import ContextTypes, MessageHandler, filters
 
 from gcp_util.secrets import get_telegram_user_id
-from handwritten_notes import transcribe, vault
+from handwritten_notes import figures, transcribe, vault
 from util.logging_util import setup_logger
 from util.timezone import STOCKHOLM
 from voice_notes.voice_notes_bot import download, split_message
@@ -98,8 +98,30 @@ async def process(pages: list[Page], bot) -> None:
         await first.reply_text(f"Transcription failed: {e}"[:500])
         return
 
-    for part in split_message(text or "(no text recognised)"):
-        await first.reply_text(part)
+    svgs, previews = [], []
+    if wanted := figures.find_figures(text, len(pages)):
+        await first.reply_text(
+            "Redrawing the figure…" if len(wanted) == 1 else f"Redrawing {len(wanted)} figures…")
+        # redraw_all degrades marker by marker, so this only guards the unexpected.
+        try:
+            redrawn = await asyncio.to_thread(
+                figures.redraw_all, text, [(data, p.mime) for data, p in zip(images, pages)])
+            text, svgs, previews = redrawn.transcript, redrawn.svgs, redrawn.previews
+        except Exception:
+            logger.exception("Redrawing figures failed")
+
+    # A page that's only a drawing has no text left once its figure becomes a preview.
+    chat = figures.for_chat(text)
+    if chat or not previews:
+        for part in split_message(chat or "(no text recognised)"):
+            await first.reply_text(part)
+
+    # Previews are a nicety for the chat; the note has the real thing.
+    for preview in previews:
+        try:
+            await first.reply_photo(preview.png, caption=preview.description[:1024])
+        except Exception:
+            logger.exception("Sending a figure preview failed")
 
     # The transcript is already in the chat, so a failed save loses nothing.
     try:
@@ -110,6 +132,7 @@ async def process(pages: list[Page], bot) -> None:
             model=transcribe.MODEL,
             caption=caption,
             transcript=text or "_(no text recognised)_",
+            figures=svgs,
         )
     except Exception as e:
         logger.exception("Saving handwritten note to the vault failed")
