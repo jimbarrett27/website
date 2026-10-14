@@ -1,0 +1,49 @@
+{
+  "games": [
+    {
+      "url": "https://www.chess.com/game/daily/900000000",
+      "move_by": 1792411200,
+      "pgn": "[Event \"Let's Play!\"]\n[Site \"Chess.com\"]\n[Date \"2026.10.01\"]\n[Round \"-\"]\n[White \"jimjimjimmyjim\"]\n[Black \"naslundx\"]\n[Result \"*\"]\n[TimeControl \"1/259200\"]\n[CurrentPosition \"1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18\"]\n\n1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3 Be7 9. Qd2 O-O 10. O-O-O Nbd7 11. g4 b5 12. g5 b4 13. Ne2 Ne8 14. h4 a5 15. Kb1 a4 16. Nbc1 Qa5 17. Ng3 Rb8 *",
+      "time_control": "1/259200",
+      "last_activity": 1791000000,
+      "rated": true,
+      "turn": "white",
+      "fen": "1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18",
+      "start_time": 1790870400,
+      "time_class": "daily",
+      "rules": "chess",
+      "white": "https://api.chess.com/pub/player/naslundx",
+      "black": "https://api.chess.com/pub/player/jimjimjimmyjim"
+    },
+    {
+      "url": "https://www.chess.com/game/daily/900000001",
+      "move_by": 1792411200,
+      "pgn": "[Event \"Let's Play!\"]\n[Site \"Chess.com\"]\n[Date \"2026.10.01\"]\n[Round \"-\"]\n[White \"jimjimjimmyjim\"]\n[Black \"naslundx\"]\n[Result \"*\"]\n[TimeControl \"1/259200\"]\n[CurrentPosition \"1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18\"]\n\n1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3 Be7 9. Qd2 O-O 10. O-O-O Nbd7 11. g4 b5 12. g5 b4 13. Ne2 Ne8 14. h4 a5 15. Kb1 a4 16. Nbc1 Qa5 17. Ng3 Rb8 *",
+      "time_control": "1/259200",
+      "last_activity": 1792152000,
+      "rated": true,
+      "turn": "white",
+      "fen": "1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18",
+      "start_time": 1790870400,
+      "time_class": "daily",
+      "rules": "chess",
+      "white": "https://api.chess.com/pub/player/jimjimjimmyjim",
+      "black": "https://api.chess.com/pub/player/naslundx"
+    },
+    {
+      "url": "https://www.chess.com/game/daily/900000002",
+      "move_by": 1792411200,
+      "pgn": "[Event \"Let's Play!\"]\n[Site \"Chess.com\"]\n[Date \"2026.10.01\"]\n[Round \"-\"]\n[White \"jimjimjimmyjim\"]\n[Black \"naslundx\"]\n[Result \"*\"]\n[TimeControl \"1/259200\"]\n[CurrentPosition \"1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18\"]\n\n1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3 Be7 9. Qd2 O-O 10. O-O-O Nbd7 11. g4 b5 12. g5 b4 13. Ne2 Ne8 14. h4 a5 15. Kb1 a4 16. Nbc1 Qa5 17. Ng3 Rb8 *",
+      "time_control": "1/259200",
+      "last_activity": 1792152000,
+      "rated": true,
+      "turn": "white",
+      "fen": "1r2nrk1/3nbppp/3pb3/q3p1P1/pp2P2P/4BPN1/PPPQ4/1KNR1B1R w - - 4 18",
+      "start_time": 1790870400,
+      "time_class": "daily",
+      "rules": "chess",
+      "white": "https://api.chess.com/pub/player/jimjimjimmyjim",
+      "black": "https://api.chess.com/pub/player/someoneelse"
+    }
+  ]
+}
