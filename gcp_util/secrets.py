@@ -175,6 +175,17 @@ def get_trmnl_swedish_webhook_url() -> str:
     return _bot_key("TRMNL_SWEDISH_WEBHOOK_URL")
 
 
+@lru_cache(maxsize=2)
+def get_trmnl_chess_webhook_url(username: str) -> str:
+    """Webhook for one player's copy of the chess TRMNL private plugin.
+
+    Each of us has our own plugin on our own TRMNL account, so there is one secret
+    per chess.com username: ``TRMNL_CHESS_WEBHOOK_URL_<USERNAME>``. As with the
+    other plugins, the UUID in the URL is the only credential TRMNL checks.
+    """
+    return _bot_key(f"TRMNL_CHESS_WEBHOOK_URL_{username.upper()}")
+
+
 @lru_cache(maxsize=1)
 def get_intervals_api_key() -> str:
     """API key for intervals.icu (used as the *password*, with username ``API_KEY``)."""

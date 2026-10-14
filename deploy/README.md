@@ -91,3 +91,26 @@ survives re-cloning the deploy directory):
     uv run playwright install chromium-headless-shell
 
 Without it, flowchart previews are skipped (logged) and everything else still works.
+
+## Chess panel
+
+`chess_panel/` pushes the ongoing chess.com Daily game between `jimjimjimmyjim`
+and `naslundx` to **two** TRMNL private plugins, one on each of our accounts, each
+with the board from its owner's side. The game comes from chess.com's public API,
+so there is no chess.com credential; the only secrets are the two webhook URLs:
+
+| Secret | Plugin |
+|---|---|
+| `TRMNL_CHESS_WEBHOOK_URL_JIMJIMJIMMYJIM` | mine |
+| `TRMNL_CHESS_WEBHOOK_URL_NASLUNDX` | his |
+
+Each plugin is a webhook-strategy private plugin with
+`chess_panel/templates/chess_full.liquid` pasted in as its full-screen markup. A
+player whose secret doesn't exist yet is skipped with a warning, so either panel
+can go live first. To add one:
+
+    printf '%s' "$WEBHOOK_URL" | gcloud secrets create TRMNL_CHESS_WEBHOOK_URL_NASLUNDX \
+        --project=personal-website-318015 --replication-policy=automatic --data-file=-
+
+The job pushes every 15 minutes from the bot process, like the other panels. Check
+by hand with `uv run python -m chess_panel.trmnl --dry-run`.

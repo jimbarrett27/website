@@ -29,6 +29,7 @@ dependencies = [
     "faster-whisper>=1.2.1",
     "matplotlib>=3.11.2",
     "playwright>=1.63.0",
+    "chess>=1.11.2",
 ]
 
 [project.optional-dependencies]
