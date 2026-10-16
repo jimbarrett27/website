@@ -187,6 +187,12 @@ def get_trmnl_chess_webhook_url(username: str) -> str:
 
 
 @lru_cache(maxsize=1)
+def get_readeck_api_token() -> str:
+    """API token for the self-hosted Readeck instance (Settings → API tokens)."""
+    return _bot_key("READECK_API_TOKEN")
+
+
+@lru_cache(maxsize=1)
 def get_intervals_api_key() -> str:
     """API key for intervals.icu (used as the *password*, with username ``API_KEY``)."""
     return _bot_key("INTERVALS_ICU_API_KEY")
