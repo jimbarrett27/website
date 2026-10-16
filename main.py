@@ -27,6 +27,7 @@ from tapestry.daily import daily_tapestry_task
 from fitness.daily import REFRESH_INTERVAL_SECONDS, fitness_panel_task
 from swedish import daily as swedish_panel
 from chess_panel import daily as chess_panel
+from hn_favourites import sync as hn_favourites
 from telegram_bot.telegram_bot import TelegramBot
 from util.logging_util import configure_root_logging, setup_logger, log_telegram_message_received
 from util.timezone import stockholm_time, stockholm_now
@@ -250,6 +251,13 @@ def build_minecraft_app() -> Application:
             chess_panel.chess_panel_task,
             interval=chess_panel.REFRESH_INTERVAL_SECONDS,
             first=60,
+        )
+        # HN favourites → Readeck (the self-hosted read-later app on this box).
+        # Hourly; a routine run reads one page of HN and sends nothing.
+        app.job_queue.run_repeating(
+            hn_favourites.hn_favourites_task,
+            interval=hn_favourites.REFRESH_INTERVAL_SECONDS,
+            first=90,
         )
     else:
         logger.warning("JobQueue not available - daily paper scan disabled.")
