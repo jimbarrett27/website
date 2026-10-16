@@ -3,6 +3,7 @@
     uv run --extra dev python -m chess_panel.preview                  # live games, my side
     uv run --extra dev python -m chess_panel.preview --as naslundx    # live games, his side
     uv run --extra dev python -m chess_panel.preview --games tests/chess_panel/fixtures/current_games.json
+    uv run --extra dev python -m chess_panel.preview --layout half_vertical
 
 ``--games`` takes a saved ``/pub/player/{username}/games`` response instead of
 reading chess.com, for designing against a position when no game is on.
@@ -19,7 +20,12 @@ from chess_panel.client import fetch_games_between, games_between
 from chess_panel.trmnl import PLAYERS
 from util import panel_preview, trmnl
 
-TEMPLATE = Path(__file__).parent / "templates" / "chess_full.liquid"
+TEMPLATES = Path(__file__).parent / "templates"
+# Layout -> (template, width, height). Each is a markup tab on the same plugin.
+LAYOUTS = {
+    "full": ("chess_full.liquid", 800, 480),
+    "half_vertical": ("chess_half_vertical.liquid", 400, 480),
+}
 
 
 def main() -> int:
@@ -28,6 +34,7 @@ def main() -> int:
     parser.add_argument("--as", dest="viewer", choices=PLAYERS, default=PLAYERS[0],
                         help="whose panel to render")
     parser.add_argument("--games", type=Path, help="a saved current-games response to use")
+    parser.add_argument("--layout", choices=LAYOUTS, default="full")
     parser.add_argument("--json", type=Path, help="also write the webhook payload here")
     args = parser.parse_args()
 
@@ -42,7 +49,9 @@ def main() -> int:
     payload = trmnl.build_payload(merge_variables)
     if args.json:
         args.json.write_text(payload)
-    panel_preview.preview(TEMPLATE, merge_variables, args.out)
+    template, width, height = LAYOUTS[args.layout]
+    panel_preview.preview(TEMPLATES / template, merge_variables, args.out,
+                          width=width, height=height)
     return 0
 
 
