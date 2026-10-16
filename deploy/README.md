@@ -105,7 +105,9 @@ so there is no chess.com credential; the only secrets are the two webhook URLs:
 | `TRMNL_CHESS_WEBHOOK_URL_NASLUNDX` | his |
 
 Each plugin is a webhook-strategy private plugin with
-`chess_panel/templates/chess_full.liquid` pasted in as its full-screen markup. A
+`chess_panel/templates/chess_full.liquid` pasted in as its full-screen markup, and
+optionally `chess_half_vertical.liquid` in its Half Vertical tab for mashups (same
+data, so nothing else changes). A
 player whose secret doesn't exist yet is skipped with a warning, so either panel
 can go live first. To add one:
 

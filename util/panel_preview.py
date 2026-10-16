@@ -38,14 +38,14 @@ def render_html(template_path: Path, merge_variables: dict) -> str:
     return Template(template_path.read_text()).render(**merge_variables)
 
 
-def _screenshot(html_path: Path, png_path: Path) -> bool:
+def _screenshot(html_path: Path, png_path: Path, width: int, height: int) -> bool:
     chrome = next((c for c in CHROME_BINARIES if shutil.which(c)), None)
     if chrome is None:
         logger.warning("no Chrome on PATH (%s); skipping PNG", "/".join(CHROME_BINARIES))
         return False
     subprocess.run(
         [chrome, "--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
-         f"--screenshot={png_path}", f"--window-size={PANEL_WIDTH},{PANEL_HEIGHT}",
+         f"--screenshot={png_path}", f"--window-size={width},{height}",
          "--default-background-color=FFFFFFFF", html_path.as_uri()],
         check=True, capture_output=True,
     )
@@ -63,12 +63,15 @@ def _to_one_bit(png_path: Path, out_path: Path) -> float:
 
 
 def preview(template_path: Path, merge_variables: dict, out_dir: Path,
-            check_grey: bool = True) -> Path:
+            check_grey: bool = True, width: int = PANEL_WIDTH,
+            height: int = PANEL_HEIGHT) -> Path:
     """Write the HTML, PNG and 1-bit PNG for a panel. Returns the output directory.
 
     ``check_grey`` is for line-art panels; switch it off for a panel whose whole
     point is a dithered photograph, where a high mid-grey count is expected
-    rather than a warning.
+    rather than a warning. ``width`` and ``height`` are for a mashup layout,
+    e.g. 400x480 for half vertical; the page is that size, so a template that
+    fills its container rather than fixing pixels is previewed at it.
     """
     # Resolved because the screenshot step needs a file:// URI, which a relative
     # path cannot express.
@@ -76,12 +79,13 @@ def preview(template_path: Path, merge_variables: dict, out_dir: Path,
     out_dir.mkdir(parents=True, exist_ok=True)
 
     html_path = out_dir / "panel.html"
-    html_path.write_text('<!doctype html><meta charset="utf-8"><style>body{margin:0}</style>'
+    html_path.write_text('<!doctype html><meta charset="utf-8">'
+                         '<style>html,body{margin:0;height:100%}</style>'
                          + render_html(template_path, merge_variables))
     logger.info("html  -> %s", html_path)
 
     png_path = out_dir / "panel.png"
-    if _screenshot(html_path, png_path):
+    if _screenshot(html_path, png_path, width, height):
         logger.info("png   -> %s", png_path)
         one_bit_path = out_dir / "panel-1bit.png"
         grey_fraction = _to_one_bit(png_path, one_bit_path)
