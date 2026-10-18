@@ -8,6 +8,7 @@ from telegram.error import NetworkError
 from telegram.ext import CommandHandler, ContextTypes, MessageHandler, filters
 
 from gcp_util.secrets import get_telegram_user_id
+from notes_routing import telegram as routing
 from util.logging_util import setup_logger
 from util.timezone import STOCKHOLM
 from voice_notes import audio, transcribe, vault
@@ -99,7 +100,9 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await message.reply_text(f"⚠️ Couldn't save to Obsidian: {e}"[:500])
         return
 
-    await message.reply_text(f"📝 Saved to {vault.NOTES_FOLDER}/{saved.note_path.name}")
+    # Anything said about where it belongs ("file this under…") is in the transcript itself.
+    await routing.route_and_reply(message, saved.note_path, transcript=text or NO_SPEECH,
+                                  hint=None, source="voice")
 
 
 async def preload_model(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -112,8 +115,8 @@ async def preload_model(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "Send me a voice note, or photos of handwritten notes (several pages as one "
-        "album), and I'll transcribe them into Obsidian."
+        "Send me a voice note, photos of handwritten notes (several pages as one "
+        "album), or just type a message, and I'll file it in Obsidian."
     )
 
 
@@ -121,4 +124,5 @@ def get_handlers():
     return [
         CommandHandler("start", handle_start),
         MessageHandler(filters.VOICE | filters.AUDIO, handle_voice),
+        *routing.get_handlers(),
     ]
