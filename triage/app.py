@@ -1,10 +1,11 @@
 """FastAPI application for the triage backend.
 
-Identity is enforced at the edge by Cloudflare Access. As defence in depth, the
-backend also verifies the ``Cf-Access-Authenticated-User-Email`` header on every
-``/api/triage`` request when ``TRIAGE_REQUIRE_CF_ACCESS`` is enabled (the backend
-is only reachable through the Cloudflare Tunnel, so the header can be trusted).
-``/healthz`` is intentionally left open for container/tunnel health probes.
+In production the backend binds localhost and Caddy proxies ``/api`` to it on
+``triage.home.jimbarrett.dev``, which is served only to Tailscale addresses; that
+is the access control. The optional ``TRIAGE_REQUIRE_CF_ACCESS`` guard, left over
+from the earlier Cloudflare Tunnel + Access setup, checks the
+``Cf-Access-Authenticated-User-Email`` header on every ``/api/triage`` request
+when enabled. ``/healthz`` is intentionally left open for health probes.
 """
 
 import asyncio
@@ -93,9 +94,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # The SPA is served from the main domain and calls the API on a separate
-    # `triage-api.<domain>` host, so cross-origin requests need CORS. Credentials
-    # are allowed so the Cloudflare Access cookie is sent.
+    # Only needed if the SPA is served from a different origin from the API. In
+    # production Caddy serves both from one host, so this stays off.
     if settings.allowed_origins:
         app.add_middleware(
             CORSMiddleware,
@@ -141,10 +141,10 @@ def create_app() -> FastAPI:
         background_tasks: BackgroundTasks,
         session: Session = Depends(db_session),
     ) -> PaperOut:
-        # `decision` is a query parameter (not a JSON body) deliberately: with an
-        # empty body and no Content-Type the browser treats the cross-origin POST
-        # as a "simple" request and skips the CORS preflight, which Cloudflare's
-        # edge rejects for OPTIONS. The Access cookie still rides along.
+        # `decision` is a query parameter rather than a JSON body. That dates from
+        # the cross-origin Cloudflare setup, where an empty-body POST skipped a
+        # CORS preflight that Cloudflare's edge rejected. The frontend still
+        # sends it this way.
         paper = repository.get_paper(session, paper_id)
         if paper is None:
             raise HTTPException(status_code=404, detail="Paper not found")

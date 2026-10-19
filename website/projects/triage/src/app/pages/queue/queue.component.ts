@@ -69,7 +69,7 @@ const UNDO_WINDOW_MS = 30_000;
         }
         @case ('error') {
           <p class="status error">
-            Error displaying triage. If you're not Jim, this is intended. If you are Jim, go <a href="https://triage-api.jimbarrett.dev/">here</a>.
+            Couldn't reach the triage backend. Is <code>triage-backend</code> running?
           </p>
         }
         @case ('ready') {

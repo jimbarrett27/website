@@ -8,13 +8,15 @@ All paths and commands below are relative to `website/`.
 
 ## What this is
 
-Personal website (jimbarrett.dev) — an Angular 21 single-page app deployed as static files to **Google App Engine**. Standalone-component architecture (no NgModules), all routes lazy-loaded. Most of the site is content-driven (home, publications, blog); the `/triage` route is a self-contained feature app that talks to a separate FastAPI backend.
+Personal website (jimbarrett.dev) — an Angular 21 single-page app deployed as static files to **Google App Engine**. Standalone-component architecture (no NgModules), all routes lazy-loaded. Most of the site is content-driven (home, publications, blog). The workspace also holds a second, separate application, `triage`, which is **not** part of jimbarrett.dev (see below).
 
 ## Commands
 
 ```bash
-npm start              # ng serve — dev server on :4200 (proxies /api → triage backend, see below)
-npm run build          # ng build — runs the prebuild markdown step first, output to dist/website/browser
+npm start              # ng serve website — dev server on :4200
+npm run start:triage   # ng serve triage — the triage app on :4200, proxies /api → local backend
+npm run build          # ng build website — runs the prebuild markdown step first, output to dist/website/browser
+npm run build:triage   # ng build triage — output to dist/triage/browser
 npm run watch          # dev build in watch mode
 npm run lint           # ng lint (eslint) — CI gate, must be green before deploy
 npx ng test            # unit tests (Karma); note: components are scaffolded with skipTests, so coverage is sparse
@@ -35,16 +37,16 @@ Implication: **editing a `.md` file does nothing until the prebuild script runs.
 ## Routing & structure
 
 - `src/app/app.routes.ts` — root routes, every entry lazy via `loadComponent`. Pages live under `src/app/pages/<name>/`. Shared chrome (header/footer) is in `src/app/shared/components/`; cross-cutting services in `src/app/core/services/`.
-- `src/app/triage/` — the triage feature, mounted at `/triage` via `loadChildren` → `TRIAGE_ROUTES`. It is intentionally self-contained (its own pages/services/models/shortcuts) so it can evolve independently of the marketing site.
 - `app.config.ts` wires `provideRouter` + `provideHttpClient` (standalone bootstrap, no AppModule).
 
-## Triage backend integration (the cross-origin bit)
+## The triage app (`projects/triage/`)
 
-The triage UI calls a **separate** FastAPI service that is not part of this repo — it runs on the same server behind a Cloudflare Tunnel + Cloudflare Access.
+A second application in this workspace, sharing `node_modules`, lint config and Angular version with the site but nothing else: its own `main.ts`, `index.html`, `styles.css` (a slice of the site's tokens and reset) and routes, with the queue at `/`. It reuses only the Comic Shanns font from `src/assets/fonts` and `public/favicon.ico`.
 
-- **Dev:** `environment.ts` sets `triageApiBase: '/api/triage'`; `proxy.conf.json` forwards `/api` → `http://127.0.0.1:8077` (the local backend). Same-origin, no auth.
-- **Prod:** `angular.json` `fileReplacements` swaps in `environment.prod.ts`, whose `triageApiBase` is the absolute `https://triage-api.jimbarrett.dev/api/triage`. App Engine static hosting can't path-proxy to the tunnel, hence the dedicated cross-origin subdomain.
-- Because prod is cross-origin behind Cloudflare Access, triage API calls must send `withCredentials: true` (Access cookie), and writes are kept as CORS-"simple" requests (query params, no JSON `Content-Type`) to avoid a preflight that Cloudflare's edge blocks. Keep new triage API calls defensive about missing fields (optional chaining) — the backend and frontend deploy independently and can briefly skew.
+- **Not deployed to App Engine.** It is served on the tailnet at `https://triage.home.jimbarrett.dev` by the home server's Caddy, which serves the static build and proxies `/api/*` to the FastAPI backend on `127.0.0.1:8077`. Same origin, no CORS, no auth: Caddy only answers that host for Tailscale addresses.
+- **Build/deploy:** `deploy/deploy.sh` at the repo root runs `ng build triage` in the deploy checkout and syncs `dist/triage/browser/` into `/home/jim/data/triage-web`, which Caddy bind-mounts. See `deploy/README.md`.
+- **Dev:** `npm run start:triage`; the API base is the relative `/api/triage` and `proxy.conf.json` forwards `/api` to the local backend.
+- Writes pass data as query params with an empty body; that's the shape the backend endpoints take. Keep reads of API fields defensive (optional chaining): backend and frontend deploy separately and can briefly skew.
 
 ## Deploy
 
@@ -52,4 +54,4 @@ Deployment is GCP **Cloud Build → App Engine** (`app.yaml` serves `dist/websit
 - `infrastructure/deploy.yml` — `npm ci` → `npm run build` → `gcloud app deploy`, triggered on merge to `main`.
 - `infrastructure/pull_requests.yml` — `npm ci` → `npm run lint` → `npm run build` on PRs.
 
-So: **push triage frontend changes to a branch, merge to main to trigger the deploy.** A frontend change is only live on jimbarrett.dev after that build completes.
+So: **push site changes to a branch, merge to main to trigger the deploy.** A change is only live on jimbarrett.dev after that build completes. (The triage app is not part of this pipeline.)
