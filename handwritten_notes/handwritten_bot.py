@@ -14,6 +14,7 @@ from telegram.ext import ContextTypes, MessageHandler, filters
 
 from gcp_util.secrets import get_telegram_user_id
 from handwritten_notes import figures, transcribe, vault
+from notes_routing import telegram as routing
 from util.logging_util import setup_logger
 from util.timezone import STOCKHOLM
 from voice_notes.voice_notes_bot import download, split_message
@@ -139,7 +140,8 @@ async def process(pages: list[Page], bot) -> None:
         await first.reply_text(f"⚠️ Couldn't save to Obsidian: {e}"[:500])
         return
 
-    await first.reply_text(f"📝 Saved to {vault.NOTES_FOLDER}/{saved.note_path.name}")
+    await routing.route_and_reply(first, saved.note_path, transcript=text or "_(no text recognised)_",
+                                  hint=caption, source="handwritten")
 
 
 def get_handlers():

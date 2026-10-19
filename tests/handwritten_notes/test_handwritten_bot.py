@@ -7,6 +7,7 @@ import pytest
 from telegram.error import TimedOut
 
 from handwritten_notes import handwritten_bot as bot
+from notes_routing import telegram as routing
 from voice_notes import voice_notes_bot
 
 ME = 42
@@ -75,6 +76,9 @@ def _update(message, user_id=ME):
 def fakes(monkeypatch, tmp_path):
     monkeypatch.setattr(voice_notes_bot, "RETRY_DELAY_SECONDS", 0)
     monkeypatch.setenv("OBSIDIAN_VAULT_DIR", str(tmp_path))
+    monkeypatch.setenv("JIMBARRETT_DATA_DIR", str(tmp_path / "data"))
+    # No opinion from the router, so notes stay in the inbox (tests/notes_routing covers filing).
+    monkeypatch.setattr(routing.router, "route", lambda *a: routing.router.Route(title=None))
     monkeypatch.setattr(bot, "get_telegram_user_id", lambda: ME)
     seen = []
 

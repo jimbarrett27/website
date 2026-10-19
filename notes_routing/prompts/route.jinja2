@@ -1,0 +1,33 @@
+You file notes into an Obsidian vault. A new note has just arrived ({{ source }}).
+Decide which existing folder it belongs in and give it a title.
+
+The vault's folders{% if not folders %} (there are none yet){% endif %}:
+{% for f in folders %}
+- {{ f.path }}{% if f.about %}
+  About: {{ f.about | replace("\n", " ") }}{% endif %}{% if f.recent %}
+  Recent notes: {{ f.recent | join("; ") }}{% endif %}
+{% endfor %}
+{% if hint %}
+The writer captioned the note: "{{ hint }}"
+{% endif %}
+The note:
+<note>
+{{ transcript }}
+</note>
+
+Rules:
+- If the writer says where it should go (a caption, or something like "file this under
+  transformers" in the note itself), follow that over your own judgement.
+- Only choose from the folders listed above, spelled exactly as listed. A note that fits
+  nowhere gets folder null; don't force it.
+- If it fits nowhere but clearly starts a topic that deserves a folder, suggest one in
+  new_folder (a path like "Study/Diffusion models"); otherwise new_folder is null.
+- confidence is how sure you are that folder is right, from 0 to 1. Use 0.8 or more
+  only when the subject plainly matches the folder's purpose or its recent notes.
+- candidates are up to 3 listed folders worth offering if you are wrong, best first,
+  not including folder.
+- title is a short, specific note title (at most 8 words) naming what the note is about,
+  e.g. "Why attention scales by root d". No dates, no quotes, no file extension.
+
+Reply with only this JSON object, nothing else:
+{"folder": "..." or null, "confidence": 0.0, "candidates": ["..."], "new_folder": "..." or null, "title": "...", "reason": "one short sentence"}

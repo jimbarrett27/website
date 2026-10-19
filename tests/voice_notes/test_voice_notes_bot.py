@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 from telegram.error import TimedOut
 
+from notes_routing import telegram as routing
 from voice_notes import voice_notes_bot as bot
 
 ME = 42
@@ -57,6 +58,9 @@ def fakes(monkeypatch, tmp_path):
     monkeypatch.setattr(bot, "get_telegram_user_id", lambda: ME)
     monkeypatch.setattr(bot.audio, "decode", lambda b: np.zeros(16_000 * 5, dtype=np.float32))
     monkeypatch.setattr(bot.transcribe, "transcribe", lambda s: "Remember the milk.")
+    monkeypatch.setenv("JIMBARRETT_DATA_DIR", str(tmp_path / "data"))
+    # No opinion from the router, so notes stay in the inbox (tests/notes_routing covers filing).
+    monkeypatch.setattr(routing.router, "route", lambda *a: routing.router.Route(title=None))
     return tmp_path
 
 
