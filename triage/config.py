@@ -16,8 +16,8 @@ class Settings:
     # default of 0.0 selects exactly the "surfaced" papers.
     min_relevance_score: float = 0.0
 
-    # Bind address for local/dev runs. In production the service sits behind a
-    # Cloudflare Tunnel, so binding to localhost is fine.
+    # Bind address. In production Caddy on the same host proxies /api here, so
+    # binding to localhost is fine.
     host: str = "127.0.0.1"
     port: int = 8077
 
@@ -27,12 +27,13 @@ class Settings:
     # --- Cloudflare Access (defence in depth) ---
     # When enabled, every /api/triage request must carry a
     # Cf-Access-Authenticated-User-Email header matching `allowed_email`.
-    # Off by default so local/dev runs need no auth; enabled in production.
+    # Off by default. Production no longer uses it either: the app is now only
+    # reachable over Tailscale, not through Cloudflare.
     require_cf_access: bool = False
     allowed_email: str = ""
 
-    # Origins permitted by CORS. Needed because the SPA (main domain) calls the
-    # API on a separate `triage-api.<domain>` host. Empty disables CORS.
+    # Origins permitted by CORS. Empty (the production setting) disables it: Caddy
+    # serves the UI and the API from the same origin.
     allowed_origins: tuple[str, ...] = field(default_factory=tuple)
 
     # --- Obsidian ---

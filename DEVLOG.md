@@ -4,6 +4,44 @@ Decisions and milestones for this repo, newest first. One `### entry` per decisi
 milestone under a `## YYYY-MM-DD` date header — capture the *why*, not just the *what*.
 Maintained via the `/devlog` skill. (Format mirrors `SignalAgents/RESEARCH_LOG.md`.)
 
+## 2026-10-19
+
+### Triage moves off Cloudflare onto the tailnet (triage.home.jimbarrett.dev)
+
+Triage now lives at `https://triage.home.jimbarrett.dev`, served the same way as the
+other home services: Caddy's `*.home` block, behind DNS-only records that point at
+the Tailscale IP. Caddy proxies `/api/*` to the backend on `127.0.0.1:8077` and serves
+everything else from a static build, falling back to `index.html`. Every device that
+uses triage is on the tailnet, so the Cloudflare Tunnel, Cloudflare Access and the
+`triage-api.jimbarrett.dev` host have nothing left to do. The UI and the API now
+share one origin, which also drops CORS, `withCredentials`, and the Access identity
+guard (`TRIAGE_REQUIRE_CF_ACCESS=false`). The guard's code stays, switched off.
+
+**A separate Angular app, not the whole site with a redirect.** The UI moved from
+`website/src/app/triage/` into a second workspace project,
+`website/projects/triage/`, built with `ng build triage`. The other option was to
+serve the full site build at home and redirect `/` to `/triage`. That would have
+put the blog and publications on the home host, and still left the public site with
+a triage route. The feature's only ties to the site were `environment.triageApiBase`
+and the colour tokens; the new app carries a small slice of `styles.css` instead.
+The public `/triage` route is gone entirely, with no "moved" stub.
+
+**Defence in depth in Caddy.** The app has no login, and Caddy listens on every
+interface, not just Tailscale. So the `@triage` matcher requires
+`remote_ip 100.64.0.0/10` as well as the host. A request on the LAN IP with a forged
+`Host` falls through to the wildcard's 404; this was checked. The cost is that the
+Homepage tile has no `siteMonitor`: the container can reach neither the
+localhost-bound backend nor the gated host.
+
+**`deploy/deploy.sh`** replaces the three manual commands. It fetches and checks out
+a detached `origin/main`, runs `npm ci` and `ng build triage`, rsyncs into
+`/home/jim/data/triage-web`, and restarts the services. The rsync updates files in
+place because Caddy bind-mounts that directory, and replacing it would leave the
+mount on a stale inode. The script's body sits inside `main()` so that the checkout
+can safely rewrite the running file. The Cloudflare pieces (the DNS record, the
+tunnel, the Access app and `cloudflared`) are retired once the new route has been
+verified end to end.
+
 ## 2026-10-09
 
 ### Handwritten notes: photos on the voice notes bot → vision model → Obsidian

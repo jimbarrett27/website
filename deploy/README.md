@@ -1,8 +1,9 @@
 # Deploying the Python side
 
-The bots and the triage backend run on the home server under systemd. There is
-no build step and no artefact: each unit runs `uv run` against a checkout, so
-**deploying is moving that checkout**.
+The bots and the triage backend run on the home server under systemd. Each unit
+runs `uv run` against a checkout, so **deploying is mostly moving that checkout**.
+The one build step is the triage UI: a static Angular build that Caddy serves
+(see `triage/deploy/README.md`).
 
 ## The two directories
 
@@ -24,10 +25,16 @@ by a reboot rather than by any decision to deploy it.
 ## Deploying
 
 ```sh
-git -C /home/jim/deploy/jimbarrett.dev fetch origin
-git -C /home/jim/deploy/jimbarrett.dev checkout --detach origin/main
-sudo systemctl restart telegram-bot triage-backend
+/home/jim/repos/jimbarrett.dev/deploy/deploy.sh
 ```
+
+[`deploy.sh`](deploy.sh) does four things:
+
+1. Fetches and moves the deploy checkout to a detached `origin/main`.
+2. Runs `npm ci` and `ng build triage` in its `website/`.
+3. Syncs `dist/triage/browser/` into `/home/jim/data/triage-web`. It syncs in
+   place rather than replacing the directory, because Caddy bind-mounts it.
+4. Restarts `telegram-bot` and `triage-backend`. This asks for your sudo password.
 
 Then check it came up, and confirm which commit is live:
 

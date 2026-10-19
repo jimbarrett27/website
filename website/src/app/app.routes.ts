@@ -22,10 +22,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/tapestry/tapestry.component').then(m => m.TapestryComponent)
   },
   {
-    path: 'triage',
-    loadChildren: () => import('./triage/triage.routes').then(m => m.TRIAGE_ROUTES)
-  },
-  {
     path: '**',
     redirectTo: ''
   }

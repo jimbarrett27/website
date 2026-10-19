@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve website",
+    "start:triage": "ng serve triage",
     "prebuild": "node build-scripts/process-markdown.js",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "build": "ng build website",
+    "build:triage": "ng build triage",
+    "watch": "ng build website --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint"
   },

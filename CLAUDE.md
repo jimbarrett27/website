@@ -13,7 +13,7 @@ Personal monorepo: a Python automation/bot codebase at the root, plus the
 |---|---|
 | `telegram_bot/`, `swedish/`, `minecraft/`, `diary/`, `photos/`, `memes/`, `dnd/` | Telegram bot surfaces, one per bot |
 | `voice_notes/`, `handwritten_notes/` | Voice notes (local Whisper) and photos of handwritten notes (OpenRouter vision) → Obsidian vault; both on the voice notes bot |
-| `triage/` | FastAPI backend for the paper-triage app — serves the `/triage` UI in `website/` |
+| `triage/` | FastAPI backend for the paper-triage app; its UI is the separate `triage` Angular app in `website/projects/triage/` |
 | `tapestry/` | Daily news-tapestry generator; writes SVG panels to GCS, rendered by the tapestry page in `website/` |
 | `content_screening/` | Paper discovery/screening pipeline feeding `triage/` |
 | `llm/`, `agents/`, `gcp_util/`, `util/` | Shared helpers |
@@ -42,15 +42,18 @@ only on PATH in an nvm-activated shell.
 Two features span both halves of this repo, and their contracts are the thing most
 likely to break:
 
-- **triage** — `triage/schemas.py` (FastAPI response models) ↔ `website/src/app/triage/models/paper.model.ts`
+- **triage** — `triage/schemas.py` (FastAPI response models) ↔ `website/projects/triage/src/app/models/paper.model.ts`
 - **tapestry** — the panel JSON written by `tapestry/storage.py` ↔ `website/src/app/core/models/tapestry.interface.ts`
 
-They still **deploy independently** (backend: systemd + Cloudflare Tunnel on the home
-server; frontend: Cloud Build → App Engine on merge to main), so the two sides can
-briefly skew even though they now land in one commit. Keep frontend reads of API
-fields defensive.
+Each side still **deploys on its own**, so the two can briefly skew even though they
+land in one commit. Keep frontend reads of API fields defensive.
+
+- **triage** is deployed by hand on the home server with `deploy/deploy.sh`: it restarts
+  the systemd backend and rebuilds the static UI that Caddy serves on the tailnet.
+- **tapestry**'s page ships with the site: Cloud Build → App Engine on merge to main.
 
 ## Builds
 
 Cloud Build triggers are path-filtered to `website/**`, and the build steps `dir:` into
-`website/`. A change to the Python side does not deploy the site.
+`website/`. A change to the Python side does not deploy the site. A change to `website/projects/triage/`
+does trigger a site build, but the triage app isn't part of it.

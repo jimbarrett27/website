@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
 /**
- * Lazy-loaded triage feature routes. Mounted at /triage by the root router.
- * The history view (/triage/history) is added in build step 8.
+ * Triage app routes. The app is served on its own host, so the queue sits at
+ * the root.
  */
 export const TRIAGE_ROUTES: Routes = [
   {
