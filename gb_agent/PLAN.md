@@ -238,11 +238,21 @@ The main agent can design a sub-agent and give it a job:
 class SubAgentSpec:
     name: str
     purpose: str            # one line, shown in listings
-    system_prompt: str      # written by the parent agent
+    instructions: str       # written by the parent agent
     tools: list[str]        # a subset of the parent's tools
     scripts: list[str]      # library scripts it may call
     model: str              # a model profile name; defaults to the parent's
 ```
+
+As built (2026-10-21, `gb_agent/subagents.py`): specs are `subagents/<name>.json` in the
+run's library repo, versioned like scripts. A sub-agent's system prompt is the harness's
+own description of `game` and the tools, plus the parent's instructions; it always gets
+a `finish(summary)` tool. Its model must be the parent's (the local server runs one
+model at a time) or, if the run was started with `--allow-paid`, a paid profile.
+`run_subagent` takes `max_calls` (default 15, at most 50) and `max_frames` (default
+3,000), and the result tells the parent why it ended (`finished`, `max_calls`,
+`max_frames`, or a run limit), its summary, and its calls and frames. Events and logs
+are tagged `<name>#<n>`, and sub-agent jobs are counted per spec version.
 
 - **Running one:** `run_subagent(name, task)` starts the sub-agent with a fresh
   context and the given task, and returns its final summary plus a trace of what it
@@ -424,7 +434,7 @@ Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
 - Experiment configs, the run loop with every limit, and the run directory.
 - `python -m gb_agent.play --game silver --model <profile> --frames N --goal "..."`.
 
-### Chunk 5: sub-agents
+### Chunk 5: sub-agents (done 2026-10-21)
 
 - `SubAgentSpec`, `define_subagent`, `run_subagent`, `list_subagents`.
 - Tool-subset and depth checks, per-run budgets, sub-agent traces.

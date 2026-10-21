@@ -5,6 +5,8 @@ Layout of a library repo:
     library/__init__.py
     library/<name>.py      one script each, defining a function also called <name>
 
+    subagents/<name>.json  one sub-agent spec each (see gb_agent/subagents.py)
+
 Scripts are mounted read-only into the sandbox, where they import each other as
 ``from library.walk_to import walk_to``. Being a package, a script can't shadow a
 standard-library module by its name.
@@ -33,6 +35,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 PACKAGE = "library"
+SUBAGENTS = "subagents"  # sub-agent specs, as <name>.json; never mounted into the sandbox
 NAME_RE = re.compile(r"^[a-z][a-z0-9_]{0,39}$")
 VERSION_RE = re.compile(r"^[0-9a-f]{7,40}$")
 MAX_SCRIPT_BYTES = 64_000
@@ -150,8 +153,7 @@ class Library:
         """Short hash of the last commit that touched ``name``."""
         if not self.exists(name):
             raise ScriptError(f"no script called {name!r}")
-        return self._git("log", "-1", "--format=%h", "--",
-                         f"{PACKAGE}/{name}.py").stdout.strip()
+        return self._last_commit(f"{PACKAGE}/{name}.py")
 
     def read(self, name: str, version: str | None = None) -> str:
         """The source of ``name``, now or as of ``version``."""
@@ -159,12 +161,7 @@ class Library:
             if not self.exists(name):
                 raise ScriptError(f"no script called {name!r}")
             return self.path(name).read_text()
-        if not isinstance(version, str) or not VERSION_RE.match(version):
-            raise ScriptError(f"bad version {version!r}")
-        shown = self._git("show", f"{version}:{PACKAGE}/{check_name(name)}.py", check=False)
-        if shown.returncode != 0:
-            raise ScriptError(f"{name!r} has no version {version!r}")
-        return shown.stdout
+        return self._show(f"{PACKAGE}/{check_name(name)}.py", name, version)
 
     def scripts(self) -> list[ScriptInfo]:
         infos = []
@@ -179,9 +176,53 @@ class Library:
     def history(self, name: str) -> list[Change]:
         """Every change to ``name``, newest first."""
         self.version(name)  # raises if there's no such script
-        log = self._git("log", "--format=%h%x1f%cI%x1f%s", "--",
-                        f"{PACKAGE}/{name}.py").stdout
-        return [Change(*line.split("\x1f", 2)) for line in log.splitlines() if line]
+        return self._changes(f"{PACKAGE}/{name}.py")
+
+    # -- sub-agents ---------------------------------------------------------
+
+    def subagent_path(self, name: str) -> Path:
+        return self.root / SUBAGENTS / f"{check_name(name)}.json"
+
+    def subagent_version(self, name: str) -> str:
+        if not self.subagent_path(name).exists():
+            raise ScriptError(f"no sub-agent called {name!r}")
+        return self._last_commit(f"{SUBAGENTS}/{name}.json")
+
+    def read_subagent(self, name: str, version: str | None = None) -> dict:
+        if version is None:
+            path = self.subagent_path(name)
+            if not path.exists():
+                raise ScriptError(f"no sub-agent called {name!r}")
+            return json.loads(path.read_text())
+        return json.loads(self._show(f"{SUBAGENTS}/{check_name(name)}.json", name, version))
+
+    def subagents(self) -> list[dict]:
+        """Every sub-agent spec, with its name and version."""
+        folder = self.root / SUBAGENTS
+        return [{**json.loads(path.read_text()), "version": self.subagent_version(path.stem)}
+                for path in sorted(folder.glob("*.json"))] if folder.exists() else []
+
+    def subagent_history(self, name: str) -> list[Change]:
+        self.subagent_version(name)
+        return self._changes(f"{SUBAGENTS}/{name}.json")
+
+    def write_subagent(self, name: str, spec: dict, reason: str, *, agent: str | None = None,
+                       run: str | None = None, step: int | None = None) -> tuple[str, bool]:
+        """Create or replace a sub-agent spec; return its version and whether it changed.
+
+        ``spec`` must already be validated (gb_agent.subagents.check_spec).
+        """
+        reason = " ".join(str(reason).split())[:200]
+        if not reason:
+            raise ScriptError("give a one-line reason for the change")
+        path = self.subagent_path(name)
+        text = json.dumps(spec, indent=2, sort_keys=True) + "\n"
+        if path.exists() and path.read_text() == text:
+            return self.subagent_version(name), False
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(text)
+        self._commit(reason + _trailers(agent, run, step))
+        return self.subagent_version(name), True
 
     # -- writing ------------------------------------------------------------
 
@@ -205,19 +246,21 @@ class Library:
     # -- usage --------------------------------------------------------------
 
     def record_use(self, name: str, version: str, *, ok: bool, frames: int,
-                   error: str | None = None) -> None:
+                   error: str | None = None, kind: str = "script") -> None:
         entry = {"script": check_name(name), "version": version, "ok": ok,
-                 "frames": frames, "error": error}
+                 "frames": frames, "error": error, "kind": kind}
         with self.usage_path.open("a") as f:
             f.write(json.dumps(entry) + "\n")
 
-    def usage(self) -> dict[str, dict]:
-        """Per script: calls, failures and frames, overall and per version."""
+    def usage(self, kind: str = "script") -> dict[str, dict]:
+        """Per script (or sub-agent): uses, failures and frames, overall and per version."""
         totals: dict[str, dict] = {}
         if not self.usage_path.exists():
             return totals
         for line in self.usage_path.read_text().splitlines():
             entry = json.loads(line)
+            if entry.get("kind", "script") != kind:
+                continue
             script = totals.setdefault(entry["script"], {"calls": 0, "failures": 0,
                                                          "frames": 0, "versions": {}})
             version = script["versions"].setdefault(entry["version"],
@@ -237,8 +280,23 @@ class Library:
         self.package_dir.chmod(0o755)
 
     def _commit(self, message: str) -> None:
-        self._git("add", "-A", "--", PACKAGE)
+        self._git("add", "-A")
         self._git("commit", "-q", "--allow-empty", "-m", message)
+
+    def _last_commit(self, relpath: str) -> str:
+        return self._git("log", "-1", "--format=%h", "--", relpath).stdout.strip()
+
+    def _show(self, relpath: str, name: str, version: str) -> str:
+        if not isinstance(version, str) or not VERSION_RE.match(version):
+            raise ScriptError(f"bad version {version!r}")
+        shown = self._git("show", f"{version}:{relpath}", check=False)
+        if shown.returncode != 0:
+            raise ScriptError(f"{name!r} has no version {version!r}")
+        return shown.stdout
+
+    def _changes(self, relpath: str) -> list[Change]:
+        log = self._git("log", "--format=%h%x1f%cI%x1f%s", "--", relpath).stdout
+        return [Change(*line.split("\x1f", 2)) for line in log.splitlines() if line]
 
     def _git(self, *args: str, check: bool = True) -> subprocess.CompletedProcess:
         if shutil.which("git") is None:

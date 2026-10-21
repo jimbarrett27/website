@@ -90,7 +90,39 @@ TOOL_SCHEMAS = [
     }, ["problem"]),
 ]
 
-TOOL_NAMES = [schema["function"]["name"] for schema in TOOL_SCHEMAS]
+SUBAGENT_SCHEMAS = [
+    _fn("define_subagent", "Create or update a sub-agent: a helper you design and give one "
+        "job at a time, so long or fiddly work doesn't fill your own context.", {
+        "name": {"type": "string", "description": "lowercase_with_underscores"},
+        "purpose": {"type": "string", "description": "one line: what it's for"},
+        "instructions": {"type": "string", "description":
+                         "its instructions: how to do the job, what to watch for, when to stop"},
+        "tools": {"type": "array", "items": {"type": "string"}, "description":
+                  "which of your tools it gets (not the sub-agent tools)"},
+        "scripts": {"type": "array", "items": {"type": "string"}, "description":
+                    "library scripts it may run (empty: any)"},
+        "model": {"type": "string", "description": "model profile; default: yours"},
+        "reason": {"type": "string", "description": "one line: why this change"},
+    }, ["name", "purpose", "instructions", "tools", "reason"]),
+    _fn("run_subagent", "Give a sub-agent a job. It starts fresh, works until it calls "
+        "finish or runs out of calls or frames, and you get its summary back.", {
+        "name": {"type": "string"},
+        "task": {"type": "string", "description": "the job, with anything it needs to know"},
+        "max_calls": {"type": "integer", "description": "LLM calls it may use, default 15"},
+        "max_frames": {"type": "integer", "description": "frames it may spend, default 3000"},
+    }, ["name", "task"]),
+    _fn("list_subagents", "List your sub-agents: purpose, tools, model, how often they finished.",
+        {}, []),
+]
+
+FINISH_SCHEMA = _fn("finish", "End your job and report back to the agent that started you.", {
+    "summary": {"type": "string", "description":
+                "what you did, what happened, what you learned, what's left"},
+}, ["summary"])
+
+TOOL_NAMES = [schema["function"]["name"] for schema in TOOL_SCHEMAS]  # the main agent's base set
+_SCHEMAS = {schema["function"]["name"]: schema
+            for schema in [*TOOL_SCHEMAS, *SUBAGENT_SCHEMAS, FINISH_SCHEMA]}
 
 
 class ToolError(ValueError):
@@ -133,32 +165,60 @@ def _bool(args: dict, key: str) -> bool:
     return bool(value)
 
 
-def _trace_result(run: Run, trace: Trace, budget: int) -> ToolResult:
-    return ToolResult(f"{trace.to_text(budget)}\n{run.budget_line()}", trace.images, trace)
 
 
 class Tools:
-    """Dispatches tool calls for one agent on one run."""
+    """Dispatches tool calls for one agent on one run.
 
-    def __init__(self, run: Run, agent: str = "main", trace_budget: int = 2_500):
+    The main agent gets every tool (with the sub-agent tools when ``host`` is
+    given). A sub-agent gets ``allowed`` (always including ``finish``), may be
+    limited to some ``scripts``, and can only keep ``frame_allowance`` frames.
+    """
+
+    def __init__(self, run: Run, agent: str = "main", trace_budget: int = 2_500, *,
+                 allowed: tuple[str, ...] | None = None, scripts: tuple[str, ...] | None = None,
+                 frame_allowance: int | None = None, host=None):
         self.run = run
         self.agent = agent
         self.trace_budget = trace_budget
+        if allowed is None:
+            subagent_tools = [s["function"]["name"] for s in SUBAGENT_SCHEMAS]
+            allowed = (*TOOL_NAMES, *(subagent_tools if host is not None else []))
+        self.allowed = tuple(name for name in _SCHEMAS if name in allowed)
+        self.scripts = scripts
+        self.frame_allowance = frame_allowance
+        self.frames_kept = 0
+        self.host = host
+        self.finished: str | None = None  # set by the finish tool
         self._last_call: str | None = None
         self._repeats = 0
         self._test_streak = 0
 
+    def schemas(self) -> list[dict]:
+        return [_SCHEMAS[name] for name in self.allowed]
+
+    def frames_left(self) -> int:
+        if self.frame_allowance is None:
+            return self.run.frames_left
+        return max(0, min(self.run.frames_left, self.frame_allowance - self.frames_kept))
+
+    def _cap(self) -> int | None:
+        return None if self.frame_allowance is None else self.frames_left()
+
     def call(self, name: str, args) -> ToolResult:
         if not isinstance(args, dict):
             return ToolResult(f"Error: arguments for {name} must be a JSON object.")
-        method = getattr(self, f"_{name}", None) if name in TOOL_NAMES else None
+        method = getattr(self, f"_{name}", None) if name in self.allowed else None
         if method is None:
-            return ToolResult(f"Error: there's no tool called {name!r}. "
-                              f"Tools: {', '.join(TOOL_NAMES)}.")
+            return ToolResult(f"Error: you don't have a tool called {name!r}. "
+                              f"Your tools: {', '.join(self.allowed)}.")
+        frame = self.run.frame
         try:
             result = method(args)
         except (ToolError, ScriptError) as e:
             result = ToolResult(f"Error: {e}")
+        if name != "run_subagent":  # a sub-agent's frames count against its own allowance
+            self.frames_kept += self.run.frame - frame
         if len(result.text) > MAX_TOOL_TEXT:
             result.text = result.text[:MAX_TOOL_TEXT] + "\n…[cut]"
         result.text += self._notes(name, args)
@@ -182,8 +242,18 @@ class Tools:
         return "".join(f"\nNote: {note}" for note in notes)
 
     def _game_step_allowed(self, test: bool) -> None:
-        if not test and self.run.frames_left == 0:
+        if not test and self.frames_left() == 0:
             raise ToolError("the frame budget is used up; only test runs are possible")
+
+    def _budget(self) -> str:
+        line = self.run.budget_line()
+        if self.frame_allowance is not None:
+            line += f" [your allowance: {self.frames_left()} frames left]"
+        return line
+
+    def _trace_result(self, trace: Trace) -> ToolResult:
+        return ToolResult(f"{trace.to_text(self.trace_budget)}\n{self._budget()}",
+                          trace.images, trace)
 
     # -- game ---------------------------------------------------------------
 
@@ -196,14 +266,19 @@ class Tools:
                 script_args = json.loads(script_args)
             except json.JSONDecodeError:
                 raise ToolError("args must be a JSON object of keyword arguments") from None
-        trace = self.run.run_script(_str(args, "name"), script_args, test=test, agent=self.agent)
-        return _trace_result(self.run, trace, self.trace_budget)
+        name = _str(args, "name")
+        if self.scripts is not None and name not in self.scripts:
+            raise ToolError(f"you may only run these scripts: {', '.join(self.scripts)}")
+        trace = self.run.run_script(name, script_args, test=test, agent=self.agent,
+                                    max_frames=self._cap())
+        return self._trace_result(trace)
 
     def _run_code(self, args: dict) -> ToolResult:
         test = _bool(args, "test")
         self._game_step_allowed(test)
-        trace = self.run.run_code(_str(args, "code"), test=test, agent=self.agent)
-        return _trace_result(self.run, trace, self.trace_budget)
+        trace = self.run.run_code(_str(args, "code"), test=test, agent=self.agent,
+                                  max_frames=self._cap())
+        return self._trace_result(trace)
 
     def _press(self, args: dict) -> ToolResult:
         self._game_step_allowed(False)
@@ -216,17 +291,18 @@ class Tools:
         wait = _int(args, "after", 16, 0, 600)
         code = (f"game.press({button!r})\ngame.tick({hold})\ngame.release({button!r})\n"
                 + (f"game.tick({wait})\n" if wait else ""))
-        trace = self.run.run_code(code, agent=self.agent, title=f"press({button})")
-        return _trace_result(self.run, trace, self.trace_budget)
+        trace = self.run.run_code(code, agent=self.agent, title=f"press({button})",
+                                  max_frames=self._cap())
+        return self._trace_result(trace)
 
     def _wait(self, args: dict) -> ToolResult:
         self._game_step_allowed(False)
         frames = _int(args, "frames", None, 1, 3_600)
-        shortened = frames > self.run.frames_left
-        frames = min(frames, self.run.frames_left)
+        shortened = frames > self.frames_left()
+        frames = min(frames, self.frames_left())
         trace = self.run.run_code(f"game.tick({frames})", agent=self.agent,
-                                  title=f"wait({frames})")
-        result = _trace_result(self.run, trace, self.trace_budget)
+                                  title=f"wait({frames})", max_frames=self._cap())
+        result = self._trace_result(trace)
         if shortened:
             result.text = f"(Shortened to the {frames} frames left in the budget.)\n" + result.text
         return result
@@ -303,6 +379,57 @@ class Tools:
         name = _str(args, "name")
         return ToolResult("\n".join(f"{c.version} {c.date[:16]} {c.reason}"
                                     for c in self.run.library.history(name)))
+
+    # -- sub-agents ---------------------------------------------------------
+
+    def _define_subagent(self, args: dict) -> ToolResult:
+        from gb_agent.subagents import check_spec
+
+        spec = check_spec(args, parent_tools=list(self.allowed), allow_paid=self.host.allow_paid,
+                          parent_model=self.host.parent_profile)
+        version, changed = self.run.library.write_subagent(
+            spec.name, spec.to_json(), _str(args, "reason"),
+            agent=self.agent, run=self.run.id, step=self.run.step)
+        if not changed:
+            return ToolResult(f"Nothing saved: that's identical to the current {spec.name} "
+                              f"(version {version}).")
+        return ToolResult(f"Saved sub-agent {spec.name} as version {version}. Give it a job "
+                          f"with run_subagent(name={spec.name!r}, task=...).")
+
+    def _run_subagent(self, args: dict) -> ToolResult:
+        from gb_agent.subagents import DEFAULT_CALLS, DEFAULT_FRAMES, MAX_CALLS
+
+        name = _str(args, "name")
+        task = _str(args, "task")[:2_000]
+        max_calls = _int(args, "max_calls", DEFAULT_CALLS, 1, MAX_CALLS)
+        max_frames = _int(args, "max_frames", min(DEFAULT_FRAMES, self.frames_left()), 0,
+                          max(0, self.frames_left()))
+        result = self.host.run_subagent(name, task, max_calls=max_calls,
+                                        max_frames=max_frames, parent=self.agent)
+        text = (f"Sub-agent {result.agent} ({name} @ {result.version}) ended: {result.reason}. "
+                f"It used {result.calls} LLM calls and {result.frames} frames "
+                f"({result.kept_steps} steps kept).\nIts summary: {result.summary}\n"
+                f"{self._budget()}")
+        return ToolResult(text, [(f"the screen now (frame {self.run.frame})",
+                                  result.screen_png)])
+
+    def _list_subagents(self, args: dict) -> ToolResult:
+        specs = self.run.library.subagents()
+        if not specs:
+            return ToolResult("You have no sub-agents yet. Make one with define_subagent.")
+        usage = self.run.library.usage(kind="subagent")
+        lines = []
+        for spec in specs:
+            use = usage.get(spec["name"])
+            stats = (f"{use['calls']} jobs, {use['calls'] - use['failures']} finished"
+                     if use else "never run")
+            lines.append(f"- {spec['name']} @ {spec['version']}: {spec['purpose']} "
+                         f"(tools: {', '.join(spec['tools'])}; model: {spec['model']}; {stats})")
+        return ToolResult("\n".join(lines))
+
+    def _finish(self, args: dict) -> ToolResult:
+        self.finished = _str(args, "summary")
+        return ToolResult("Finished. Your summary goes back to the agent that started you.")
 
     # -- people -------------------------------------------------------------
 

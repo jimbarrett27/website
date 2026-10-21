@@ -193,7 +193,7 @@ def test_an_agent_that_stops_calling_tools_ends_the_run(make_run):
     run = make_run()
     reason, model, _ = play(run, [say(text="hmm"), say(text="thinking"), say(text="done")])
     assert reason == "agent_stopped"
-    assert "Keep playing" in model.seen[1][-1].content
+    assert "Keep going" in model.seen[1][-1].content
 
 
 def test_the_call_limit_ends_the_run(make_run):

@@ -13,6 +13,7 @@ from gb_agent.agent import GameAgent
 from gb_agent.models import PROFILES, build_chat_model, get_profile
 from gb_agent.run import ExperimentConfig, Run
 from gb_agent.steps import StepLimits
+from gb_agent.subagents import SubAgentHost
 
 DEFAULT_GOAL = "Make as much progress in the game as you can."
 
@@ -29,7 +30,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--step-timeout", type=float, default=60, help="seconds per sandbox step")
     p.add_argument("--video", action="store_true", help="render run.mp4 at the end")
     p.add_argument("--no-notify", action="store_true", help="don't send blockers to Telegram")
-    p.add_argument("--allow-paid", action="store_true", help="allow a paid (OpenRouter) model")
+    p.add_argument("--allow-paid", action="store_true",
+                   help="allow a paid (OpenRouter) model, for the agent or its sub-agents")
     return p.parse_args(argv)
 
 
@@ -47,6 +49,7 @@ def main(argv=None) -> int:
         max_llm_calls=args.max_calls, max_tokens=args.max_tokens, max_minutes=args.max_minutes,
         step=replace(steps, sandbox=replace(steps.sandbox, timeout_s=args.step_timeout)),
         notify=not args.no_notify,
+        allow_paid=args.allow_paid,
     )
     run = Run(config)
     logging.basicConfig(
@@ -59,7 +62,9 @@ def main(argv=None) -> int:
     describer = None
     if not profile.vision and profile.describer:
         describer = build_chat_model(get_profile(profile.describer))
-    agent = GameAgent(run, build_chat_model(profile), profile, describer=describer)
+    host = SubAgentHost(run, profile, build_chat_model, allow_paid=args.allow_paid,
+                        describer=describer)
+    agent = GameAgent(run, build_chat_model(profile), profile, describer=describer, host=host)
     try:
         reason = agent.play()
     except KeyboardInterrupt:

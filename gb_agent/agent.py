@@ -24,14 +24,14 @@ from agents.utils import content_to_str
 from gb_agent.emulator import BUTTONS
 from gb_agent.models import ModelProfile
 from gb_agent.run import Run
-from gb_agent.tools import TOOL_SCHEMAS, Tools
+from gb_agent.tools import Tools
 
 logger = logging.getLogger(__name__)
 
 MAX_IDLE_TURNS = 3  # replies without a tool call, in a row, before the run ends
 LLM_RETRIES = 3
 
-SYSTEM_PROMPT = """\
+MAIN_INTRO = """\
 You are playing a Game Boy game through tools. Nobody is watching live; keep going \
 on your own until the run's budget runs out.
 
@@ -43,8 +43,15 @@ you're expected to play:
 - If you've done the same thing by hand twice, turn it into a script.
 - If a script doesn't do what you expected, read its report, fix it with \
 write_script, and try again with test=true.
-Pressing buttons directly is fine for a quick look, but don't play that way for long.
+Pressing buttons directly is fine for a quick look, but don't play that way for long."""
 
+SUB_INTRO = """\
+You are a helper working for another agent that plays a Game Boy game. You have one \
+job, given below. Work on it with your tools. When it's done, or you're sure you can't \
+do it, call finish with a short summary: what you did, what happened, and anything \
+the other agent should know. Only that summary goes back to it."""
+
+GAME_API = """\
 Scripts and snippets run in a sandbox with `game`, which has:
   game.press(button) / game.release(button)   buttons: {buttons}
   game.tick(frames=1)      advance time; 60 frames is about one second
@@ -60,18 +67,42 @@ with a docstring, for example:
       ...
 Scripts can use each other: `from library.walk_left import walk_left`.
 
-After each step you get a report (what happened, inputs used, notes, errors) and \
-screenshots. Use test=true on run_script or run_code to try something and throw the \
-result away: it costs no frames. Kept steps spend the frame budget.
+After each step you get a report (what happened, inputs used, how much of the screen \
+changed, notes, errors) and a screenshot. Use test=true on run_script or run_code to \
+try something and throw the result away: it costs no frames. Kept steps spend frames."""
 
+MAIN_CONTEXT = """\
 Your context is limited. When it fills up you'll be asked to write notes for \
 yourself, and everything else you've seen will be forgotten, except your scripts. \
-If something seems impossible with the tools you have, use report_blocker.
+If something seems impossible with the tools you have, use report_blocker."""
 
+SUBAGENTS = """\
+You can also make sub-agents: helpers you design with define_subagent (instructions, \
+some of your tools, which scripts they may run) and give one job at a time with \
+run_subagent. A sub-agent starts with a fresh context and only its summary comes \
+back, so long or fiddly jobs (getting through a conversation, reaching a place, \
+testing a script until it works) don't fill up your own context. Write clear \
+instructions: it knows nothing except what you tell it."""
+
+EVERY_REPLY = """\
 Every reply should call a tool. If you want to think, write it briefly in the same \
-reply as the tool call.
+reply as the tool call."""
 
-The game: {notes}"""
+
+def system_prompt(notes: str, *, instructions: str | None = None,
+                  subagents: bool = False) -> str:
+    """The main agent's system prompt, or a sub-agent's when given its instructions."""
+    parts = [SUB_INTRO if instructions else MAIN_INTRO, GAME_API.format(buttons=", ".join(BUTTONS))]
+    if not instructions:
+        parts.append(MAIN_CONTEXT)
+        if subagents:
+            parts.append(SUBAGENTS)
+    parts.append(EVERY_REPLY)
+    if instructions:
+        parts.append(f"Your instructions, from the agent that made you:\n{instructions}")
+    parts.append(f"The game: {notes or '(no notes)'}")
+    return "\n\n".join(parts)
+
 
 COMPACT_PROMPT = """\
 Your context is nearly full and is about to be cleared. Write notes for yourself: \
@@ -112,21 +143,33 @@ def _estimate_tokens(messages: list[AnyMessage]) -> int:
 
 
 class GameAgent:
+    """The main agent, or (given ``instructions`` and a ``task``) a sub-agent.
+
+    A sub-agent's ``tools`` are restricted by its spec; it ends when it calls
+    finish, uses ``max_calls`` LLM calls, or the run hits a limit.
+    """
+
     def __init__(self, run: Run, llm: BaseChatModel, profile: ModelProfile, *,
-                 name: str = "main", describer: BaseChatModel | None = None):
+                 name: str = "main", describer: BaseChatModel | None = None,
+                 tools: Tools | None = None, host=None, instructions: str | None = None,
+                 task: str | None = None, max_calls: int | None = None):
         self.run = run
         self.profile = profile
         self.name = name
         self.base_llm = llm
-        self.llm = llm.bind_tools(TOOL_SCHEMAS)
+        self.tools = tools or Tools(run, agent=name, host=host)
+        schemas = self.tools.schemas()
+        self.llm = llm.bind_tools(schemas)
         # Same tools in the prompt, so the server can reuse the cached prefix (the
         # tool definitions are part of it), but the model must answer in text.
-        self.notes_llm = llm.bind_tools(TOOL_SCHEMAS, tool_choice="none")
+        self.notes_llm = llm.bind_tools(schemas, tool_choice="none")
         self.describer = describer
-        self.tools = Tools(run, agent=name)
-        self.system = SystemMessage(SYSTEM_PROMPT.format(
-            buttons=", ".join(BUTTONS),
-            notes=run.game.notes or "(no notes)"))
+        self.task = task
+        self.max_calls = max_calls
+        self.calls = 0  # this agent's own LLM calls
+        self.system = SystemMessage(system_prompt(
+            run.game.notes, instructions=instructions,
+            subagents="run_subagent" in self.tools.allowed))
         self.messages: list[AnyMessage] = []
         self.context_tokens = 0  # as of the last call
         self.compactions = 0
@@ -134,6 +177,14 @@ class GameAgent:
     # -- messages -----------------------------------------------------------
 
     def _opening(self, notes: str | None = None) -> list[AnyMessage]:
+        if self.task is not None:
+            text = (f"Your job: {self.task}\n\nYou can use {self.max_calls} LLM calls and "
+                    f"{self.tools.frames_left()} frames. {self.tools._budget()}\n\n"
+                    "Call finish when you're done.")
+            if notes:
+                text += f"\n\nYour notes from earlier in this job:\n{notes}"
+            return [self.system, self._with_screens(text, [
+                (f"the screen now (frame {self.run.frame})", self.run.screenshot_png())])]
         c = self.run.config
         text = (f"Your goal: {c.goal}\n\nBudget: {c.frame_budget} frames "
                 f"(about {c.frame_budget // 60} seconds of game time), {c.max_llm_calls} LLM "
@@ -173,7 +224,7 @@ class GameAgent:
     def play(self) -> str:
         self.messages = self._opening()
         idle = 0
-        while (reason := self.run.limit_reached()) is None:
+        while (reason := self._limit_reached()) is None:
             if self.context_tokens > self.profile.context_window * self.profile.compact_at:
                 self._compact()
             try:
@@ -190,7 +241,7 @@ class GameAgent:
                 if idle >= MAX_IDLE_TURNS:
                     return "agent_stopped"
                 self.messages.append(HumanMessage(
-                    f"Keep playing: call a tool. {self.run.budget_line()}"))
+                    f"Keep going: call a tool. {self.tools._budget()}"))
                 continue
             idle = 0
 
@@ -213,6 +264,15 @@ class GameAgent:
                     "Screenshots from that step are below. Call your next tool.", images))
         return reason
 
+    def _limit_reached(self) -> str | None:
+        if self.tools.finished is not None:
+            return "finished"
+        if self.max_calls is not None and self.calls >= self.max_calls:
+            return "max_calls"
+        if self.task is not None and self.tools.frames_left() == 0 and self.run.frames_left:
+            return "max_frames"
+        return self.run.limit_reached()
+
     def _invoke(self, llm, messages: list[AnyMessage], *, purpose: str) -> AIMessage:
         for attempt in range(LLM_RETRIES):
             started = time.monotonic()
@@ -229,6 +289,7 @@ class GameAgent:
         input_tokens = usage.get("input_tokens") or _estimate_tokens(messages)
         output_tokens = usage.get("output_tokens") or len(content_to_str(response.content)) // 3
         self.run.llm_calls += 1
+        self.calls += 1
         self.run.tokens += input_tokens + output_tokens
         self.run.save_manifest()  # kept current, so a killed run still has one
         if purpose == "act":

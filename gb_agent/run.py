@@ -51,6 +51,7 @@ class ExperimentConfig:
     max_minutes: float = 240
     step: StepLimits = field(default_factory=StepLimits)
     notify: bool = True
+    allow_paid: bool = False  # may sub-agents use paid (OpenRouter) models?
 
 
 def new_run_id(config: ExperimentConfig) -> str:
@@ -128,29 +129,31 @@ class Run:
 
     # -- steps --------------------------------------------------------------
 
-    def _limits(self, test: bool) -> StepLimits:
+    def _limits(self, test: bool, max_frames: int | None = None) -> StepLimits:
+        """Step limits; a kept step can't pass the budget (or ``max_frames``, if given)."""
         step = self.config.step
         if test:
             return step
-        return replace(step, max_frames=min(step.max_frames, self.frames_left))
+        cap = self.frames_left if max_frames is None else min(self.frames_left, max_frames)
+        return replace(step, max_frames=min(step.max_frames, cap))
 
     def run_script(self, name: str, args: dict | None, *, test: bool = False,
-                   agent: str = "main") -> Trace:
+                   agent: str = "main", max_frames: int | None = None) -> Trace:
         self.step += 1
         outcome, trace, version = run_script(
             self.library, name, args, rom_path=self.game.rom, state=self.state,
-            start_frame=self.frame, watch=self.watch, limits=self._limits(test),
+            start_frame=self.frame, watch=self.watch, limits=self._limits(test, max_frames),
             image=self.image)
         self._finish_step(outcome, trace, test=test, agent=agent, script=name,
                           version=version, args=args)
         return trace
 
     def run_code(self, code: str, *, test: bool = False, agent: str = "main",
-                 title: str | None = None) -> Trace:
+                 title: str | None = None, max_frames: int | None = None) -> Trace:
         self.step += 1
         outcome, trace = run_code(self.library, code, rom_path=self.game.rom, state=self.state,
                                   start_frame=self.frame, watch=self.watch,
-                                  limits=self._limits(test), image=self.image)
+                                  limits=self._limits(test, max_frames), image=self.image)
         if title:
             trace.title = title
         self._finish_step(outcome, trace, test=test, agent=agent, code=code)
