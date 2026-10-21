@@ -37,7 +37,17 @@ class ModelProfile:
         return self.provider != "local"
 
 
+# The local server runs one model at a time (VISION_MODEL in run-vision-server.sh,
+# 8b by default), so only the matching local profile works at any moment.
 PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
+    ModelProfile(
+        name="qwen3-vl-8b-local",
+        provider="local",
+        model="qwen3-vl-8b",  # llama-server's --alias
+        base_url=LOCAL_SERVER,
+        context_window=16_384,
+        vision=True,
+    ),
     ModelProfile(
         name="qwen3-vl-2b-local",
         provider="local",

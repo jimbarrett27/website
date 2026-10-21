@@ -20,7 +20,7 @@ DEFAULT_GOAL = "Make as much progress in the game as you can."
 def parse_args(argv=None) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="python -m gb_agent.play", description=__doc__)
     p.add_argument("--game", default="silver")
-    p.add_argument("--model", default="qwen3-vl-2b-local", choices=sorted(PROFILES))
+    p.add_argument("--model", default="qwen3-vl-8b-local", choices=sorted(PROFILES))
     p.add_argument("--goal", default=DEFAULT_GOAL)
     p.add_argument("--frames", type=int, default=10_000, help="frame budget (kept steps only)")
     p.add_argument("--max-calls", type=int, default=300, help="LLM calls")
