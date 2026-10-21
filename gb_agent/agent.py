@@ -233,6 +233,9 @@ class GameAgent:
         self.run.tokens += input_tokens + output_tokens
         if purpose == "act":
             self.context_tokens = input_tokens + output_tokens
+        logger.info("%s call %d (%s): %.1fs, %d in / %d out, tools: %s", self.name,
+                    self.run.llm_calls, purpose, time.monotonic() - started, input_tokens,
+                    output_tokens, ", ".join(c["name"] for c in response.tool_calls or []) or "-")
         self.run.log_agent({
             "agent": self.name, "kind": "llm", "purpose": purpose,
             "seconds": round(time.monotonic() - started, 1),

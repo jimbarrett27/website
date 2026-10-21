@@ -52,7 +52,6 @@ def main(argv=None) -> int:
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         handlers=[logging.StreamHandler(), logging.FileHandler(run.dir / "run.log")],
-        force=True,  # something imported earlier has already configured logging
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
     print(f"run {run.id}\n  {run.dir}", flush=True)

@@ -180,6 +180,8 @@ class Run:
             (self.dir / "states" / f"step{step:05d}.state").write_bytes(self.state)
             self._log_progress()
 
+        logger.info("step %d %s: %s, frames %d→%d, %s", step, trace.title, outcome.sandbox.status,
+                    outcome.start_frame, outcome.end_frame, "kept" if kept else "not kept")
         _jsonl(self.dir / "steps.jsonl", {
             "step": step, "agent": agent, "kept": kept, "test": test,
             "script": script, "version": version, "args": args, "code": code,
