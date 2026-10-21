@@ -77,7 +77,8 @@ def validate_events(events, start_frame: int, end_frame: int, limits: StepLimits
             if type(frames) is not int or frames < 1:
                 return f"event {i} has a bad frame count: {event!r}"
             frame += frames
-            if frame - start_frame > limits.max_frames:
+            # +1: a step that ends with an input runs one more frame (end_step)
+            if frame - start_frame > limits.max_frames + 1:
                 return f"events advance more than the limit of {limits.max_frames} frames"
         elif kind in ("press", "release"):
             if event.get("button") not in BUTTONS:

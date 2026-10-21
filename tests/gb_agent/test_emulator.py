@@ -79,6 +79,41 @@ def test_steps_chain_on_one_timeline(test_rom, test_start):
     assert save_state(replayed) == save_state(pyboy)
 
 
+def test_a_step_ending_with_an_input_still_replays_continuously(test_rom, test_start):
+    """PyBoy queues inputs until the next frame and doesn't save the queue."""
+    pyboy = boot(test_rom, test_start)
+    first = RecordingGame(pyboy)
+    first.press("a")
+    first.tick(10)
+    first.press("start")  # still held, and queued, when the step ends
+    first.end_step()
+    assert first.events[-3:] == [
+        {"frame": 10, "type": "release", "button": "a"},
+        {"frame": 10, "type": "release", "button": "start"},
+        {"frame": 10, "type": "tick", "frames": 1},
+    ]
+    assert first.frame == 11 and first.held == set()
+    assert {e["button"] for e in first.events if e["type"] == "release"} == {"a", "start"}
+    middle = save_state(pyboy)
+
+    pyboy = boot(test_rom, middle)
+    second = RecordingGame(pyboy, start_frame=first.frame)
+    second.tap("b", after=20)
+    second.end_step()
+
+    replayed = boot(test_rom, test_start)
+    apply_events(replayed, first.events + second.events)
+    assert save_state(replayed) == save_state(pyboy)
+
+
+def test_end_step_adds_nothing_when_the_step_is_already_clean(test_rom, test_start):
+    game = RecordingGame(boot(test_rom, test_start))
+    game.tap("a")
+    before = list(game.events)
+    game.end_step()
+    assert game.events == before
+
+
 def test_clock_is_locked_after_a_state_load(test_rom, test_start):
     pyboy = boot(test_rom, test_start)
     before = latch_rtc_seconds(pyboy)

@@ -76,6 +76,10 @@ class Harness:
 
     def finish(self) -> dict:
         game = self.game
+        try:
+            game.end_step()
+        except Exception:
+            pass  # e.g. the event limit; the replay check still guards the record
         return {
             "state": _b64(save_state(self._pyboy)),
             "events": game.events,

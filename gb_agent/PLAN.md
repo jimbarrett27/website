@@ -272,16 +272,47 @@ problems with the setup get noticed.
 | `write_script(name, code, reason)` | Creates or updates a script (a new version). |
 | `read_script(name, version)` | Current or past source. |
 | `list_scripts()` | Names, docstrings, how often each is used and how often it fails. |
-| `press(button, frames)` | Direct play, through the same recorded path. |
+| `script_history(name)` | Every change to a script, newest first. |
+| `press(button, hold_frames, wait_frames)` | Direct play, through the same recorded path. |
+| `wait(frames)` | Let the game run; shortened to what's left of the budget. |
 | `screenshot()` / `read_memory(addr, length)` | Look without advancing. |
-| `watch_memory(addr, label)` | Add an address to the watch list used in traces. |
+| `watch_memory(label, addr, length, remove)` | Add or remove memory in the watch list used in traces. |
 | `define_subagent(spec, reason)` | Creates or updates a sub-agent. |
 | `run_subagent(name, task)` | Hands a job to a sub-agent and returns its summary. |
 | `list_subagents()` | Names, purposes, usage. |
 | `report_blocker(problem, tried, would_help)` | Tells Jim something seems impossible. |
 
-Bounds on the agent side: a per-turn `recursion_limit`, with `GraphRecursionError`
-caught. (Telling the model to stop wasn't enough last time; the hard limit was.)
+Bounds on the agent side: the run's limits (frames, LLM calls, tokens, minutes) are
+checked before every model call, and three replies in a row without a tool call end
+the run. (Telling a model to stop wasn't enough last time; hard limits were.)
+
+### The agent loop (`gb_agent/agent.py`)
+
+Written on LangChain's chat-model interface rather than with `agents.Agent`, which
+keeps every message and returns tool results as text only. A small local model needs
+control over its context:
+
+- **Append-only.** llama-server reuses the work for an unchanged prompt prefix, so
+  appending costs only new tokens; dropping old messages forces the whole prompt to be
+  re-read (measured: 69 tokens/s, so a full 16k context takes about 4 minutes).
+- **Compaction.** At 75% of the profile's context window the model writes notes for
+  itself, and the context restarts from the system prompt, the goal, those notes and
+  the current screen. Scripts survive regardless.
+- **Screenshots** follow the tool results as a user message, only for the latest step
+  (before and after), doubled in size. A profile without vision gets descriptions from
+  a describer profile instead.
+
+### Step boundaries
+
+PyBoy queues button events until the next frame, and the queue isn't in save states
+(which buttons are held is). So every step ends with `RecordingGame.end_step()`:
+buttons still held are released, and if inputs are waiting one more frame runs. Both
+are recorded. Without it, per-step checks pass but replaying a whole run diverges.
+
+### Paid models
+
+OpenRouter profiles are defined in `gb_agent/models.py`, but `gb_agent.play` refuses
+them without `--allow-paid`. Tests use a scripted fake model.
 
 ## The run directory
 
@@ -379,11 +410,11 @@ Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
   sized by a context budget.
 - Script imports between library scripts, and usage stats per version.
 
-### Chunk 4: the agent and experiments
+### Chunk 4: the agent and experiments (done 2026-10-21)
 
 - `ModelProfile`, the profiles module, and building a chat model from a profile.
-- The tools above (except sub-agents), including `report_blocker`, and an
-  `agents.Agent` wired to them.
+- The tools above (except sub-agents), including `report_blocker`, and the agent
+  loop (its own, not `agents.Agent`; see above).
 - Experiment configs, the run loop with every limit, and the run directory.
 - `python -m gb_agent.play --game silver --model <profile> --frames N --goal "..."`.
 

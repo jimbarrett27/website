@@ -108,6 +108,20 @@ class RecordingGame:
         for hook in self._after_tick:
             hook()
 
+    def end_step(self) -> None:
+        """Leave the game in a state a save captures completely.
+
+        PyBoy queues button events until the next frame, and the queue isn't part
+        of a save state (which buttons are held is). So any button still held is
+        released, and if inputs are waiting, one more frame runs so they land.
+        That frame may go one past the step's frame limit.
+        """
+        for button in sorted(self.held):
+            self.release(button)
+        if self.events and self.events[-1]["type"] != "tick":
+            self._record({"frame": self.frame, "type": "tick", "frames": 1})
+            self.frame += 1
+
     def tap(self, button: str, hold: int = 2, after: int = 6) -> None:
         """Press ``button`` for ``hold`` frames, release it, then wait ``after`` frames."""
         self.press(button)
