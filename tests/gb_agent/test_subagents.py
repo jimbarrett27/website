@@ -165,7 +165,7 @@ def test_a_sub_agent_is_held_to_its_frame_allowance(make_run):
     assert run.frame == 60
     assert len(sub.seen) == 1  # the allowance was gone, so no second call
     [waited] = [r for r in jsonl(run, "agents.jsonl") if r.get("tool") == "wait"]
-    assert waited["agent"] == "walker#1" and "Shortened to the 60 frames" in waited["result"]
+    assert waited["agent"] == "walker#1" and "Shortened to 60 frames" in waited["result"]
 
 
 @needs_docker[0]
@@ -180,6 +180,17 @@ def test_a_sub_agent_that_never_finishes_runs_out_of_calls(make_run):
     assert "ended without calling finish" in text
     usage = run.library.usage(kind="subagent")["walker"]
     assert usage["failures"] == 1
+
+
+@needs_docker[0]
+@needs_docker[1]
+def test_the_opening_suggests_sub_agents_only_when_available(make_run):
+    run = make_run()
+    with_host = GameAgent(run, ScriptedModel(), LOCAL, host=host_for(run, None))
+    without = GameAgent(run, ScriptedModel(), LOCAL)
+    assert "consider a sub-agent" in with_host._opening()[1].content[0]["text"]
+    assert "consider a sub-agent" not in without._opening()[1].content[0]["text"]
+    assert "consider a sub-agent" not in with_host._opening("notes")[1].content[0]["text"]
 
 
 @needs_docker[0]

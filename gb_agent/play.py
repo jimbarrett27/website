@@ -11,7 +11,7 @@ from dataclasses import replace
 
 from gb_agent.agent import GameAgent
 from gb_agent.models import PROFILES, build_chat_model, get_profile
-from gb_agent.run import ExperimentConfig, Run
+from gb_agent.run import STEP_FRAMES, ExperimentConfig, Run
 from gb_agent.steps import StepLimits
 from gb_agent.subagents import SubAgentHost
 
@@ -28,6 +28,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--max-tokens", type=int, default=5_000_000)
     p.add_argument("--max-minutes", type=float, default=240)
     p.add_argument("--step-timeout", type=float, default=60, help="seconds per sandbox step")
+    p.add_argument("--step-frames", type=int, default=STEP_FRAMES,
+                   help="most frames one kept step may use")
     p.add_argument("--video", action="store_true", help="render run.mp4 at the end")
     p.add_argument("--no-notify", action="store_true", help="don't send blockers to Telegram")
     p.add_argument("--allow-paid", action="store_true",
@@ -43,7 +45,7 @@ def main(argv=None) -> int:
               file=sys.stderr)
         return 2
 
-    steps = StepLimits()
+    steps = StepLimits(max_frames=args.step_frames)
     config = ExperimentConfig(
         game=args.game, model=args.model, goal=args.goal, frame_budget=args.frames,
         max_llm_calls=args.max_calls, max_tokens=args.max_tokens, max_minutes=args.max_minutes,

@@ -192,7 +192,11 @@ class GameAgent:
                 + (", ".join(i.name for i in self.run.library.scripts()) or "nothing yet")
                 + ". Use list_scripts and read_script to look at them."
                 + ("\n\nStart by writing a script of your own for something you expect to "
-                   "do often, and run it." if notes is None else ""))
+                   "do often, and run it." if notes is None else "")
+                + ("\n\nOnce you have a script or two, consider a sub-agent for a job that "
+                   "takes many steps, such as exploring a room or getting through a "
+                   "conversation. It keeps that work out of your own context."
+                   if notes is None and "run_subagent" in self.tools.allowed else ""))
         if notes:
             text += f"\n\nYour notes from earlier in this run:\n{notes}"
         return [self.system, self._with_screens(text, [

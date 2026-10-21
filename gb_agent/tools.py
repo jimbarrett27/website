@@ -298,13 +298,15 @@ class Tools:
     def _wait(self, args: dict) -> ToolResult:
         self._game_step_allowed(False)
         frames = _int(args, "frames", None, 1, 3_600)
-        shortened = frames > self.frames_left()
-        frames = min(frames, self.frames_left())
+        limit = min(self.frames_left(), self.run.config.step.max_frames)
+        shortened = frames > limit
+        frames = min(frames, limit)
         trace = self.run.run_code(f"game.tick({frames})", agent=self.agent,
                                   title=f"wait({frames})", max_frames=self._cap())
         result = self._trace_result(trace)
         if shortened:
-            result.text = f"(Shortened to the {frames} frames left in the budget.)\n" + result.text
+            result.text = (f"(Shortened to {frames} frames: the most one step may use, or "
+                           "what's left of the budget.)\n" + result.text)
         return result
 
     def _screenshot(self, args: dict) -> ToolResult:

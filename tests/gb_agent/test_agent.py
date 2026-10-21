@@ -295,6 +295,18 @@ def test_reports_say_how_much_of_the_screen_changed(make_run):
     assert "screen: " in text
 
 
+def test_kept_steps_are_capped_per_step(make_run):
+    from gb_agent.run import STEP_FRAMES, ExperimentConfig
+    from gb_agent.tools import Tools
+
+    assert ExperimentConfig("g", "m", "goal").step.max_frames == STEP_FRAMES == 600
+    run = make_run(step=StepLimits(max_frames=100, sandbox=SandboxLimits(timeout_s=20)))
+    tools = Tools(run)
+    assert tools.call("wait", {"frames": 500}).text.startswith("(Shortened to 100 frames")
+    assert "FrameLimitExceeded" in tools.call("run_code", {"code": "game.tick(150)"}).text
+    assert run.frame == 100  # the second step was refused at the limit, nothing advanced
+
+
 def test_budget_used_up_refuses_kept_steps_but_not_tests(make_run):
     run = make_run(frame_budget=30)
     run.frame = 30  # as if spent

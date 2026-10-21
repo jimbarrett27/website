@@ -40,6 +40,9 @@ from util.paths import data_path
 logger = logging.getLogger(__name__)
 
 
+STEP_FRAMES = 600
+
+
 @dataclass(frozen=True)
 class ExperimentConfig:
     game: str
@@ -49,7 +52,9 @@ class ExperimentConfig:
     max_llm_calls: int = 300
     max_tokens: int = 5_000_000
     max_minutes: float = 240
-    step: StepLimits = field(default_factory=StepLimits)
+    # 600 frames (10 s of game time) per kept step: one blind loop shouldn't be able
+    # to spend a big share of the budget (Gemma's loops spent up to 1,400).
+    step: StepLimits = field(default_factory=lambda: StepLimits(max_frames=STEP_FRAMES))
     notify: bool = True
     allow_paid: bool = False  # may sub-agents use paid (OpenRouter) models?
 
