@@ -182,6 +182,12 @@ traces only include memory the agent has chosen to watch. So finding its own pos
 in RAM is part of the task. A per-experiment hints switch (pre-watched addresses, an
 example script that reads them) can be added later to compare the two.
 
+**Game-agnostic helpers are fine (decided 2026-10-21).** Small local models couldn't
+tell whether an action did anything (Silver's first tap in a new direction only turns
+the player: 0.5% of pixels). So every report says how much of the screen changed, in
+plain words, and tool results add a note after 3 identical calls in a row or 4 test
+runs in a row. None of this knows anything about the game.
+
 ## Scripts
 
 A script is a Python file in the library exposing one function, with typed arguments

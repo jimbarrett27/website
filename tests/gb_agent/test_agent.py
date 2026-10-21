@@ -265,6 +265,36 @@ def test_press_takes_the_same_names_as_game_tap(make_run):
                                                   "wait_frames": 4}).text
 
 
+def test_repeated_identical_calls_get_a_note(make_run):
+    from gb_agent.tools import Tools
+
+    tools = Tools(make_run())
+    texts = [tools.call("read_memory", {"addr": "0xC000"}).text for _ in range(4)]
+    assert "Note:" not in texts[0] + texts[1]
+    assert "this exact call 3 times in a row" in texts[2]
+    assert "4 times" in texts[3]
+    assert "Note:" not in tools.call("read_memory", {"addr": "0xC001"}).text
+
+
+def test_long_test_run_streaks_get_a_note(make_run):
+    from gb_agent.tools import Tools
+
+    tools = Tools(make_run())
+    texts = [tools.call("run_code", {"code": f"game.tick({i + 1})", "test": True}).text
+             for i in range(4)]
+    assert "test runs in a row" not in texts[2]
+    assert "4 test runs in a row" in texts[3]
+    kept = tools.call("run_code", {"code": "game.tick(1)"}).text
+    assert "test runs in a row" not in kept
+
+
+def test_reports_say_how_much_of_the_screen_changed(make_run):
+    from gb_agent.tools import Tools
+
+    text = Tools(make_run()).call("wait", {"frames": 30}).text
+    assert "screen: " in text
+
+
 def test_budget_used_up_refuses_kept_steps_but_not_tests(make_run):
     run = make_run(frame_budget=30)
     run.frame = 30  # as if spent

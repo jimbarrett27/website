@@ -60,3 +60,41 @@ def test_an_unusable_step_says_nothing_was_kept():
     text = trace.to_text()
     assert "loop(): timeout (nothing kept)" in text
     assert "problem: no result" in text
+
+
+def _png(color, size=(160, 144), box=None):
+    import io
+
+    from PIL import Image, ImageDraw
+
+    image = Image.new("RGB", size, color)
+    if box:
+        ImageDraw.Draw(image).rectangle(box, fill="black")
+    out = io.BytesIO()
+    image.save(out, format="PNG")
+    return out.getvalue()
+
+
+def test_screen_change_measures_pixels():
+    from gb_agent.trace import screen_change
+
+    white = _png("white")
+    assert screen_change(white, white) == 0
+    assert screen_change(white, _png("white", box=(0, 0, 15, 8))) == 16 * 9 / (160 * 144)
+    assert screen_change(white, _png("red")) == 1.0
+    assert screen_change(white, _png("white", size=(10, 10))) == 1.0
+
+
+def test_screen_change_in_plain_words():
+    from gb_agent.trace import describe_change
+
+    assert describe_change(0).startswith("unchanged")
+    assert describe_change(0.005) == "a tiny part of the screen changed (0.5% of pixels)"
+    assert describe_change(0.26) == "part of the screen changed (26% of pixels)"
+    assert describe_change(0.55).startswith("most of the screen")
+
+
+def test_screen_change_appears_in_the_report():
+    trace = Trace(title="t()", status="ok", usable=True, start_frame=0, end_frame=1,
+                  screen_change=0.005)
+    assert "screen: a tiny part of the screen changed" in trace.to_text()

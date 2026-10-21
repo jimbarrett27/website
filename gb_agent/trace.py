@@ -31,6 +31,7 @@ class Trace:
     inputs: str = ""
     memory: list[tuple[str, list[int], list[int]]] = field(default_factory=list)
     images: list[tuple[str, bytes]] = field(default_factory=list)  # (caption, png)
+    screen_change: float | None = None  # share of pixels that differ, before vs after
     problem: str = ""
 
     @property
@@ -45,6 +46,8 @@ class Trace:
             head.append(f"problem: {self.problem}")
         if self.inputs:
             head.append(f"inputs: {self.inputs}")
+        if self.screen_change is not None:
+            head.append(f"screen: {describe_change(self.screen_change)}")
         if self.value is not None:
             head.append(f"returned: {_short(repr(self.value), 400)}")
         if self.memory:
@@ -99,6 +102,30 @@ def _short(text: str, limit: int, keep_end: bool = False) -> str:
     return text[:half] + marker + text[-half:] if half > 0 else text[:limit]
 
 
+def screen_change(before_png: bytes, after_png: bytes) -> float:
+    """The share of pixels that differ between two screenshots, 0 to 1."""
+    import io
+
+    from PIL import Image, ImageChops
+
+    before = Image.open(io.BytesIO(before_png)).convert("RGB")
+    after = Image.open(io.BytesIO(after_png)).convert("RGB")
+    if before.size != after.size:
+        return 1.0
+    diff = ImageChops.difference(before, after).convert("L").point(lambda v: 255 if v else 0)
+    return diff.histogram()[255] / (diff.width * diff.height)
+
+
+def describe_change(share: float) -> str:
+    """Plain words for a screen change, so a small model doesn't have to judge."""
+    if share == 0:
+        return "unchanged (identical before and after)"
+    percent = share * 100
+    amount = f"{percent:.1f}%" if percent < 1 else f"{percent:.0f}%"
+    size = "a tiny part" if share < 0.02 else "part" if share < 0.3 else "most"
+    return f"{size} of the screen changed ({amount} of pixels)"
+
+
 def summarize_inputs(events: list[dict]) -> str:
     """e.g. "left ×3, right ×3 (held ~16 frames)"."""
     presses = [e["button"] for e in events if e["type"] == "press"]
@@ -141,6 +168,8 @@ def build_trace(outcome: StepOutcome, title: str) -> Trace:
     trace.inputs = summarize_inputs(outcome.events)
     trace.memory = [(label, outcome.watch_before.get(label, []), after)
                     for label, after in outcome.watch_after.items()]
+    if outcome.before_png and outcome.screenshot_png:
+        trace.screen_change = screen_change(outcome.before_png, outcome.screenshot_png)
     if outcome.before_png:
         trace.images.append((f"before (frame {outcome.start_frame})", outcome.before_png))
     trace.images += [(f"frame {frame}", png) for frame, png in outcome.keyframes]

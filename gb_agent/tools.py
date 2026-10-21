@@ -14,6 +14,8 @@ from gb_agent.run import Run
 from gb_agent.trace import Trace
 
 MAX_TOOL_TEXT = 6_000
+REPEAT_NOTE_AT = 3  # identical calls in a row before saying so
+TEST_STREAK_NOTE_AT = 4  # test runs in a row before saying so
 
 
 @dataclass
@@ -142,6 +144,9 @@ class Tools:
         self.run = run
         self.agent = agent
         self.trace_budget = trace_budget
+        self._last_call: str | None = None
+        self._repeats = 0
+        self._test_streak = 0
 
     def call(self, name: str, args) -> ToolResult:
         if not isinstance(args, dict):
@@ -153,10 +158,28 @@ class Tools:
         try:
             result = method(args)
         except (ToolError, ScriptError) as e:
-            return ToolResult(f"Error: {e}")
+            result = ToolResult(f"Error: {e}")
         if len(result.text) > MAX_TOOL_TEXT:
             result.text = result.text[:MAX_TOOL_TEXT] + "\n…[cut]"
+        result.text += self._notes(name, args)
         return result
+
+    def _notes(self, name: str, args: dict) -> str:
+        """Plain-spoken nudges when the agent seems stuck in a loop."""
+        notes = []
+        call = f"{name} {json.dumps(args, sort_keys=True, default=str)}"
+        self._repeats = self._repeats + 1 if call == self._last_call else 1
+        self._last_call = call
+        if self._repeats >= REPEAT_NOTE_AT:
+            notes.append(f"You've made this exact call {self._repeats} times in a row. "
+                         "If it isn't doing what you want, try something different.")
+        if name in ("run_script", "run_code"):
+            self._test_streak = self._test_streak + 1 if _bool(args, "test") else 0
+            if self._test_streak >= TEST_STREAK_NOTE_AT:
+                notes.append(f"That's {self._test_streak} test runs in a row, and test runs "
+                             "never change the game. When something works, run it with "
+                             "test=false to keep its progress.")
+        return "".join(f"\nNote: {note}" for note in notes)
 
     def _game_step_allowed(self, test: bool) -> None:
         if not test and self.run.frames_left == 0:
