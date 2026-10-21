@@ -45,8 +45,21 @@ class ModelProfile:
 
 
 # The local server runs one model at a time (VISION_MODEL in run-vision-server.sh,
-# 8b by default), so only the matching local profile works at any moment.
+# set in the service's model.conf drop-in), so only the matching local profile
+# works at any moment.
 PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
+    ModelProfile(
+        name="gemma-4-26b-local",
+        provider="local",
+        model="gemma-4-26b-a4b",  # llama-server's --alias
+        base_url=LOCAL_SERVER,
+        context_window=16_384,
+        vision=True,
+        compact_at=0.5,
+        # Gemma thinks first (capped at 256 tokens by the server), and thinking
+        # counts against this, so leave room for the tool call after it.
+        max_output_tokens=1536,
+    ),
     ModelProfile(
         name="qwen3-vl-8b-local",
         provider="local",
