@@ -28,7 +28,6 @@ from gb_agent.tools import TOOL_SCHEMAS, Tools
 
 logger = logging.getLogger(__name__)
 
-COMPACT_AT = 0.75  # of the context window
 MAX_IDLE_TURNS = 3  # replies without a tool call, in a row, before the run ends
 LLM_RETRIES = 3
 
@@ -175,7 +174,7 @@ class GameAgent:
         self.messages = self._opening()
         idle = 0
         while (reason := self.run.limit_reached()) is None:
-            if self.context_tokens > self.profile.context_window * COMPACT_AT:
+            if self.context_tokens > self.profile.context_window * self.profile.compact_at:
                 self._compact()
             try:
                 response = self._invoke(self.llm, self.messages, purpose="act")
@@ -231,6 +230,7 @@ class GameAgent:
         output_tokens = usage.get("output_tokens") or len(content_to_str(response.content)) // 3
         self.run.llm_calls += 1
         self.run.tokens += input_tokens + output_tokens
+        self.run.save_manifest()  # kept current, so a killed run still has one
         if purpose == "act":
             self.context_tokens = input_tokens + output_tokens
         logger.info("%s call %d (%s): %.1fs, %d in / %d out, tools: %s", self.name,

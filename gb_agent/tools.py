@@ -60,10 +60,10 @@ TOOL_SCHEMAS = [
     _fn("script_history", "Show every change to a script, newest first.", {
         "name": {"type": "string"},
     }, ["name"]),
-    _fn("press", "Press one button: hold it, release, then wait.", {
+    _fn("press", "Press one button: hold it, release, then wait (like game.tap).", {
         "button": {"type": "string", "enum": list(BUTTONS)},
-        "hold_frames": {"type": "integer", "description": "default 8"},
-        "wait_frames": {"type": "integer", "description": "default 16"},
+        "hold": {"type": "integer", "description": "frames to hold it, default 8"},
+        "after": {"type": "integer", "description": "frames to wait after, default 16"},
     }, ["button"]),
     _fn("wait", "Let the game run without pressing anything.", {
         "frames": {"type": "integer", "description": "60 frames is about one second"},
@@ -187,8 +187,10 @@ class Tools:
         button = args.get("button")
         if button not in BUTTONS:
             raise ToolError(f"button must be one of {', '.join(BUTTONS)}")
-        hold = _int(args, "hold_frames", 8, 1, 600)
-        wait = _int(args, "wait_frames", 16, 0, 600)
+        # hold_frames/wait_frames: the names this tool used before matching game.tap
+        args = {"hold": args.get("hold_frames", 8), "after": args.get("wait_frames", 16), **args}
+        hold = _int(args, "hold", 8, 1, 600)
+        wait = _int(args, "after", 16, 0, 600)
         code = (f"game.press({button!r})\ngame.tick({hold})\ngame.release({button!r})\n"
                 + (f"game.tick({wait})\n" if wait else ""))
         trace = self.run.run_code(code, agent=self.agent, title=f"press({button})")
@@ -244,7 +246,12 @@ class Tools:
 
     def _write_script(self, args: dict) -> ToolResult:
         name = _str(args, "name")
-        version = self.run.library.write(name, _str(args, "code"), _str(args, "reason"),
+        code = _str(args, "code")
+        library = self.run.library
+        if library.exists(name) and library.read(name) == code:
+            return ToolResult(f"Nothing saved: that's identical to the current {name} "
+                              f"(version {library.version(name)}). Change the code to fix it.")
+        version = self.run.library.write(name, code, _str(args, "reason"),
                                          agent=self.agent, run=self.run.id, step=self.run.step)
         return ToolResult(f"Saved {name} as version {version}. "
                           f"Run it with run_script(name={name!r}, args={{...}}).")

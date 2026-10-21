@@ -29,8 +29,15 @@ class ModelProfile:
     base_url: str | None = None  # for local
     temperature: float = 0.7
     max_output_tokens: int = 1024
-    images_per_step: int = 2  # screenshots shown after each step (before, after)
+    # Screenshots shown after each step, latest first: 1 is just "after" (the
+    # "before" is normally the previous step's "after", already in context).
+    # Each costs ~25 s of image encoding on this CPU with the 8B.
+    images_per_step: int = 1
     describer: str | None = None  # without vision: profile that describes screens
+    # Compact when the context reaches this share of context_window. Local models
+    # compact earlier: on this CPU generation slows as the context grows (the 8B
+    # took ~140 s a call at 12k tokens).
+    compact_at: float = 0.75
 
     @property
     def paid(self) -> bool:
@@ -47,6 +54,7 @@ PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
         base_url=LOCAL_SERVER,
         context_window=16_384,
         vision=True,
+        compact_at=0.5,
     ),
     ModelProfile(
         name="qwen3-vl-2b-local",
@@ -55,6 +63,7 @@ PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
         base_url=LOCAL_SERVER,
         context_window=16_384,
         vision=True,
+        compact_at=0.5,
     ),
     ModelProfile(
         name="qwen3-vl-8b",
@@ -68,7 +77,7 @@ PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
         name="claude-haiku-5.5",
         provider="openrouter",
         model="anthropic/claude-haiku-5.5",
-        context_window=64_000,
+        context_window=24_000,  # every call re-sends the context, so this sets cost
         vision=True,
         max_output_tokens=2048,
     ),

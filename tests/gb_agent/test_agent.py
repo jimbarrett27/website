@@ -208,7 +208,8 @@ def test_screenshots_follow_game_steps(make_run):
     last = model.seen[1][-1]
     assert isinstance(last, HumanMessage)
     images = [p for p in last.content if p.get("type") == "image_url"]
-    assert len(images) == 2  # before and after
+    assert len(images) == 1  # just "after": "before" is the previous step's "after"
+    assert "after (frame 30)" in last.content[0]["text"]
     assert images[0]["image_url"]["url"].startswith("data:image/png;base64,")
     # the opening message shows the screen too
     assert any(p.get("type") == "image_url" for p in model.seen[0][1].content)
@@ -240,6 +241,28 @@ def test_compaction_restarts_from_notes(make_run):
     assert "Notes: waiting works" in opening
     assert [r["kind"] for r in jsonl(run, "agents.jsonl")].count("compaction") == 1
     assert run.frame == 20
+
+
+def test_rewriting_a_script_unchanged_says_so(make_run):
+    from gb_agent.tools import Tools
+
+    run = make_run()
+    tools = Tools(run)
+    code = run.library.read("walk")
+    assert tools.call("write_script", {"name": "walk", "code": code, "reason": "again"}) \
+        .text.startswith("Nothing saved")
+    assert "Saved walk" in tools.call("write_script", {
+        "name": "walk", "code": code.replace("20", "30"), "reason": "longer"}).text
+
+
+def test_press_takes_the_same_names_as_game_tap(make_run):
+    from gb_agent.tools import Tools
+
+    run = make_run()
+    tools = Tools(run)
+    assert "frames 0→7" in tools.call("press", {"button": "a", "hold": 3, "after": 4}).text
+    assert "frames 7→14" in tools.call("press", {"button": "a", "hold_frames": 3,
+                                                  "wait_frames": 4}).text
 
 
 def test_budget_used_up_refuses_kept_steps_but_not_tests(make_run):

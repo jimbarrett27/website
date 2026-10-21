@@ -96,7 +96,7 @@ class Run:
         self.started_at = datetime.now(timezone.utc).isoformat()
         self.stop_reason: str | None = None
         self._log_progress()
-        self._write_manifest()
+        self.save_manifest()
 
     # -- budget -------------------------------------------------------------
 
@@ -244,7 +244,7 @@ class Run:
         return self.blockers.report(problem, tried, would_help, agent=agent,
                                     step=self.step, frame=self.frame)
 
-    def _write_manifest(self) -> None:
+    def save_manifest(self) -> None:
         manifest = {
             "run": self.id,
             "config": asdict(self.config),
@@ -265,7 +265,7 @@ class Run:
 
     def finish(self, stop_reason: str, *, video: bool = False) -> None:
         self.stop_reason = stop_reason
-        self._write_manifest()
+        self.save_manifest()
         (self.dir / "states" / "final.state").write_bytes(self.state)
         if video:
             self.render_video()
