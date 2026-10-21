@@ -9,7 +9,7 @@ declared here.
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from gb_agent.emulator import power_on_state
+from gb_agent.emulator import RecordingGame, boot, power_on_state, save_state
 
 
 @dataclass(frozen=True)
@@ -21,11 +21,31 @@ class MemRef:
     bank: int | None = None
 
 
+def apply_setup(game: RecordingGame, commands: tuple[str, ...]) -> None:
+    """Play a profile's setup inputs.
+
+    Each command is ``t:N`` (wait N frames), ``BUTTON`` (a short tap), or
+    ``BUTTON:HOLD:AFTER`` (hold for HOLD frames, then wait AFTER frames).
+    """
+    for command in commands:
+        parts = command.split(":")
+        if parts[0] == "t" and len(parts) == 2:
+            game.tick(int(parts[1]))
+        elif len(parts) == 1:
+            game.tap(parts[0])
+        elif len(parts) == 3:
+            game.tap(parts[0], hold=int(parts[1]), after=int(parts[2]))
+        else:
+            raise ValueError(f"bad setup command {command!r}")
+
+
 @dataclass(frozen=True)
 class GameProfile:
     name: str
     rom: Path
-    start_state: Path  # every run starts here; made from the ROM on first use
+    power_on_state: Path  # the cartridge just switched on; made once and kept
+    start_state: Path  # where every run starts: power-on plus `setup`
+    setup: tuple[str, ...] = ()  # inputs from power-on to the start (see apply_setup)
     watched_memory: dict[str, MemRef] = field(default_factory=dict)  # shown in traces
     progress_values: dict[str, MemRef] = field(default_factory=dict)  # logged every step
     seed_library: Path | None = None  # scripts copied into each new run's library
@@ -37,12 +57,22 @@ class GameProfile:
         return self.rom.read_bytes()
 
     def load_start_state(self) -> bytes:
-        """The run start state, made (as a power-on state) the first time it's needed.
+        """The run start state, made the first time it's needed and then kept.
 
-        It's made once and then kept: a fresh boot stamps the wall-clock time into
-        the state, so regenerating it would give every later run a different start.
+        Kept, not regenerated: a fresh boot stamps the wall-clock time into the
+        state, so a remade state would differ byte for byte (though not in play).
         """
         if not self.start_state.exists():
+            rom = self.rom_bytes()
+            if not self.power_on_state.exists():
+                self.power_on_state.parent.mkdir(parents=True, exist_ok=True)
+                self.power_on_state.write_bytes(power_on_state(rom))
+            pyboy = boot(rom, self.power_on_state.read_bytes())
+            try:
+                apply_setup(RecordingGame(pyboy, max_frames=10**7), self.setup)
+                state = save_state(pyboy)
+            finally:
+                pyboy.stop(save=False)
             self.start_state.parent.mkdir(parents=True, exist_ok=True)
-            self.start_state.write_bytes(power_on_state(self.rom_bytes()))
+            self.start_state.write_bytes(state)
         return self.start_state.read_bytes()

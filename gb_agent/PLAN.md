@@ -352,7 +352,8 @@ Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
 ### Chunk 2: recording, replay, clock, game profile (done 2026-10-21)
 
 - `GameProfile` and the Silver profile, and creating Silver's start state with the
-  clock locked from first boot. For now the start state is power-on.
+  clock locked from first boot. Silver starts in the bedroom after new-game setup:
+  power-on plus a recorded list of setup inputs (`gb_agent/games/silver.py`).
 - The determinism test: two runs from the same state with the same inputs give
   identical states.
 - Read-only `RecordingGame`, the event log format, and the step runner (state in,
