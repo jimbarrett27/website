@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 IMAGE_DIR = Path(__file__).parent / "image"
+BUILD_CONTEXT = IMAGE_DIR.parent.parent  # gb_agent/
 IMAGE_NAME = "gb-agent-sandbox"
 RESULT_MARKER = "\x1egb-agent-result:"  # must match image/runner.py
 SANDBOX_USER = "10001:10001"
@@ -56,19 +57,31 @@ class SandboxResult:
     stdout_bytes: int = 0  # full sizes, so a caller can say what was cut
     stderr_bytes: int = 0
     error: dict | None = None  # type, message, traceback
+    harness: dict | None = None  # the harness's finish() output, if one ran
+    harness_error: dict | None = None  # the harness itself failed, not the code
     exit_code: int | None = None
     duration_s: float = 0.0
     detail: str = ""  # why, for anything but ok/error
     diagnostics: str = field(default="", repr=False)  # docker's own stderr
 
 
+def image_files() -> list[Path]:
+    """Everything that goes into the image (mirrors gb_agent/.dockerignore)."""
+    return sorted([
+        BUILD_CONTEXT / ".dockerignore",
+        BUILD_CONTEXT / "__init__.py",
+        IMAGE_DIR / "Dockerfile",
+        IMAGE_DIR / "runner.py",
+        *(BUILD_CONTEXT / "emulator").glob("*.py"),
+    ])
+
+
 def image_tag() -> str:
     """Tag the image by its contents, so any change to it means a rebuild."""
     digest = hashlib.sha256()
-    for path in sorted(IMAGE_DIR.iterdir()):
-        if path.is_file():
-            digest.update(path.name.encode())
-            digest.update(path.read_bytes())
+    for path in image_files():
+        digest.update(str(path.relative_to(BUILD_CONTEXT)).encode())
+        digest.update(path.read_bytes())
     return f"{IMAGE_NAME}:{digest.hexdigest()[:12]}"
 
 
@@ -79,8 +92,11 @@ def build_image() -> str:
         ["docker", "image", "inspect", tag], capture_output=True
     ).returncode == 0
     if not exists:
-        subprocess.run(["docker", "build", "-q", "-t", tag, str(IMAGE_DIR)],
-                       check=True, capture_output=True)
+        subprocess.run(
+            ["docker", "build", "-q", "-t", tag,
+             "-f", str(IMAGE_DIR / "Dockerfile"), str(BUILD_CONTEXT)],
+            check=True, capture_output=True,
+        )
     return tag
 
 
@@ -147,6 +163,8 @@ def _from_runner(result: dict) -> SandboxResult:
         stdout_bytes=result.get("stdout_bytes", 0),
         stderr_bytes=result.get("stderr_bytes", 0),
         error=result.get("error"),
+        harness=result.get("harness"),
+        harness_error=result.get("harness_error"),
     )
 
 
@@ -172,6 +190,7 @@ def run_in_sandbox(
     *,
     limits: SandboxLimits = SandboxLimits(),
     read_only_mounts: dict[Path, str] | None = None,
+    harness: str | None = None,
     image: str | None = None,
 ) -> SandboxResult:
     """Run ``code`` in a fresh sandbox container and report what happened.
@@ -183,11 +202,15 @@ def run_in_sandbox(
 
     ``read_only_mounts`` maps host paths to container paths. The code runs as
     uid 10001, not as you, so mounted files must be world-readable.
+
+    ``harness`` names a module in the image (such as ``gb_agent.emulator.harness``)
+    whose ``Harness`` wraps the code; see image/runner.py.
     """
     name = f"gb-agent-{uuid.uuid4().hex[:12]}"
     request = json.dumps({
         "code": code,
         "payload": payload,
+        "harness": harness,
         "output_limit": limits.output_limit,
         "value_limit": limits.value_limit,
     }).encode()

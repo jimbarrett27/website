@@ -121,10 +121,20 @@ Replay feeds the logged events back in frame by frame from the run's starting st
 
 **Verifying the record.** Python in the container can always get past the wrapper if
 it tries. Rather than try to prevent that, check it: after every step, the host
-replays that step's events from its starting state, in a second container, and
-compares the result with the state the script produced. A mismatch means something
-wasn't recorded, and the step is flagged at once. This is also what enforces the
-no-memory-writes rule: a write that bypasses the wrapper makes the replay disagree.
+replays that step's events from its starting state and compares the result with the
+state the script produced. A mismatch means something wasn't recorded, and the step
+is flagged at once. This is also what enforces the no-memory-writes rule: a write
+that bypasses the wrapper makes the replay disagree.
+
+The replay runs on the host, not in a second container: it runs no agent code, only
+recorded inputs into a trusted ROM. The events do come out of the sandbox, so they're
+validated first (known types and buttons, frames in order, within the step's limits).
+Host and image pin the same PyBoy, NumPy and Pillow versions.
+
+What makes this exact (measured, PyBoy 2.7): the rendered screen is part of the save
+state, so recording and replay share one function that turns an event into PyBoy
+calls, and every tick renders. A fresh boot stamps the wall-clock time into the
+clock's state, so runs always start from a saved state, never from a boot.
 
 ### The real-time clock
 
@@ -134,10 +144,11 @@ that reads wall-clock time directly (`pyboy/core/cartridge/rtc.py`, which does
 `pyboy.rtc_lock_experimental(True)` makes the clock report its starting moment
 forever.
 
-- The base save state is created with the lock on from first boot, and its stored
-  clock epoch is a fixed timestamp, so every run starts at the same in-game moment.
-- The lock itself isn't stored in save states, so the runner turns it on after every
-  load.
+- The lock is on from power-on, so the clock always reads zero. Silver keeps its own
+  offset from the clock (set when starting a new game), so in-game time is frozen at
+  whatever time is chosen then, identically in every run.
+- The lock itself isn't stored in save states, so it's turned on after every load.
+- Whether a cartridge has a clock is read from its header, not configured.
 - A test proves two runs from the same state with the same inputs give identical
   states.
 - Cost: the in-game time of day never moves. If day/night ever matters, a
@@ -152,7 +163,6 @@ Everything game-specific sits behind one profile:
 class GameProfile:
     name: str
     rom: Path
-    rtc: bool                          # lock the clock if the cartridge has one
     start_state: Path                  # base save state every run starts from
     watched_memory: dict[str, MemRef]  # labelled addresses shown in traces
     progress_values: dict[str, MemRef] # raw values logged every step for scoring
@@ -331,7 +341,7 @@ class ModelProfile:
 
 Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
 
-### Chunk 1: sandbox and its limits
+### Chunk 1: sandbox and its limits (done 2026-10-21)
 
 - `gb_agent/sandbox/Dockerfile` (Python plus PyBoy, nothing else) and a host-side
   `run_in_sandbox(code, inputs) -> result` with every limit above.
@@ -339,14 +349,15 @@ Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
   connection, write outside the scratch space, read the home directory, read env
   vars, fork-bomb, allocate too much memory, loop forever, print endlessly.
 
-### Chunk 2: recording, replay, clock, game profile
+### Chunk 2: recording, replay, clock, game profile (done 2026-10-21)
 
 - `GameProfile` and the Silver profile, and creating Silver's start state with the
-  clock locked from first boot.
+  clock locked from first boot. For now the start state is power-on.
 - The determinism test: two runs from the same state with the same inputs give
   identical states.
 - Read-only `RecordingGame`, the event log format, and the step runner (state in,
-  state out, with test runs).
+  state out). `run_step` never commits anything itself, so a test run is just a
+  step whose result the caller throws away; the run loop (chunk 4) decides.
 - The replay check after every step, with tests that bypass the wrapper and that
   write memory directly, both expected to be flagged.
 - A replay tool that rebuilds a run and renders it to video.

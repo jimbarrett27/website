@@ -4,37 +4,19 @@ Each test runs real code in a real container, so these need Docker and the
 sandbox image (built on first use, which needs the network once).
 """
 
-import os
-import shutil
 import subprocess
 
-import pytest
-
-from gb_agent.sandbox import SandboxLimits, build_image, run_in_sandbox
+from gb_agent.sandbox import SandboxLimits, run_in_sandbox
 from gb_agent.sandbox.run import docker_args
+from tests.gb_agent.conftest import needs_docker
 
-
-def _docker_available() -> bool:
-    if shutil.which("docker") is None:
-        return False
-    return subprocess.run(["docker", "info"], capture_output=True).returncode == 0
-
-
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.skipif(not _docker_available(), reason="needs a working Docker"),
-]
+pytestmark = needs_docker
 
 QUICK = SandboxLimits(timeout_s=5)
 IMAGE_ENV = {
     "PATH", "HOSTNAME", "HOME", "LANG", "GPG_KEY", "PYTHON_VERSION", "PYTHON_SHA256",
     "PYTHONDONTWRITEBYTECODE", "PYTHONUNBUFFERED",
 }
-
-
-@pytest.fixture(scope="module")
-def image():
-    return build_image()
 
 
 def run(image, code, payload=None, limits=QUICK, **kwargs):
