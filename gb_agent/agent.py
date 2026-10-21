@@ -38,8 +38,13 @@ on your own until the run's budget runs out.
 
 The idea is to build up a library of scripts: Python functions that do multi-step \
 things for you (walk somewhere, get through a menu, mash through text), so you can \
-decide *what* to do while your scripts handle *how*. You can also press buttons \
-directly, which is fine for exploring.
+decide *what* to do while your scripts handle *how*. Writing scripts is the main way \
+you're expected to play:
+- Write your first script early, even a small one, and run it.
+- If you've done the same thing by hand twice, turn it into a script.
+- If a script doesn't do what you expected, read its report, fix it with \
+write_script, and try again with test=true.
+Pressing buttons directly is fine for a quick look, but don't play that way for long.
 
 Scripts and snippets run in a sandbox with `game`, which has:
   game.press(button) / game.release(button)   buttons: {buttons}
@@ -135,7 +140,9 @@ class GameAgent:
                 f"(about {c.frame_budget // 60} seconds of game time), {c.max_llm_calls} LLM "
                 f"calls. {self.run.budget_line()}\n\nYour library has: "
                 + (", ".join(i.name for i in self.run.library.scripts()) or "nothing yet")
-                + ". Use list_scripts and read_script to look at them.")
+                + ". Use list_scripts and read_script to look at them."
+                + ("\n\nStart by writing a script of your own for something you expect to "
+                   "do often, and run it." if notes is None else ""))
         if notes:
             text += f"\n\nYour notes from earlier in this run:\n{notes}"
         return [self.system, self._with_screens(text, [
