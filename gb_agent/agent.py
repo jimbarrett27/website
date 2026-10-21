@@ -64,6 +64,9 @@ Your context is limited. When it fills up you'll be asked to write notes for \
 yourself, and everything else you've seen will be forgotten, except your scripts. \
 If something seems impossible with the tools you have, use report_blocker.
 
+Every reply should call a tool. If you want to think, write it briefly in the same \
+reply as the tool call.
+
 The game: {notes}"""
 
 COMPACT_PROMPT = """\
@@ -112,6 +115,9 @@ class GameAgent:
         self.name = name
         self.base_llm = llm
         self.llm = llm.bind_tools(TOOL_SCHEMAS)
+        # Same tools in the prompt, so the server can reuse the cached prefix (the
+        # tool definitions are part of it), but the model must answer in text.
+        self.notes_llm = llm.bind_tools(TOOL_SCHEMAS, tool_choice="none")
         self.describer = describer
         self.tools = Tools(run, agent=name)
         self.system = SystemMessage(SYSTEM_PROMPT.format(
@@ -197,7 +203,8 @@ class GameAgent:
                 self.messages.append(ToolMessage(text, tool_call_id=call.get("id") or "invalid",
                                                  name=call.get("name") or "unknown"))
             if images:
-                self.messages.append(self._with_screens("What the last step showed.", images))
+                self.messages.append(self._with_screens(
+                    "Screenshots from that step are below. Call your next tool.", images))
         return reason
 
     def _invoke(self, llm, messages: list[AnyMessage], *, purpose: str) -> AIMessage:
@@ -233,13 +240,15 @@ class GameAgent:
         return response
 
     def _compact(self) -> None:
-        # Close any dangling tool calls, then ask for notes without tools.
+        # Appended to the existing context, so only the request itself is new input.
         request = self.messages + [HumanMessage(COMPACT_PROMPT)]
         try:
-            notes = content_to_str(self._invoke(self.base_llm, request,
+            notes = content_to_str(self._invoke(self.notes_llm, request,
                                                 purpose="compact").content).strip()
         except Exception:
             logger.exception("compaction failed; continuing without notes")
+            notes = ""
+        if not notes:
             notes = "(writing notes failed; start again from the screen and your scripts)"
         self.compactions += 1
         self.run.log_agent({"agent": self.name, "kind": "compaction", "notes": notes,
