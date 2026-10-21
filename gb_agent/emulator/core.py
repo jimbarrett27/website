@@ -15,8 +15,13 @@ Determinism rules, measured on PyBoy 2.7 (see tests/gb_agent/test_emulator.py):
 """
 
 import io
+import warnings
 
-from pyboy import PyBoy
+# PySDL2 warns on import that it's using its bundled SDL2. Harmless, but it would
+# land in the stderr of every step the agent sees.
+warnings.filterwarnings("ignore", message="Using SDL2 binaries", category=UserWarning)
+
+from pyboy import PyBoy  # noqa: E402
 
 BUTTONS = ("a", "b", "start", "select", "up", "down", "left", "right")
 

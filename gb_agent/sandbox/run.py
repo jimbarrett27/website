@@ -191,6 +191,7 @@ def run_in_sandbox(
     limits: SandboxLimits = SandboxLimits(),
     read_only_mounts: dict[Path, str] | None = None,
     harness: str | None = None,
+    sys_path: list[str] | None = None,
     image: str | None = None,
 ) -> SandboxResult:
     """Run ``code`` in a fresh sandbox container and report what happened.
@@ -204,13 +205,15 @@ def run_in_sandbox(
     uid 10001, not as you, so mounted files must be world-readable.
 
     ``harness`` names a module in the image (such as ``gb_agent.emulator.harness``)
-    whose ``Harness`` wraps the code; see image/runner.py.
+    whose ``Harness`` wraps the code; see image/runner.py. ``sys_path`` adds
+    container directories to the import path (such as a mounted library).
     """
     name = f"gb-agent-{uuid.uuid4().hex[:12]}"
     request = json.dumps({
         "code": code,
         "payload": payload,
         "harness": harness,
+        "sys_path": sys_path or [],
         "output_limit": limits.output_limit,
         "value_limit": limits.value_limit,
     }).encode()

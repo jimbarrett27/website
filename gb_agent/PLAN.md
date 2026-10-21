@@ -163,8 +163,9 @@ Everything game-specific sits behind one profile:
 class GameProfile:
     name: str
     rom: Path
-    start_state: Path                  # base save state every run starts from
-    watched_memory: dict[str, MemRef]  # labelled addresses shown in traces
+    power_on_state: Path               # the cartridge just switched on, kept
+    start_state: Path                  # where every run starts: power-on + setup
+    setup: tuple[str, ...]             # inputs from power-on to the start
     progress_values: dict[str, MemRef] # raw values logged every step for scoring
     seed_library: Path                 # scripts copied into a new run's library
     notes: str                         # game facts given to the agent
@@ -174,6 +175,12 @@ Silver is the only profile at first (`gb_agent/games/silver.py`). The sandbox,
 recording, scripts, sub-agents, model profiles and run loop only know about buttons,
 frames, screens and memory, so adding another game means writing a profile and a
 start state, with no harness changes.
+
+**Hints are off (decided 2026-10-21).** The agent gets no memory addresses: the
+profile's `progress_values` are read by the harness for scoring and never shown, and
+traces only include memory the agent has chosen to watch. So finding its own position
+in RAM is part of the task. A per-experiment hints switch (pre-watched addresses, an
+example script that reads them) can be added later to compare the two.
 
 ## Scripts
 
@@ -189,11 +196,12 @@ Scripts can import other library scripts, so higher-level ones are built from
 lower-level ones. They report back with `print`, their return value, and
 `game.note(...)` for labelled observations that show up in the trace.
 
-**Seed library.** Silver's seed library holds one example, `hello_world.py`: walk
-three tiles left, then three right, reporting the player's position from memory.
-It shows the agent what a script looks like (typed function, docstring,
-`game.note()`, return value). It's per game profile, since walking assumes an
-overworld.
+**Seed library.** Silver's seed library holds one example, `hello_world.py`: tap
+left three times, then right three times, noting each tap. It shows the agent what a
+script looks like (typed function, docstring, `game.note()`, return value). With
+hints off it reads no memory and doesn't say what the taps do; the screenshots in its
+trace show that. (Measured: the first tap in a new direction only turns the player,
+so it turns, walks two tiles, turns back and walks two.)
 
 ### Observing what a script did
 
@@ -202,8 +210,8 @@ Every run of a script returns a **trace**, sized to fit the model's context:
 - outcome: returned value, or the error and traceback
 - before and after screenshots, plus a few keyframes for longer runs
 - frames used and a summary of inputs (for example "Down ×12, A ×3")
-- changes to watched memory (player position, map, money, party HP, …); the agent
-  can add addresses to the watch list
+- changes to memory the agent has chosen to watch (nothing by default, since
+  hints are off)
 - the script's prints and notes, cut down to fit
 
 The full detail is in the run directory if the agent asks for more, but isn't pushed
@@ -363,7 +371,7 @@ Each chunk ends with passing tests (`uv run pytest tests/gb_agent`).
   write memory directly, both expected to be flagged.
 - A replay tool that rebuilds a run and renders it to video.
 
-### Chunk 3: scripts, library and traces
+### Chunk 3: scripts, library and traces (done 2026-10-21)
 
 - The library git repo, script versions and commit messages, seeded from the game
   profile (including `hello_world.py`).

@@ -68,6 +68,7 @@ class RecordingGame:
         self.notes: list[dict] = []
         self.held: set[str] = set()
         self.memory = Memory(pyboy)
+        self._after_tick = []  # callables run after every frame advance (see harness)
 
     @property
     def frames_used(self) -> int:
@@ -104,6 +105,8 @@ class RecordingGame:
             )
         self._record({"frame": self.frame, "type": "tick", "frames": frames})
         self.frame += frames
+        for hook in self._after_tick:
+            hook()
 
     def tap(self, button: str, hold: int = 2, after: int = 6) -> None:
         """Press ``button`` for ``hold`` frames, release it, then wait ``after`` frames."""

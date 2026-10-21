@@ -46,8 +46,8 @@ class GameProfile:
     power_on_state: Path  # the cartridge just switched on; made once and kept
     start_state: Path  # where every run starts: power-on plus `setup`
     setup: tuple[str, ...] = ()  # inputs from power-on to the start (see apply_setup)
-    watched_memory: dict[str, MemRef] = field(default_factory=dict)  # shown in traces
-    progress_values: dict[str, MemRef] = field(default_factory=dict)  # logged every step
+    # Logged every step for scoring; read by the harness, never shown to the agent.
+    progress_values: dict[str, MemRef] = field(default_factory=dict)
     seed_library: Path | None = None  # scripts copied into each new run's library
     notes: str = ""  # game facts given to the agent
 

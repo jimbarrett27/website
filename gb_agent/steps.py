@@ -22,12 +22,17 @@ from gb_agent.sandbox import SandboxLimits, SandboxResult, run_in_sandbox
 
 HARNESS = "gb_agent.emulator.harness"
 ROM_IN_SANDBOX = "/rom/game.gb"
+LIBRARY_IMPORT_ROOT = "/opt/library"  # scripts import each other as `library.<name>`
+MAX_WATCHES = 32
+MAX_WATCH_LENGTH = 64
 
 
 @dataclass(frozen=True)
 class StepLimits:
     max_frames: int = 36_000  # ten minutes of game time
     max_events: int = 200_000
+    keyframe_every: int = 120  # frames between keyframe screenshots
+    max_keyframes: int = 6
     sandbox: SandboxLimits = SandboxLimits()
 
 
@@ -39,7 +44,11 @@ class StepOutcome:
     state: bytes | None  # None: the step produced nothing usable; keep the old state
     events: list[dict] = field(default_factory=list)
     notes: list[dict] = field(default_factory=list)
-    screenshot_png: bytes | None = None
+    screenshot_png: bytes | None = None  # after the step
+    before_png: bytes | None = None
+    keyframes: list[tuple[int, bytes]] = field(default_factory=list)  # (frame, png)
+    watch_before: dict[str, list[int]] = field(default_factory=dict)
+    watch_after: dict[str, list[int]] = field(default_factory=dict)
     verified: bool = False  # replaying the events reproduced the state exactly
     problem: str = ""  # why there's no state, or why it isn't verified
 
@@ -82,6 +91,44 @@ def validate_events(events, start_frame: int, end_frame: int, limits: StepLimits
     return ""
 
 
+def validate_watch(watch: dict) -> str:
+    """Why a watch list is unusable, or "" if it's fine.
+
+    ``watch`` maps labels to ``(addr, length, bank)``; bank may be None.
+    """
+    if not isinstance(watch, dict) or len(watch) > MAX_WATCHES:
+        return f"watch must be a dict of at most {MAX_WATCHES} entries"
+    for label, ref in watch.items():
+        if not isinstance(label, str) or not 0 < len(label) <= 40:
+            return f"bad watch label {label!r}"
+        try:
+            addr, length, bank = ref
+        except (TypeError, ValueError):
+            return f"watch {label!r} must be (addr, length, bank)"
+        if type(addr) is not int or not 0 <= addr <= 0xFFFF:
+            return f"watch {label!r}: addr must be 0x0000-0xFFFF"
+        if type(length) is not int or not 1 <= length <= MAX_WATCH_LENGTH \
+                or addr + length > 0x10000:
+            return f"watch {label!r}: length must be 1-{MAX_WATCH_LENGTH} and stay in range"
+        if bank is not None and (type(bank) is not int or not 0 <= bank <= 0x1FF):
+            return f"watch {label!r}: bad bank"
+    return ""
+
+
+def _decode_keyframes(raw) -> list[tuple[int, bytes]]:
+    if not isinstance(raw, list):
+        raise ValueError("keyframes is not a list")
+    return [(int(frame), base64.b64decode(png, validate=True)) for frame, png in raw]
+
+
+def _memory_values(raw) -> dict[str, list[int]]:
+    if not isinstance(raw, dict) or not all(
+        isinstance(v, list) and all(type(b) is int for b in v) for v in raw.values()
+    ):
+        raise ValueError("watched memory is malformed")
+    return {str(k): v for k, v in raw.items()}
+
+
 def replay(rom: bytes, start_state: bytes, events: list[dict]) -> bytes:
     """The state reached by applying ``events`` from ``start_state``."""
     pyboy = boot(rom, start_state)
@@ -99,21 +146,38 @@ def run_step(
     *,
     start_frame: int = 0,
     limits: StepLimits = StepLimits(),
+    library_dir: Path | None = None,
+    watch: dict | None = None,
     image: str | None = None,
 ) -> StepOutcome:
-    """Run ``code`` against the game at ``state`` in the sandbox, and check it."""
+    """Run ``code`` against the game at ``state`` in the sandbox, and check it.
+
+    ``library_dir`` is the library's package directory, mounted read-only so
+    the code can ``import library.<script>``. ``watch`` is memory to read
+    before and after (see ``validate_watch``); it raises ValueError if invalid.
+    """
+    watch = watch or {}
+    if problem := validate_watch(watch):
+        raise ValueError(problem)
+    mounts = {Path(rom_path): ROM_IN_SANDBOX}
+    if library_dir is not None:
+        mounts[Path(library_dir)] = f"{LIBRARY_IMPORT_ROOT}/library"
     payload = {
         "rom": ROM_IN_SANDBOX,
         "state": base64.b64encode(state).decode(),
         "start_frame": start_frame,
         "max_frames": limits.max_frames,
         "max_events": limits.max_events,
+        "watch": {label: list(ref) for label, ref in watch.items()},
+        "keyframe_every": limits.keyframe_every,
+        "max_keyframes": limits.max_keyframes,
     }
     result = run_in_sandbox(
         code, payload,
         limits=limits.sandbox,
-        read_only_mounts={Path(rom_path): ROM_IN_SANDBOX},
+        read_only_mounts=mounts,
         harness=HARNESS,
+        sys_path=[LIBRARY_IMPORT_ROOT] if library_dir is not None else None,
         image=image,
     )
     outcome = StepOutcome(sandbox=result, start_frame=start_frame,
@@ -130,6 +194,10 @@ def run_step(
         new_state = base64.b64decode(h["state"], validate=True)
         end_frame = h["end_frame"]
         screenshot = base64.b64decode(h["screenshot"], validate=True)
+        before = base64.b64decode(h["before_screenshot"], validate=True)
+        keyframes = _decode_keyframes(h["keyframes"])
+        watch_before = _memory_values(h["watch_before"])
+        watch_after = _memory_values(h["watch_after"])
     except (KeyError, TypeError, ValueError) as e:
         outcome.problem = f"malformed step result: {e}"
         return outcome
@@ -145,6 +213,10 @@ def run_step(
     outcome.events = h["events"]
     outcome.notes = h.get("notes") or []
     outcome.screenshot_png = screenshot
+    outcome.before_png = before
+    outcome.keyframes = keyframes
+    outcome.watch_before = watch_before
+    outcome.watch_after = watch_after
     outcome.verified = replay(Path(rom_path).read_bytes(), state, outcome.events) == new_state
     if not outcome.verified:
         outcome.problem = ("replaying the recorded inputs didn't reproduce the step's state: "

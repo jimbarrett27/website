@@ -3,7 +3,7 @@
 This file is the sandbox container's entrypoint. It reads a JSON request on stdin:
 
     {"code": str, "payload": any, "output_limit": int, "value_limit": int,
-     "harness": optional module name, "sys_path": optional list of dirs}
+     "harness": optional module name, "sys_path": optional extra import dirs}
 
 runs ``code`` with ``payload`` in scope, and writes one result line to the
 original stdout, prefixed with ``RESULT_MARKER``.
@@ -78,7 +78,7 @@ def main() -> None:
     sys.stdin.close()
     output_limit = int(request.get("output_limit", 16_000))
     value_limit = int(request.get("value_limit", 16_000))
-    sys.path[:0] = request.get("sys_path") or [CODE_ROOT]
+    sys.path[:0] = [CODE_ROOT, *(request.get("sys_path") or [])]
 
     sys.stdout.flush()
     sys.stderr.flush()
