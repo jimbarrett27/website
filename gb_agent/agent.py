@@ -72,8 +72,10 @@ changed, notes, errors) and a screenshot. Use test=true on run_script or run_cod
 try something and throw the result away: it costs no frames. Kept steps spend frames."""
 
 MAIN_CONTEXT = """\
-Your context is limited. When it fills up you'll be asked to write notes for \
-yourself, and everything else you've seen will be forgotten, except your scripts. \
+Your context is limited. When it fills up it's cleared: you'll be asked for a quick \
+summary, and everything else you've seen is forgotten, except your scripts and your \
+notes. Keep your notes up to date with update_notes as you learn things (where you \
+are, how places connect, what works, what you're trying), so you never lose track. \
 If something seems impossible with the tools you have, use report_blocker."""
 
 SUBAGENTS = """\
@@ -105,10 +107,10 @@ def system_prompt(notes: str, *, instructions: str | None = None,
 
 
 COMPACT_PROMPT = """\
-Your context is nearly full and is about to be cleared. Write notes for yourself: \
-what you've learned about the game and its controls, where you are and what you're \
-doing, which scripts work and which don't, and what to do next. Be specific and \
-brief (at most about 300 words). Reply with the notes only."""
+Your context is nearly full and is about to be cleared. Your notes (from update_notes) \
+will be kept as they are. Write a short summary of what isn't in them: what you were \
+just doing, where you are right now, and what to do next. Be specific and brief (at \
+most about 200 words). Reply with the summary only."""
 
 
 def _image_part(png: bytes) -> dict:
@@ -197,8 +199,10 @@ class GameAgent:
                    "takes many steps, such as exploring a room or getting through a "
                    "conversation. It keeps that work out of your own context."
                    if notes is None and "run_subagent" in self.tools.allowed else ""))
+        if self.run.notes:
+            text += f"\n\nYour notes (from update_notes):\n{self.run.notes}"
         if notes:
-            text += f"\n\nYour notes from earlier in this run:\n{notes}"
+            text += f"\n\nYour summary from just before your context was cleared:\n{notes}"
         return [self.system, self._with_screens(text, [
             (f"the screen now (frame {self.run.frame})", self.run.screenshot_png())])]
 

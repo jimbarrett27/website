@@ -16,6 +16,7 @@ from gb_agent.trace import Trace
 MAX_TOOL_TEXT = 6_000
 REPEAT_NOTE_AT = 3  # identical calls in a row before saying so
 TEST_STREAK_NOTE_AT = 4  # test runs in a row before saying so
+MAX_NOTES = 2_000
 
 
 @dataclass
@@ -82,6 +83,11 @@ TOOL_SCHEMAS = [
         "length": {"type": "integer", "description": "1-64, default 1"},
         "remove": {"type": "boolean"},
     }, ["label"]),
+    _fn("update_notes", "Replace your notes: facts you want to keep, such as where you are, "
+        "what you've found out, which scripts work, what you're trying. They're shown to you "
+        "word for word every time your context is cleared.", {
+        "notes": {"type": "string", "description": "the whole new notes, at most 2000 characters"},
+    }, ["notes"]),
     _fn("report_blocker", "Tell Jim (who set this up) that something seems impossible with "
         "your current tools. He reads these to fix the setup.", {
         "problem": {"type": "string"},
@@ -381,6 +387,15 @@ class Tools:
         name = _str(args, "name")
         return ToolResult("\n".join(f"{c.version} {c.date[:16]} {c.reason}"
                                     for c in self.run.library.history(name)))
+
+    def _update_notes(self, args: dict) -> ToolResult:
+        notes = _str(args, "notes").strip()
+        if len(notes) > MAX_NOTES:
+            raise ToolError(f"notes are limited to {MAX_NOTES} characters (these are "
+                            f"{len(notes)}); keep what matters most")
+        self.run.set_notes(notes, agent=self.agent)
+        return ToolResult(f"Notes saved ({len(notes)} characters). You'll see them again, "
+                          "word for word, whenever your context is cleared.")
 
     # -- sub-agents ---------------------------------------------------------
 

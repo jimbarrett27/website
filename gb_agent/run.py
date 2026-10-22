@@ -96,6 +96,7 @@ class Run:
         self.step = 0
         self.kept_steps = 0
         self.watch: dict[str, tuple[int, int, int | None]] = {}
+        self.notes = ""  # the main agent's own notes (update_notes), kept across compactions
         self.llm_calls = 0
         self.tokens = 0
         self.started = time.monotonic()
@@ -244,6 +245,11 @@ class Run:
             pyboy.stop(save=False)
         _jsonl(self.dir / "progress.jsonl", {"step": self.step, "frame": self.frame,
                                              "values": values})
+
+    def set_notes(self, notes: str, agent: str) -> None:
+        self.notes = notes
+        (self.dir / "notes.md").write_text(notes + "\n")
+        self.log_agent({"agent": agent, "kind": "notes", "notes": notes, "step": self.step})
 
     def log_agent(self, record: dict) -> None:
         _jsonl(self.dir / "agents.jsonl", {"time": time.time(), **record})

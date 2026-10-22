@@ -14,6 +14,7 @@ from tests.gb_agent.test_agent import ScriptedModel, call, game, make_run, say  
 
 LOCAL = get_profile("qwen3-vl-2b-local")
 PARENT_TOOLS = [*TOOL_NAMES, "define_subagent", "run_subagent", "list_subagents"]
+assert "update_notes" in TOOL_NAMES
 
 SPEC = {"name": "walker", "purpose": "walk places", "instructions": "Use walk. Stop when done.",
         "tools": ["run_script", "wait"], "scripts": ["walk"], "reason": "need a walker"}
@@ -39,6 +40,7 @@ def test_a_valid_spec():
     ({"tools": ["teleport"]}, "can't give a sub-agent teleport"),
     ({"tools": ["run_subagent"]}, "can't give a sub-agent run_subagent"),
     ({"tools": ["define_subagent", "wait"]}, "can't give a sub-agent define_subagent"),
+    ({"tools": ["update_notes"]}, "can't give a sub-agent update_notes"),
     ({"tools": ["wait"], "scripts": ["walk"]}, "only makes sense with the run_script tool"),
     ({"scripts": ["../x"]}, "bad script name"),
     ({"model": "qwen3-vl-8b-local"}, "model must be one of"),

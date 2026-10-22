@@ -295,6 +295,29 @@ def test_reports_say_how_much_of_the_screen_changed(make_run):
     assert "screen: " in text
 
 
+def test_notes_survive_compaction_word_for_word(make_run):
+    run = make_run()
+    small = replace(get_profile("qwen3-vl-2b-local"), context_window=1_000)
+    reason, model, agent = play(run, [
+        say(call("update_notes", notes="Stairs are top right. walk() works."), input_tokens=900),
+        say(text="Was heading to the stairs."),  # the compaction summary
+        say(call("wait", frames=10)),
+    ], profile=small)
+    opening = model.seen[2][1].content[0]["text"]
+    assert "Your notes (from update_notes):\nStairs are top right. walk() works." in opening
+    assert "Was heading to the stairs." in opening
+    assert (run.dir / "notes.md").read_text() == "Stairs are top right. walk() works.\n"
+    assert any(r["kind"] == "notes" for r in jsonl(run, "agents.jsonl"))
+
+
+def test_notes_have_a_size_limit(make_run):
+    from gb_agent.tools import Tools
+
+    run = make_run()
+    assert "limited to 2000" in Tools(run).call("update_notes", {"notes": "x" * 2_001}).text
+    assert run.notes == ""
+
+
 def test_kept_steps_are_capped_per_step(make_run):
     from gb_agent.run import STEP_FRAMES, ExperimentConfig
     from gb_agent.tools import Tools

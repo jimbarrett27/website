@@ -53,9 +53,13 @@ PROFILES: dict[str, ModelProfile] = {p.name: p for p in [
         provider="local",
         model="gemma-4-26b-a4b",  # llama-server's --alias
         base_url=LOCAL_SERVER,
-        context_window=16_384,
+        # The server gives Gemma 64k (its sliding-window layers make that cheap), but
+        # generation slows as the context grows: 13.6 tok/s short, 4.3 at 19.5k. So
+        # compact at ~26k: still ~3x fewer compactions than at 16k/0.5, which
+        # compacted 23 times overnight and kept forgetting where it was.
+        context_window=65_536,
         vision=True,
-        compact_at=0.5,
+        compact_at=0.4,
         # Gemma thinks first (capped at 256 tokens by the server), and thinking
         # counts against this, so leave room for the tool call after it.
         max_output_tokens=1536,

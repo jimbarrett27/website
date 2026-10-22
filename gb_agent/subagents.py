@@ -28,6 +28,7 @@ from gb_agent.run import Run
 logger = logging.getLogger(__name__)
 
 SUBAGENT_TOOLS = ("define_subagent", "run_subagent", "list_subagents")
+MAIN_ONLY_TOOLS = (*SUBAGENT_TOOLS, "update_notes")  # never given to a sub-agent
 MAX_PROMPT_CHARS = 4_000
 DEFAULT_CALLS, MAX_CALLS = 15, 50
 DEFAULT_FRAMES = 3_000
@@ -76,7 +77,7 @@ def check_spec(raw: dict, *, parent_tools: list[str], parent_model: ModelProfile
     tools = raw.get("tools")
     if not isinstance(tools, list) or not tools or not all(isinstance(t, str) for t in tools):
         raise ScriptError("tools must be a non-empty list of tool names")
-    grantable = [t for t in parent_tools if t not in SUBAGENT_TOOLS]
+    grantable = [t for t in parent_tools if t not in MAIN_ONLY_TOOLS]
     if bad := [t for t in tools if t not in grantable]:
         raise ScriptError(f"can't give a sub-agent {', '.join(bad)}; it can have any of: "
                           f"{', '.join(grantable)}")
