@@ -192,7 +192,8 @@ def test_the_opening_suggests_sub_agents_only_when_available(make_run):
     without = GameAgent(run, ScriptedModel(), LOCAL)
     assert "consider a sub-agent" in with_host._opening()[1].content[0]["text"]
     assert "consider a sub-agent" not in without._opening()[1].content[0]["text"]
-    assert "consider a sub-agent" not in with_host._opening("notes")[1].content[0]["text"]
+    run.notes = "already under way"
+    assert "consider a sub-agent" not in with_host._opening()[1].content[0]["text"]
 
 
 @needs_docker[0]

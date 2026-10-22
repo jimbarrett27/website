@@ -24,7 +24,7 @@ from agents.utils import content_to_str
 from gb_agent.emulator import BUTTONS
 from gb_agent.models import ModelProfile
 from gb_agent.run import Run
-from gb_agent.tools import Tools
+from gb_agent.tools import MAX_NOTES, Tools
 
 logger = logging.getLogger(__name__)
 
@@ -107,10 +107,22 @@ def system_prompt(notes: str, *, instructions: str | None = None,
 
 
 COMPACT_PROMPT = """\
-Your context is nearly full and is about to be cleared. Your notes (from update_notes) \
-will be kept as they are. Write a short summary of what isn't in them: what you were \
-just doing, where you are right now, and what to do next. Be specific and brief (at \
-most about 200 words). Reply with the summary only."""
+Your context is nearly full and is about to be cleared. Rewrite your notes: they're \
+all you'll have afterwards, besides your scripts. Keep what's still true, fix anything \
+that's wrong, and add what you've learned: where you are right now, how places \
+connect, what works and what doesn't, what you were doing and what to do next. At \
+most 2000 characters. Reply with the notes only.
+
+Your current notes:
+{notes}"""
+
+NOTES_CHECK = """\
+Notes check: before carrying on, call update_notes with your notes brought up to \
+date (where you are now, what you've learned, what you're trying). Your current \
+notes:
+{notes}"""
+
+NOTES_EVERY = 15  # the main agent's own calls between notes checks
 
 
 def _image_part(png: bytes) -> dict:
@@ -194,15 +206,13 @@ class GameAgent:
                 + (", ".join(i.name for i in self.run.library.scripts()) or "nothing yet")
                 + ". Use list_scripts and read_script to look at them."
                 + ("\n\nStart by writing a script of your own for something you expect to "
-                   "do often, and run it." if notes is None else "")
+                   "do often, and run it." if not self.run.notes else "")
                 + ("\n\nOnce you have a script or two, consider a sub-agent for a job that "
                    "takes many steps, such as exploring a room or getting through a "
                    "conversation. It keeps that work out of your own context."
-                   if notes is None and "run_subagent" in self.tools.allowed else ""))
+                   if not self.run.notes and "run_subagent" in self.tools.allowed else ""))
         if self.run.notes:
-            text += f"\n\nYour notes (from update_notes):\n{self.run.notes}"
-        if notes:
-            text += f"\n\nYour summary from just before your context was cleared:\n{notes}"
+            text += f"\n\nYour notes (kept across context clears):\n{self.run.notes}"
         return [self.system, self._with_screens(text, [
             (f"the screen now (frame {self.run.frame})", self.run.screenshot_png())])]
 
@@ -267,9 +277,15 @@ class GameAgent:
                         "Arguments must be valid JSON.")
                 self.messages.append(ToolMessage(text, tool_call_id=call.get("id") or "invalid",
                                                  name=call.get("name") or "unknown"))
+            check = (self.task is None and "update_notes" in self.tools.allowed
+                     and self.calls % NOTES_EVERY == 0)
+            follow_up = (NOTES_CHECK.format(notes=self.run.notes or "(none yet)") if check
+                         else "Call your next tool.")
             if images:
                 self.messages.append(self._with_screens(
-                    "Screenshots from that step are below. Call your next tool.", images))
+                    f"Screenshots from that step are below. {follow_up}", images))
+            elif check:
+                self.messages.append(HumanMessage(follow_up))
         return reason
 
     def _limit_reached(self) -> str | None:
@@ -319,18 +335,21 @@ class GameAgent:
         return response
 
     def _compact(self) -> None:
+        """Clear the context; the model's rewritten notes are what carries over."""
         # Appended to the existing context, so only the request itself is new input.
-        request = self.messages + [HumanMessage(COMPACT_PROMPT)]
+        request = self.messages + [HumanMessage(COMPACT_PROMPT.format(
+            notes=self.run.notes or "(none yet)"))]
         try:
             notes = content_to_str(self._invoke(self.notes_llm, request,
                                                 purpose="compact").content).strip()
         except Exception:
-            logger.exception("compaction failed; continuing without notes")
+            logger.exception("compaction failed; keeping the old notes")
             notes = ""
-        if not notes:
-            notes = "(writing notes failed; start again from the screen and your scripts)"
+        if notes and self.task is None:
+            self.run.set_notes(notes[:MAX_NOTES], agent=self.name)
         self.compactions += 1
         self.run.log_agent({"agent": self.name, "kind": "compaction", "notes": notes,
                             "compactions": self.compactions, "step": self.run.step})
-        self.messages = self._opening(notes)
+        # A sub-agent has no persistent notes, so its rewrite is passed along directly.
+        self.messages = self._opening(notes if self.task is not None else None)
         self.context_tokens = _estimate_tokens(self.messages)

@@ -295,19 +295,32 @@ def test_reports_say_how_much_of_the_screen_changed(make_run):
     assert "screen: " in text
 
 
-def test_notes_survive_compaction_word_for_word(make_run):
+def test_compaction_rewrites_the_notes(make_run):
     run = make_run()
     small = replace(get_profile("qwen3-vl-2b-local"), context_window=1_000)
     reason, model, agent = play(run, [
         say(call("update_notes", notes="Stairs are top right. walk() works."), input_tokens=900),
-        say(text="Was heading to the stairs."),  # the compaction summary
+        say(text="Stairs are top right. walk() works. Now downstairs, looking for the door."),
         say(call("wait", frames=10)),
     ], profile=small)
+    request = model.seen[1][-1].content  # the compaction request shows the old notes
+    assert "Rewrite your notes" in request and "Stairs are top right. walk() works." in request
     opening = model.seen[2][1].content[0]["text"]
-    assert "Your notes (from update_notes):\nStairs are top right. walk() works." in opening
-    assert "Was heading to the stairs." in opening
-    assert (run.dir / "notes.md").read_text() == "Stairs are top right. walk() works.\n"
-    assert any(r["kind"] == "notes" for r in jsonl(run, "agents.jsonl"))
+    assert "Now downstairs, looking for the door." in opening
+    assert "Start by writing a script" not in opening  # not a fresh start
+    assert run.notes.endswith("looking for the door.")
+    assert (run.dir / "notes.md").read_text().startswith("Stairs are top right.")
+
+
+def test_the_agent_is_asked_to_update_its_notes_regularly(make_run):
+    from gb_agent.agent import NOTES_EVERY
+
+    run = make_run()
+    _, model, _ = play(run, [say(call("wait", frames=1))] * (NOTES_EVERY + 1))
+    followups = [m[-1].content for m in model.seen[1:]]
+    texts = [f if isinstance(f, str) else f[0]["text"] for f in followups]
+    assert sum("Notes check" in t for t in texts) == 1
+    assert "Notes check" in texts[NOTES_EVERY - 1]
 
 
 def test_notes_have_a_size_limit(make_run):
