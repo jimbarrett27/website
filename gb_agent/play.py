@@ -6,6 +6,7 @@ refuse to start without --allow-paid.
 
 import argparse
 import logging
+import subprocess
 import sys
 from dataclasses import replace
 
@@ -31,6 +32,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--step-frames", type=int, default=STEP_FRAMES,
                    help="most frames one kept step may use")
     p.add_argument("--video", action="store_true", help="render run.mp4 at the end")
+    p.add_argument("--publish", action="store_true",
+                   help="publish the run live for the website as it goes (gb_agent.publish)")
     p.add_argument("--no-notify", action="store_true", help="don't send blockers to Telegram")
     p.add_argument("--allow-paid", action="store_true",
                    help="allow a paid (OpenRouter) model, for the agent or its sub-agents")
@@ -60,6 +63,12 @@ def main(argv=None) -> int:
     )
     logging.getLogger("httpx").setLevel(logging.WARNING)
     print(f"run {run.id}\n  {run.dir}", flush=True)
+    publisher = None
+    if args.publish:  # its own process, so a publishing failure can't stop the run
+        with (run.dir / "publish.log").open("a") as log:
+            publisher = subprocess.Popen(
+                [sys.executable, "-m", "gb_agent.publish", "--run", run.id],
+                stdout=log, stderr=subprocess.STDOUT)
 
     describer = None
     if not profile.vision and profile.describer:
@@ -72,6 +81,11 @@ def main(argv=None) -> int:
     except KeyboardInterrupt:
         reason = "interrupted"
     run.finish(reason, video=args.video)
+    if publisher is not None:
+        try:  # it stops by itself once it has published the ended run
+            publisher.wait(timeout=120)
+        except subprocess.TimeoutExpired:
+            publisher.terminate()
     print(f"ended: {reason}; frame {run.frame}/{config.frame_budget}, {run.step} steps "
           f"({run.kept_steps} kept), {run.llm_calls} LLM calls, {run.tokens} tokens, "
           f"{run.minutes:.1f} min, {agent.compactions} compactions\n  {run.dir}")
