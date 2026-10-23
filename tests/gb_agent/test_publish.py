@@ -50,7 +50,7 @@ class FakeRun:
         (self.dir / "states" / f"step{self.step:05d}.state").write_bytes(self.state)
         used = game.frame
         self.append("steps.jsonl", {"step": self.step, "agent": "main", "kept": True,
-                                    "script": "mash", "frames": used,
+                                    "script": "mash", "args": {"times": 1}, "frames": used,
                                     "start_frame": self.frame, "time": time.time()})
         self.frame += used
         return used
@@ -93,6 +93,7 @@ def test_each_kept_step_becomes_a_clip_of_its_frames(run, dest):
 
     live = read(dest, f"runs/{run.dir.name}/live.json")
     assert [c["step"] for c in live["clips"]] == [1, 3]
+    assert live["clips"][0]["script"] == "mash" and live["clips"][0]["args"] == '{"times": 1}'
     clip = dest.root / live["clips"][0]["key"]
     with av.open(str(clip)) as container:
         stream = container.streams.video[0]
@@ -171,10 +172,19 @@ def test_notes_and_scripts_are_published_with_versions(run, dest):
     assert live["scripts_version"] == scripts["version"]
     mash = next(s for s in scripts["scripts"] if s["name"] == "mash")
     assert mash["reason"] == "Text boxes need A" and "game.tap" in mash["code"]
+    assert live["script_uses"] == {}
+
+    for _ in range(2):
+        run.append("script_usage.jsonl", {"script": "mash", "version": "v", "ok": True,
+                                          "frames": 10, "kind": "script"})
+    run.append("script_usage.jsonl", {"script": "helper", "version": "v", "ok": True,
+                                      "frames": 0, "kind": "subagent"})
 
     (run.dir / "notes.md").write_text("Downstairs now.\n")
     pub.sync()
-    assert read(dest, f"{prefix}/live.json")["notes_version"] != notes["version"]
+    live = read(dest, f"{prefix}/live.json")
+    assert live["notes_version"] != notes["version"]
+    assert live["script_uses"] == {"mash": 2}
 
 
 def test_long_tool_output_is_trimmed(run, dest):

@@ -22,6 +22,8 @@ export interface GbAgentClip {
   start_frame?: number;
   agent?: string;
   script?: string | null;
+  /** The script's arguments as JSON, trimmed; null for one-off code. */
+  args?: string | null;
   /** Unix seconds the step finished. */
   time?: number;
 }
@@ -70,6 +72,8 @@ export interface GbAgentLive {
   activity?: GbAgentActivity[];
   /** Unix seconds of the last agent record: the model has been working since then. */
   waiting_since?: number | null;
+  /** How many times each library script has run in this run. */
+  script_uses?: Record<string, number>;
   notes_version?: string;
   scripts_version?: string | null;
   /** ISO time the run last wrote its manifest. */

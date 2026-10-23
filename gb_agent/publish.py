@@ -8,8 +8,9 @@ own process: a publisher crash can't hurt a run, and old runs can be republished
 The bucket layout is the website's contract (``gb-agent.interface.ts``):
 
     current.json                    {run, live}: which run the page shows
-    runs/<run>/live.json            status, the newest clips and recent activity;
-                                    small, rewritten whenever something changes
+    runs/<run>/live.json            status, the newest clips, recent activity and
+                                    how often each script has run; small,
+                                    rewritten whenever something changes
     runs/<run>/notes.json           {version, notes}
     runs/<run>/scripts.json         {version, scripts, subagents}
     runs/<run>/clips/stepNNNNN.mp4  one clip per kept step, at game speed; immutable
@@ -26,7 +27,7 @@ import hashlib
 import json
 import logging
 import time
-from collections import deque
+from collections import Counter, deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
@@ -166,6 +167,8 @@ class RunPublisher:
         self._steps = _Tail(self.dir / "steps.jsonl")
         self._events = _Tail(self.dir / "events.jsonl")
         self._agents = _Tail(self.dir / "agents.jsonl")
+        self._usage = _Tail(self.dir / "script_usage.jsonl")
+        self.script_uses: Counter[str] = Counter()
         self._todo: deque[dict] = deque()  # kept steps read but not published yet
         self._pending: dict[int, list[dict]] = {}  # events of steps not rendered yet
         self._state = self.dir / "states" / "start.state"  # start of the next kept step
@@ -223,7 +226,9 @@ class RunPublisher:
         self._state = self.dir / "states" / f"step{n:05d}.state"
         self.clips.append({"step": n, "key": self._clip_key(n), "frames": step.get("frames"),
                            "start_frame": step.get("start_frame"), "agent": step.get("agent"),
-                           "script": step.get("script"), "time": step.get("time")})
+                           "script": step.get("script"),
+                           "args": _cap(step.get("args"), RESULT_CAP) if step.get("args") else None,
+                           "time": step.get("time")})
         return uploaded
 
     def _prune(self) -> None:
@@ -285,6 +290,10 @@ class RunPublisher:
             if shown := _activity(record):
                 self.activity.append(shown)
 
+        for use in self._usage.read():
+            if use.get("kind", "script") == "script":
+                self.script_uses[use["script"]] += 1
+
         notes_path = self.dir / "notes.md"
         notes = notes_path.read_text().strip() if notes_path.exists() else ""
         notes_version = _version(notes)
@@ -313,6 +322,7 @@ class RunPublisher:
             "llm_calls": manifest.get("llm_calls"), "minutes": manifest.get("minutes"),
             "fps": FPS, "clips": published,
             "activity": list(self.activity), "waiting_since": self.waiting_since,
+            "script_uses": dict(self.script_uses),
             "notes_version": notes_version, "scripts_version": self._scripts_version,
         }
         version = _version(status)

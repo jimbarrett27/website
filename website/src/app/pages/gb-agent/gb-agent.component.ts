@@ -1,12 +1,14 @@
 import {
   ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal,
 } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, catchError, exhaustMap, fromEvent, map, merge, of, switchMap, timer } from 'rxjs';
 import { GbAgentService } from '../../core/services/gb-agent.service';
 import {
   GbAgentClip, GbAgentLive, GbAgentNotes, GbAgentScripts,
 } from '../../core/models/gb-agent.interface';
+import { gameTime, notesHtml, scriptCall, toTurns } from './gb-agent.format';
 
 const LIVE_POLL_MS = 4_000;
 const IDLE_POLL_MS = 60_000;
@@ -18,76 +20,16 @@ const MAX_BEHIND_S = 60;
 
 /**
  * The gb_agent bot playing Pokémon, as it happens. Polls the publisher's files
- * in the bucket and plays each kept step's clip back to back at game speed.
- *
- * Bare on purpose: this proves the plumbing. The look is still to be designed.
+ * in the bucket and plays each kept step's clip back to back at game speed,
+ * next to a log of what the model said and did, its notes and its scripts.
  */
 @Component({
   selector: 'app-gb-agent',
   standalone: true,
+  imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="gb-agent">
-      <h1>gb_agent</h1>
-      @if (error()) {
-        <p>Couldn't reach the bot right now.</p>
-      } @else if (!live()) {
-        <p>Loading&hellip;</p>
-      } @else {
-        <p class="status">
-          <strong>{{ isLive() ? 'LIVE' : 'offline' }}</strong>
-          · {{ live()?.model }} · step {{ live()?.steps }} · frame {{ live()?.frame }}
-          @if (!isLive() && live()?.stop_reason) { · ended: {{ live()?.stop_reason }} }
-        </p>
-
-        <div class="screen">
-          <video #video playsinline [muted]="true"
-                 [attr.src]="playing() ? clipUrl(playing()!) : null"
-                 (loadeddata)="play(video)" (ended)="next()"></video>
-          @if (thinkingFor() !== null) {
-            <p class="thinking">thinking&hellip; {{ thinkingFor() }}</p>
-          }
-          @if (playing(); as clip) {
-            <p class="caption">step {{ clip.step }} · {{ clip.script ?? 'one-off code' }}
-              · {{ queue().length }} queued</p>
-          }
-        </div>
-
-        <h2>Activity</h2>
-        <ol class="activity" reversed>
-          @for (a of activityNewestFirst(); track $index) {
-            <li>
-              <small>{{ a.kind }} · {{ a.agent }} · step {{ a.step }}</small>
-              @if (a.text) { <p>{{ a.text }}</p> }
-              @if (a.reasoning) { <p><em>{{ a.reasoning }}</em></p> }
-              @for (c of a.tool_calls ?? []; track $index) { <code>{{ c.name }}({{ c.args }})</code> }
-              @if (a.kind === 'tool') { <pre>{{ a.tool }} → {{ a.result }}</pre> }
-            </li>
-          }
-        </ol>
-
-        <h2>Notes</h2>
-        <pre>{{ notes()?.notes || '(none yet)' }}</pre>
-
-        <h2>Scripts</h2>
-        @for (s of scripts()?.scripts ?? []; track s.name) {
-          <details>
-            <summary><code>{{ s.signature ?? s.name }}</code> @ {{ s.version }} — {{ s.summary }}</summary>
-            @if (s.reason) { <p>Last change: {{ s.reason }}</p> }
-            <pre>{{ s.code }}</pre>
-          </details>
-        }
-      }
-    </div>
-  `,
-  styles: [`
-    .gb-agent { max-width: var(--max-width-wide); margin: 0 auto; padding: 2rem 1rem; }
-    .screen { position: relative; width: 320px; max-width: 100%; }
-    video { width: 100%; aspect-ratio: 10 / 9; image-rendering: pixelated; background: #000; display: block; }
-    .thinking, .caption { font-size: 0.85rem; color: var(--color-gray); margin: 0.25rem 0; }
-    .activity li { margin-bottom: 0.75rem; }
-    pre { white-space: pre-wrap; }
-  `],
+  templateUrl: './gb-agent.component.html',
+  styleUrl: './gb-agent.component.css',
 })
 export class GbAgentComponent {
   private api = inject(GbAgentService);
@@ -113,7 +55,26 @@ export class GbAgentComponent {
     return !!live?.live && this.now() - updated < STALE_MS;
   });
 
-  readonly activityNewestFirst = computed(() => [...(this.live()?.activity ?? [])].reverse());
+  readonly turns = computed(() => toTurns(this.live()?.activity ?? []));
+  readonly notesHtml = computed(() => notesHtml(this.notes()?.notes ?? ''));
+  readonly gameTime = computed(() => gameTime(this.live()?.frame, this.live()?.fps));
+  readonly caption = computed(() => {
+    const clip = this.playing();
+    return clip ? `step ${clip.step} · ${scriptCall(clip.script, clip.args)}` : '';
+  });
+
+  /** The script whose code is shown; the most used one until a tab is picked. */
+  readonly picked = signal<string | null>(null);
+  readonly scriptList = computed(() => {
+    const uses = this.live()?.script_uses ?? {};
+    return [...(this.scripts()?.scripts ?? [])]
+      .map(s => ({ ...s, uses: uses[s.name] ?? 0 }))
+      .sort((a, b) => b.uses - a.uses || a.name.localeCompare(b.name));
+  });
+  readonly shownScript = computed(() => {
+    const list = this.scriptList();
+    return list.find(s => s.name === this.picked()) ?? (list.length ? list[0] : null);
+  });
 
   /** "m:ss" the model has been working, while live and nothing is playing. */
   readonly thinkingFor = computed(() => {
@@ -181,6 +142,7 @@ export class GbAgentComponent {
     this.holding.set(false);
     this.notes.set(null);
     this.scripts.set(null);
+    this.picked.set(null);
   }
 
   private apply(live: GbAgentLive): void {
