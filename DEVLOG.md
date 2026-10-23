@@ -4,6 +4,167 @@ Decisions and milestones for this repo, newest first. One `### entry` per decisi
 milestone under a `## YYYY-MM-DD` date header — capture the *why*, not just the *what*.
 Maintained via the `/devlog` skill. (Format mirrors `SignalAgents/RESEARCH_LOG.md`.)
 
+## 2026-10-22
+
+### Six hour-long Gemma runs never leave the house; Haiku with notes reaches Route 29
+
+With notes in place, Haiku 5.5 ran until the 4M-token cap (348 calls, ~36k frames,
+45 minutes). It left the house, got Cyndaquil and Elm's errand to Mr. Pokémon, fought
+battles in the grass, and reached the route west of New Bark Town. There it ran
+out of tokens wandering below one-way ledges, looking for a way north. Its notes
+were accurate throughout: controls, what blocked it, next steps. It wrote one `walk`
+script, used it 212 times, and never defined a sub-agent.
+
+A batch of six one-hour Gemma 4 26B runs (`gb_agent/runs/batch-20261022.sh`, ~65
+calls an hour each, no compactions) never got out of the house: two never left the
+bedroom and the other four only reached downstairs. Its notes are now honest ("stuck
+in the bedroom… need to find the stairs"), so they fixed false memories but not
+navigation. Gemma writes small movement scripts and once defined a sub-agent, but
+doesn't use them to search systematically. So far the gap between models is spatial
+reasoning from the screen, not the harness.
+
+### gb_agent notes: persistent, and part of the routine rather than optional
+
+The overnight Gemma run (7.8 h, 23 compactions) kept losing track of where it was:
+its compaction summaries said "in my bedroom" while it was downstairs, and it went
+between the two floors about 50 times. `update_notes` gives the main agent up to
+2,000 characters of its own notes (`notes.md` in the run). They're shown word for
+word after every compaction, and sub-agents can't change them. Gemma then never
+called the tool in a 2-hour run, so notes became part of the loop
+(`gb_agent/agent.py`): every 15 calls the harness asks for a notes update, and
+compaction shows the current notes and asks for a rewrite, which becomes the new
+notes. A model that never calls the tool still keeps notes.
+
+Gemma's profile (`gb_agent/models.py`) now uses the 64k context the server gives it
+and compacts at 0.4 of it (~26k). llama.cpp's sliding-window checkpoints keep
+appended prompts cheap without `--swa-full`, but generation slows as the context
+grows (13.6 → 4.3 tok/s).
+
+## 2026-10-21
+
+### gb_agent sub-agents, a 600-frame step cap, and help for small models
+
+Chunk 5 is done (`gb_agent/subagents.py`). `define_subagent` saves a spec to
+`subagents/<name>.json` in the run's library, committed and versioned like a script:
+instructions, a subset of the parent's tools, the scripts it may run, and a model.
+`run_subagent` runs it on one task with a fresh context, its own call and frame
+allowance, and a `finish(summary)` tool. Only the summary, a few numbers and the
+final screen go back to the parent, which keeps the parent's context small. Sub-agents
+never get the sub-agent tools, so nesting stops at one level.
+
+Gemma's blind exploration loops spent up to 1,400 frames in a single step and ran
+through the 10,000-frame budget in 19 calls, so kept steps now stop at 600 frames
+(`--step-frames`). Gemma never used sub-agents unprompted, so the opening message now
+suggests them for long jobs like exploring a room. Both small local models failed
+because they couldn't tell whether an action had done anything, so every report now
+says how much of the screen changed (a turn in Silver is 0.5% of pixels, a one-tile
+walk 26%), and tool results add a note after 3 identical calls in a row.
+
+### First gb_agent runs: small local models stall, Claude Haiku 5.5 reaches Elm's lab
+
+Four runs on Silver from the bedroom start, 10,000-frame budget:
+
+| Model | Calls | Result |
+|---|---|---|
+| Qwen3-VL-2B (local) | 80 | never moved; no scripts; notes claimed false progress |
+| Qwen3-VL-2B, script-first prompt | 66 | wrote `walk_left` (no frames between presses), ran it 38× unchanged |
+| Qwen3-VL-8B Q4_K_M (local) | 86 | fixed one script error, then resubmitted identical code 51× |
+| Claude Haiku 5.5 (OpenRouter, ~$0.12) | 99 | bedroom → downstairs (Pokégear, clock) → town → Elm's lab |
+
+Both local models were defeated by Silver's turn-before-walk mechanic (a short tap in a
+new direction only turns you), which shows up as a few changed pixels. Haiku wrote
+`walk(direction, frames)` holding the button, which sidesteps it, plus `mash_a`, and
+its compaction notes were accurate. The harness held up: every step verified, a whole
+run replays, and the frame budget, not the model, ended Haiku's run. Fixes made along
+the way: a tool call is requested in every reply (the 2B narrated half its turns);
+compaction keeps the tools bound so llama-server reuses its cached prefix (314 s →
+75 s); "Nothing saved" for identical rewrites; `press` takes `game.tap`'s parameter
+names; one screenshot per step; local models compact at half their window because CPU
+generation slows as the context grows (8B: ~140 s a call at 12k tokens); and the
+manifest is saved after every call. llama-server's `--cache-ram` (8 GiB of old prompts
+by default) is now capped at 2 GiB.
+
+### gb_agent runs end to end: agent loop, tools, budgets, `gb_agent.play`
+
+Chunk 4 is done. `python -m gb_agent.play --model qwen3-vl-2b-local` runs an
+experiment into `<data dir>/gb_agent/runs/<run id>/`. The loop (`gb_agent/agent.py`)
+is its own, not `agents.Agent`: llama-server reuses work for an unchanged prompt
+prefix, and prompt reading on this CPU measured 69 tokens/s (a full 16k context takes
+~4 minutes), so the context is append-only and compacts into the model's own notes at
+75% of the window rather than sliding. In the first live run, calls after the first
+took 3–10 s because of it. 16k is a choice in `run-vision-server.sh`, not a model or
+RAM limit; CPU prompt speed is what makes bigger contexts impractical here.
+
+Found by the whole-run replay test: PyBoy queues button events until the next frame
+and doesn't save the queue, so a step ending on an input lost it at the boundary while
+per-step checks still passed. `RecordingGame.end_step()` now releases held buttons and
+runs one more frame when inputs are waiting. OpenRouter profiles exist but
+`gb_agent.play` refuses them without `--allow-paid` (Jim: no paid runs without asking).
+
+### gb_agent hints are off: the agent gets no memory addresses
+
+While building chunk 3 (the script library and traces) I found Silver's map and
+position addresses by watching memory while walking and taking the stairs (map group
+`0xDA00`, number `0xDA01`, Y `0xDA02`, X `0xDA03`). Jim decided the agent doesn't get
+them: they're `progress_values` in `gb_agent/games/silver.py`, read by the harness for
+scoring and never shown, and traces only include memory the agent chose to watch. The
+seed `hello_world` taps left and right and reads no memory. Handing over addresses
+would test planning on top of known RAM; withholding them makes finding its own
+position part of the task. A per-experiment hints switch can come later to compare.
+
+Library design (`gb_agent/library.py`): one git repo per run, `library/<name>.py` per
+script, imported in the sandbox as `library.<name>` so a script can't shadow a stdlib
+module; versions are last-commit hashes; git runs with hooks off and a fixed identity
+since the files are agent-written. Measured on the way: in Silver the first tap in a
+new direction only turns the player, and holds over ~8 frames can start a second step.
+
+### gb_agent recording and replay: every step is checked by replaying it on the host
+
+Chunk 2 of `gb_agent/PLAN.md` is done. Scripts drive the game only through
+`RecordingGame` (`gb_agent/emulator/`), which logs every press, release and frame
+advance and has no memory writes. `gb_agent.steps.run_step` runs a script in the
+sandbox from a save state and gets back the new state plus the events; the host then
+replays the events from the starting state and requires a byte-identical state. A
+script that reaches past `game` to press buttons or write memory gets its step marked
+unverified. `gb_agent.replay.render_video` turns events into an MP4.
+
+The replay check moved from "a second container" to the host: it runs no agent code,
+only recorded inputs into a trusted ROM, so the only untrusted thing is the event list,
+which `validate_events` checks first (a forged huge tick would otherwise hang the host).
+The emulator package is copied into the image and the host and image pin the same
+PyBoy/NumPy/Pillow, so the two agree exactly; a test asserts it.
+
+Measured facts that shaped it: the rendered screen is stored in PyBoy save states, so
+recording and replay share `apply_event` and every tick renders; a fresh boot stamps
+wall-clock time into the clock state, so runs always start from a saved state (Silver's
+is a power-on state, made once at `<data dir>/gb_agent/states/`); and PyBoy reads and
+writes `.ram`/`.rtc` files next to a ROM given as a path, so ROMs go in as bytes. Tests
+use `rtc3test.gb`, a public-domain MBC3 clock test ROM, so they don't need the Silver ROM.
+
+### gb_agent sandbox: agent-written code runs in a throwaway, locked-down container
+
+Chunk 1 of `gb_agent/PLAN.md` is done. `gb_agent.sandbox.run_in_sandbox` starts a fresh
+container per call: no network, read-only root, a 64 MB noexec `/tmp`, uid 10001 with
+every capability dropped and `no-new-privileges`, memory (no swap), CPU and process
+caps, and a hard timeout that kills the container rather than just the CLI. Code and a
+JSON payload go in on stdin and one marked result line comes back on stdout, so there
+are no writable host mounts at all; read-only mounts (the ROM, later the library) are
+opt-in. `tests/gb_agent/test_sandbox.py` tries each escape or abuse in turn and expects
+a clean failure.
+
+Three things learned the hard way. Docker's default log driver keeps everything a
+container prints on disk, so runs use `--log-driver none`. The host must keep reading
+container stdout even after its cap and throw the excess away: in the first version it
+simply stopped reading, the pipe backed up, and `docker kill` hung indefinitely during
+the stdout-flood test. And every housekeeping `docker` call now has a timeout, so a
+wedged container can't hang the agent. Mounted files must be world-readable, since the
+code doesn't run as Jim.
+
+Found while planning chunk 2: PyBoy 2.7's real-time clock is compiled Cython reading
+wall-clock time (`cimport time`), so it can't be faked from Python. The plan is
+`rtc_lock_experimental(True)` from first boot, turned back on after every state load,
+since the lock isn't saved in states. The cost is that Silver's time of day never moves.
+
 ## 2026-10-19
 
 ### Triage moves off Cloudflare onto the tailnet (triage.home.jimbarrett.dev)
